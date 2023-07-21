@@ -1,0 +1,4 @@
+'Summarize the dataset', (0, 595)
+'Summarize the dataset in natural language under 100 words.', (1024, 736)
+'Summarize the dataset in natural language and less than 200 words.', (2048, 156)
+'What is this dataset depicting?', (2560, 148)

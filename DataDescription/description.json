@@ -1,0 +1,14 @@
+[
+    {
+        "name": "owid-energy-data.csv",
+        "description": "Based on the given metadata, the purpose of the dataset is to provide information about different countries' energy data. \n\nThe dataset includes the following attributes:\n- country: the name of the country\n- year: the specific year for which the data is reported\n- iso_code: the ISO code for the country\n- population: the population of the country\n- gdp: the gross domestic product of the country\n- biofuel_cons_change_pct: the percentage change in biofuel consumption\n- biofuel_cons_change_twh: the change in biofuel consumption in terawatt-hours\n- biofuel_cons_per_capita: the biofuel consumption per capita\n- biofuel_consumption: the total biofuel consumption\n- biofuel_e"
+    },
+    {
+        "name": "cat.csv",
+        "description": "The dataset provides information about the general fat level of cat's limbs."
+    },
+    {
+        "name": "dog.csv",
+        "description": "The dataset provides information about dog food components and their nutrition level."
+    }
+]

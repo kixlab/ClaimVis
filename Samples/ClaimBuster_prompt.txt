@@ -1,0 +1,9 @@
+{
+	'version': '2', 
+	'claim': 'The US obesity rate has soared substantially.', 
+	'results': [{
+		'text': 'The US obesity rate has soared substantially.', 
+		'index': 0, 
+		'score': 0.8090613011
+	}]
+}
