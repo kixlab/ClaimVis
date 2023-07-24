@@ -1,5 +1,18 @@
 from nl4dv import NL4DV
-nl4dv_instance = NL4DV(data_url="./Datasets/colleges.csv")
-response = nl4dv_instance.analyze_query("Show debt for New England.")
+import altair as alt
+# from altair import vega, vegalite
+from IPython.display import display
 
-print(response)
+data_url="./Datasets/owid-energy-data.csv"
+label_attribute = None
+dependency_parser_config = {"name": "spacy", "model": "en_core_web_sm", "parser": None}
+
+nl4dv_instance = NL4DV(verbose=False, 
+                       debug=True, 
+                       data_url=data_url, 
+                       label_attribute=label_attribute, 
+                       dependency_parser_config=dependency_parser_config
+                       )
+nl4dv_response = nl4dv_instance.analyze_query("Show the population of Africa.")
+# print(nl4dv_response)
+display(alt.display.html_renderer(nl4dv_response['visList'][0]['vlSpec']), raw=True)

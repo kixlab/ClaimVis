@@ -37,6 +37,7 @@ def prompt_description(file_name: str):
     return response['choices'][0]['message']['content']
 
 def get_meta_data(df, file_name):
+    # this function is to be changed
     max_number_of_attributes = 12 # free to set
     return {
         'name': file_name,
@@ -46,10 +47,10 @@ def get_meta_data(df, file_name):
 def summarize_all():
     descriptions = []
     for file_name in os.listdir(database_path):
-        descriptions.append(_summarize(file_name))
+        descriptions.append(summarize(file_name))
     return descriptions
 
-def _summarize(file_name: str):
+def summarize(file_name: str):
     return {
         "name": file_name,
         "description": prompt_description(file_name)
@@ -60,7 +61,7 @@ file_name = "colleges.csv"
 with open("../DataDescription/description.json", "r+") as outfile:
     # load and write new data
     file_data = json.load(outfile)
-    file_data.append(_summarize(file_name))
+    file_data.append(summarize(file_name))
 
     # Sets file's current position at offset.
     outfile.seek(0)
