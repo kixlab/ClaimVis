@@ -2,7 +2,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 import json
 
-def find_top_k_datasets(claim: str, k: int):
+def find_top_k_datasets(claim: str, k: int = 2):
     # Load a pre-trained SentenceTransformer model
     model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
     # load datasets description

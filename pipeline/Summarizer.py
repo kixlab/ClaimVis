@@ -1,4 +1,6 @@
 import openai
+import sys
+sys.path.append("..") # Adds higher directory to python modules path.
 from Credentials.info import *
 import pandas as pd
 import os
@@ -9,18 +11,15 @@ import json
 # # set credentials
 openai.organization = organization
 openai.api_key = openai_api
-database_path = "./Datasets/"
+database_path = "../Datasets/"
 
 def prompt_description(file_name: str):
     file_path = database_path + file_name
     df = pd.read_csv(file_path)
     
     # prepare metadata of the file
-    max_number_of_attributes = 12
-    meta_data = {
-        'name': file_name,
-        'attributes': df.columns.tolist()[:max_number_of_attributes]
-    }
+    meta_data = get_meta_data(df, file_name)
+
     # Prepare the dataset for summarization
     message = f"Infer what the purpose of the following dataset given its metada:\n\n{str(meta_data)}"
     # Maximum length of the generated summary
@@ -37,19 +36,33 @@ def prompt_description(file_name: str):
 
     return response['choices'][0]['message']['content']
 
-descriptions = []
-for file_name in os.listdir(database_path):
-    # write res into a json file
-    dictionary = {
+def get_meta_data(df, file_name):
+    max_number_of_attributes = 12 # free to set
+    return {
+        'name': file_name,
+        'attributes': df.columns.tolist()[:max_number_of_attributes]
+    }
+
+def summarize_all():
+    descriptions = []
+    for file_name in os.listdir(database_path):
+        descriptions.append(_summarize(file_name))
+    return descriptions
+
+def _summarize(file_name: str):
+    return {
         "name": file_name,
         "description": prompt_description(file_name)
     }
-
-    descriptions.append(dictionary)
-
-# Serializing json
-json_object = json.dumps(descriptions, indent=4)
     
+file_name = "colleges.csv"
 # Writing to sample.json
-with open("./DataDescription/description.json", "w") as outfile:
-    outfile.write(json_object)
+with open("../DataDescription/description.json", "r+") as outfile:
+    # load and write new data
+    file_data = json.load(outfile)
+    file_data.append(_summarize(file_name))
+
+    # Sets file's current position at offset.
+    outfile.seek(0)
+    # convert back to json.
+    json.dump(file_data, outfile, indent = 4)

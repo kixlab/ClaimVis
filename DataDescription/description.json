@@ -10,5 +10,9 @@
     {
         "name": "dog.csv",
         "description": "The dataset provides information about dog food components and their nutrition level."
+    },
+    {
+        "name": "colleges.csv",
+        "description": "Based on the metadata provided, it can be inferred that the purpose of the dataset is to provide data about colleges. The dataset contains information about different files, including \"colleges.csv\" which is likely to contain data specifically about colleges."
     }
 ]

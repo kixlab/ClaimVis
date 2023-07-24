@@ -1,0 +1,120 @@
+{
+    "query_raw": "Show the relation between he US's GDP and China's.", 
+    "query": "show the relation between he me ' gdp and china ' .", 
+    "dataset": "./Datasets/owid-energy-data.csv", 
+    "alias": null, 
+    "visList": [
+        {
+            "attributes": ["gdp"], 
+            "queryPhrase": null, 
+            "visType": null, 
+            "tasks": ["filter", "distribution"], 
+            "inferenceType": "implicit", 
+            "vlSpec": {
+                "$schema": "https://vega.github.io/schema/vega-lite/v4.json", 
+                "mark": {
+                    "type": "bar", 
+                    "tooltip": true
+                }, 
+                "encoding": {
+                    "x": {"field": "gdp", "type": "quantitative", "bin": true, "axis": {"format": "s"}}, 
+                    "y": {"field": "gdp", "type": "quantitative", "aggregate": "count", "axis": {"format": "s"}}
+                }, 
+                "transform": [{
+                    "filter": {"field": "country", "oneOf": ["China"]}
+                }], 
+                "data": {"url": "./Datasets/owid-energy-data.csv", "format": {"type": "csv"}}
+            }
+        }, 
+        {
+            "attributes": ["gdp"], 
+            "queryPhrase": null, 
+            "visType": null, 
+            "tasks": ["filter", "distribution"], 
+            "inferenceType": "implicit", 
+            "vlSpec": {
+                "$schema": "https://vega.github.io/schema/vega-lite/v4.json", 
+                "mark": {"type": "tick", "tooltip": true}, 
+                "encoding": {
+                    "x": {
+                        "field": "gdp", 
+                        "type": "quantitative", 
+                        "axis": {"format": "s"}
+                    }
+                }, 
+                "transform": [{
+                    "filter": {"field": "country", "oneOf": ["China"]}
+                }], 
+                "data": {"url": "./Datasets/owid-energy-data.csv", "format": {"type": "csv"}}
+            }
+        }, 
+        {
+            "attributes": ["gdp"], 
+            "queryPhrase": null, 
+            "visType": null, 
+            "tasks": ["filter", "distribution"], 
+            "inferenceType": "implicit", 
+            "vlSpec": {
+                "$schema": "https://vega.github.io/schema/vega-lite/v4.json", 
+                "mark": {"type": "boxplot", "tooltip": true}, 
+                "encoding": {
+                    "x": {
+                        "field": "gdp", 
+                        "type": "quantitative", 
+                        "axis": {"format": "s"}
+                    }
+                }, 
+            "transform": [{
+                "filter": {"field": "country", "oneOf": ["China"]}
+            }], 
+            "data": {"url": "./Datasets/owid-energy-data.csv", "format": {"type": "csv"}}
+            }
+        }
+    ], 
+    "attributeMap": {
+        "gdp": {
+            "name": "gdp", 
+            "queryPhrase": ["gdp"], 
+            "inferenceType": "explicit", 
+            "isAmbiguous": false, 
+            "ambiguity": []
+        }, 
+        "country": {
+            "name": "country", 
+            "queryPhrase": ["china"], 
+            "inferenceType": "implicit", 
+            "isAmbiguous": false, 
+            "ambiguity": []
+        }
+    }, 
+    "taskMap": {
+        "filter": [{
+            "task": "filter", 
+            "queryPhrase": ["china"], 
+            "operator": "IN", 
+            "values": ["China"], 
+            "attributes": ["country"], 
+            "inferenceType": "explicit", 
+            "followup_type": "nothing"
+        }], 
+        "distribution": [{
+            "task": "distribution", 
+            "queryPhrase": [], 
+            "operator": null, 
+            "values": null, 
+            "attributes": ["gdp"], 
+            "inferenceType": "implicit", 
+            "followup_type": null
+        }]
+    }, 
+    "followUpQuery": false, 
+    "contextObj": null, 
+    "attributeMapping": {
+        "gdp": {"gdp": 1}, 
+        "country": {"china": 0.5}
+    }, 
+    "followUpConfidence": null, 
+    "ambiguity": {"attribute": {}, "value": {}}, 
+    "dialogId": "0", 
+    "queryId": "0"
+}
