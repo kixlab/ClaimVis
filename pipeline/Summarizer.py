@@ -19,8 +19,6 @@ def prompt_description(file_name: str):
     
     # prepare metadata of the file
     meta_data = get_meta_data(df, file_name)
-
-    # Prepare the dataset for summarization
     message = f"Infer what the purpose of the following dataset given its metada:\n\n{str(meta_data)}"
     # Maximum length of the generated summary
     max_summary_length = 150
