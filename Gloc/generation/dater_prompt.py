@@ -2,8 +2,8 @@ import random
 from typing import Dict, Tuple
 import pandas as pd
 import copy
-from utils import table_linearization,twoD_list_transpose
-from json_utils import NoIndent, MyEncoder
+from utils.table import table_linearization,twoD_list_transpose
+from utils.json import NoIndent, MyEncoder
 import json
 
 class PromptBuilder(object):

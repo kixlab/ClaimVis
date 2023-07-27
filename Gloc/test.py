@@ -1,8 +1,9 @@
 import os
-from generation.dater_prompt import PromptBuilder
+# from generation.dater_prompt import PromptBuilder
+from generation.claimvis_prompt import PromptBuilder
 from generation.dater_generator import Generator
 from generation.deplot_prompt import *
-from utils import table_linearization
+from utils.table import table_linearization
 import pandas as pd
 import json
 import csv
@@ -24,7 +25,7 @@ def test_select_x_col_prompt():
     )
     print(generate_prompt)
 
-test_select_x_col_prompt()
+# test_select_x_col_prompt()
 
 def test_build_prompt(template_key, table, question):
     table = """Year | Democrats | Republicans | Independents
@@ -53,3 +54,9 @@ def test_table_linearization():
     print(tab)
 
 # test_table_linearization()
+
+def test_prompt_builder():
+    prmpt = PromptBuilder()
+    print(prmpt._COT_DEC_REASONING_)
+
+test_prompt_builder()
