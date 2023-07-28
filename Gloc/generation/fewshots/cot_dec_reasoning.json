@@ -1,30 +1,30 @@
 [
     {
-        "role": "User",
+        "role": "system",
         "content": "\nRead the table below to answer the following question.\n\nHeader: Year | Democrats | Republicans | Independents\nRow 1: 2004 | 68.1% | 45.0% | 53.0%\nRow 2: 2006 | 58.0% | 42.0% | 53.0%\nRow 3: 2007 | 59.0% | 38.0% | 45.0%\nRow 4: 2009 | 72.0% | 49.0% | 60.0%\nRow 5: 2011 | 71.0% | 51.2% | 58.0%\nRow 6: 2012 | 70.0% | 48.0% | 53.0%\nRow 7: 2013 | 72.0% | 41.0% | 60.0%\n\nDo republicans and democrats have the same lowest favor rate?"
     },
     {
-        "role": "Q",
+        "role": "user",
         "content": "What is the lowest rate of republicans?"
     },
     {
-        "role": "A",
+        "role": "assistant",
         "content": "Let's find the column of republicans. Then let's extract the favor rates, they [45.0, 42.0, 38.0, 49.0, 51.2, 48.0, 41.0]. The smallest number is 38.0. The answer is 38.0."
     },
     {
-        "role": "Q",
+        "role": "user",
         "content": "What is the lowest rate of democrats?"
     },
     {
-        "role": "A",
+        "role": "assistant",
         "content": "Let's find the column of democrats. Then let's extract the favor rates, they [68.1, 58.0, 59.0, 72.0, 71.0, 70.0, 72.0]. The smallest number is 58.0. The answer is 58.0."
     },
     {
-        "role": "Q",
+        "role": "user",
         "content": "Do republicans and democrats have the same lowest favor rate?"
     },
     {
-        "role": "A",
+        "role": "assistant",
         "content": "Republicans' lowest favor rate is 38.0%. Democrats' lowest favor rate is 58.0%. Since 38.0 is different from 58.0. It means republicans and democrats have different lowest favor rates."
     }
 ]

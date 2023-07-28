@@ -7,7 +7,7 @@ from utils.json import NoIndent, MyEncoder
 import json
 
 class PromptBuilder(object):
-    def __init__(self, args) -> None:
+    def __init__(self, args=1000) -> None:
         # self.args = args
         # random.seed(args.seed)
         pass
@@ -55,7 +55,7 @@ class PromptBuilder(object):
         # prompt += 'if you are not exactly sure link which columns, please pay more attention to column value link to columns part\n'
         # prompt += 'similar words link to columns :\n'
         return prompt
-    def _select_x_col_prompt_json2(self, question: str, caption: str=None, df: pd.DataFrame=None, num_rows: int=3,
+    def _select_x_col_prompt_jsonv2(self, question: str, caption: str=None, df: pd.DataFrame=None, num_rows: int=3,
                     format:str='codex')->str:
         # df = df.sample(num_rows) if len(df) >= num_rows else df
         prompt = ''
@@ -80,8 +80,8 @@ class PromptBuilder(object):
             }
         linear_dic = json.dumps(dic,cls=MyEncoder,ensure_ascii=False,sort_keys=False,indent=2)
         #------------
-        prompt = '/*\n' + prompt + linear_dic +  '\n*/\n'
-        prompt += 'statement : '+ question +'\n'
+        prompt = '\n' + prompt + linear_dic +  '\n'
+        prompt += ' statement : '+ question
         # prompt += "If you are not sure which columns are useful, please link more value in statement.\n"
         #---------------
         # prompt += 'if you are not exactly sure link which columns, please pay more attention to column value link to columns part\n'
@@ -132,7 +132,7 @@ class PromptBuilder(object):
 
         prompt = '/*\n'+prompt + '*/\n'
         prompt += 'statement : '+ question +'\n'
-        prompt += 'explain :'
+        # prompt += 'explain :'
         return prompt
 
     def _select_x_cloze_prompt(self, question: str, caption: str=None, df: pd.DataFrame=None, num_rows: int=3,
@@ -161,6 +161,7 @@ class PromptBuilder(object):
         prompt = '/*\n'+prompt + '*/\n'
         prompt += 'statement : '+ question +'\n'
         return prompt
+    
     def _select_x_wtq_end2end_prompt(self, question: str, caption: str=None, df: pd.DataFrame=None, num_rows: int=3,
                 format:str='codex')->str:
         # df = df.sample(num_rows) if len(df) >= num_rows else df
@@ -202,7 +203,7 @@ class PromptBuilder(object):
             # generate_prompt += self._select_x_col_prompt_json(question, title, table, num_rows)
             # generate_prompt += self._select_x_col_prompt_json2(question, title, table, num_rows)
             # generate_prompt += self._select_x_col_prompt(question, title, table, num_rows)
-            generate_prompt += self._select_x_col_prompt_jsonv7(question, title, table, num_rows)
+            generate_prompt += self._select_x_col_prompt_jsonv2(question, title, table, num_rows)
         elif select_type == 'row':
             generate_prompt += self._select_x_row_prompt(question, title, table, num_rows)
         elif select_type == 'all':

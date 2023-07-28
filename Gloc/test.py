@@ -1,9 +1,13 @@
 import os
+import sys
+sys.path.append("..")
+
 # from generation.dater_prompt import PromptBuilder
-from generation.claimvis_prompt import PromptBuilder
-from generation.dater_generator import Generator
-from generation.deplot_prompt import *
+from generation.claimvis_prompt import *
+# from generation.dater_generator import Generator
+from generation.deplot_prompt import build_prompt
 from utils.table import table_linearization
+from utils.llm import *
 import pandas as pd
 import json
 import csv
@@ -18,10 +22,10 @@ def test_select_x_col_prompt():
 
     generate_prompt = prompter.build_generate_prompt(
         table = df,
-        question = "The electricity consumption of US is greater than that of China this year.",
+        question = "The electricity consumption of US is greater than that of China this year",
         title = file_name,
         num_rows = 50,
-        select_type = 'all'
+        select_type = 'col'
     )
     print(generate_prompt)
 
@@ -59,4 +63,38 @@ def test_prompt_builder():
     prmpt = PromptBuilder()
     print(prmpt._COT_DEC_REASONING_)
 
-test_prompt_builder()
+# test_prompt_builder()
+
+def test_col_decompose(question = "How many movies have funny adjective in their names"):
+    # set template key for the correct choice of prompt
+    key = TemplateKey.QUERY_DECOMPOSE
+    # set prompt builder
+    prompter = Prompter()
+    # load dataset
+    df = pd.read_csv(dataset_path)
+    # return prompt
+    prompt = prompter.build_prompt(
+        template_key=key,
+        table=df.iloc[:10, :10],
+        question=question,
+        title=None
+    )
+    
+    print(prompt)
+    return prompt
+
+# test_col_decompose()
+
+def test_call_api(question = "Is the US' electricity consumption is larger than that from China?"):
+    prompt = test_col_decompose(question=question)
+    response = call_model(
+        model=Model.GPT3,
+        use_code=False,
+        temperature=0,
+        max_decode_steps=500,
+        prompt=prompt,
+        samples=1
+    )
+    print(question, response)
+
+test_call_api()

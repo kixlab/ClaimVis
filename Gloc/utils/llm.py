@@ -1,20 +1,3 @@
-# coding=utf-8
-# Copyright 2023 The Google Research Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""DePlot Prompts."""
-
 import collections
 from collections.abc import Callable, Iterable, Mapping, Sequence
 import enum
@@ -26,16 +9,14 @@ from typing import TypeVar
 from absl import flags
 import openai
 import tensorflow as tf
+from Credentials.info import *
 
-
-
-_OPENAI_CREDENTIALS = flags.DEFINE_list(
-    'openai_credentials', None, 'Credentials to call OpenAI.', required=True)
-
+# _OPENAI_CREDENTIALS = flags.DEFINE_list(
+#     'openai_credentials', None, 'Credentials to call OpenAI.', required=True)
+openai.api_key = openai_api
 
 class Model(enum.Enum):
-  GPT3 = 'gpt3'
-
+  GPT3 = 'gpt-3.5-turbo'
 
 def retry(
     try_count = 3,
@@ -59,14 +40,12 @@ def retry(
   return decorator
 
 
-
-
 @retry(try_count=3, sleep_seconds=1)
 def _call_openai(
     prompt,
     engine,
     max_decode_steps,
-    temperature,
+    temperature = 0,
     top_p = 1,
     frequency_penalty = 0,
     presence_penalty = 0,
@@ -88,12 +67,12 @@ def _call_openai(
   Returns:
     Text completion
   """
-  openai.api_key = random.choice(_OPENAI_CREDENTIALS.value)
+  # openai.api_key = random.choice(_OPENAI_CREDENTIALS.value)
 
   try:
-    reply = openai.Completion.create(
-        engine=engine,
-        prompt=prompt,
+    reply = openai.ChatCompletion.create(
+        model=engine,
+        messages=prompt,
         temperature=temperature,
         max_tokens=max_decode_steps,
         top_p=top_p,
@@ -101,7 +80,7 @@ def _call_openai(
         presence_penalty=presence_penalty,
         n=samples,
         stop=stop)
-    return [choice['text'] for choice in reply['choices']] if reply else []
+    return [choice['message']['content'] for choice in reply['choices']] if reply else []
 
   except openai.error.RateLimitError as e:
     print('Sleeping 60 secs.')
@@ -124,7 +103,7 @@ def call_model(
       results.extend(
           _call_openai(
               prompt,
-              engine='code-davinci-002' if use_code else 'text-davinci-003',
+              engine='code-davinci-003' if use_code else 'gpt-3.5-turbo',
               temperature=temperature,
               max_decode_steps=max_decode_steps,
               samples=samples))
