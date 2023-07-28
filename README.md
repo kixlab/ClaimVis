@@ -2,5 +2,5 @@
 Aiding online discussion users in verifying claims and exploring info on data-rich threads.
 The current pipeline: 
 <p align="center">
- <img src="https://github.com/kixlab/ClaimVis/assets/93929554/19cd2880-f698-47f5-9216-3c022565cadc" width="700">  
+ <img src="https://github.com/kixlab/ClaimVis/assets/93929554/cb75faed-64ed-4a3f-89f5-3efee641d5da" width="700">  
 <p>
