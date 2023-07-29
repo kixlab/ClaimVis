@@ -166,7 +166,7 @@ class PromptBuilder(object):
                 format:str='codex')->str:
         # df = df.sample(num_rows) if len(df) >= num_rows else df
         prompt = ''
-        str_table = table_linearization(df ,format=format)
+        str_table = table_linearization(df.sample(num_rows) if len(df)>num_rows else df ,format=format)
         prompt = str_table + '\n'
         prompt = '/*\n'+prompt + '*/\n'
         prompt += 'question : '+ question +'\n'

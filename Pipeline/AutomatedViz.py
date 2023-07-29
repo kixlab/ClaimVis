@@ -1,1 +1,1 @@
-# CoT few-shot prompting 
+# CoT few-shot prompting pipeline

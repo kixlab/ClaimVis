@@ -7,10 +7,12 @@ from generation.claimvis_prompt import *
 # from generation.dater_generator import Generator
 from generation.deplot_prompt import build_prompt
 from utils.table import table_linearization
+from processor.ans_parser import *
 from utils.llm import *
 import pandas as pd
 import json
 import csv
+from common.functionlog import log_decorator
 
 # file_name = "owid-energy-data.csv"
 file_name = "movies-w-year.csv"
@@ -59,34 +61,42 @@ def test_table_linearization():
 
 # test_table_linearization()
 
-def test_prompt_builder():
+def test_prompt_builder_1():
     prmpt = PromptBuilder()
-    print(prmpt._COT_DEC_REASONING_)
+    print(prmpt._DEC_REASONING_)
 
 # test_prompt_builder()
 
-def test_col_decompose(question = "How many movies have funny adjective in their names"):
-    # set template key for the correct choice of prompt
-    key = TemplateKey.QUERY_DECOMPOSE
+def test_prompt_builder_2(
+        question = "How many movies have funny adjective in their names",
+        template_key = TemplateKey.COL_DECOMPOSE
+    ):
     # set prompt builder
     prompter = Prompter()
     # load dataset
     df = pd.read_csv(dataset_path)
     # return prompt
     prompt = prompter.build_prompt(
-        template_key=key,
-        table=df.iloc[:10, :10],
+        template_key=template_key,
+        table=df.iloc[:5, :5],
         question=question,
         title=None
     )
     
-    print(prompt)
+    # print(prompt)
     return prompt
 
-# test_col_decompose()
+# test_prompt_builder_2()
 
-def test_call_api(question = "Is the US' electricity consumption is larger than that from China?"):
-    prompt = test_col_decompose(question=question)
+@log_decorator
+def test_call_api_1(
+        question = "There are two movies that have higher gross than The Phantom.",
+        template_key = TemplateKey.COL_DECOMPOSE
+    ):
+    prompt = test_prompt_builder_2(
+                question=question,
+                template_key=template_key
+            )
     response = call_model(
         model=Model.GPT3,
         use_code=False,
@@ -95,6 +105,61 @@ def test_call_api(question = "Is the US' electricity consumption is larger than 
         prompt=prompt,
         samples=1
     )
-    print(question, response)
+    # print(question, response)
+    # print(prompt)
+    return response
 
-test_call_api()
+# test_call_api_1(template_key=TemplateKey.ROW_DECOMPOSE)
+
+@log_decorator
+def test_call_api_2(prompt):
+    response = call_model(
+        model=Model.GPT3,
+        use_code=False,
+        temperature=0,
+        max_decode_steps=500,
+        prompt=prompt,
+        samples=1
+    )
+    # print(question, response)
+    return response
+
+@log_decorator
+def test_dec_reasoning(
+        # question = "Is the largest gross twice the amount of the lowest gross?"
+        question = "Are there only two movies that have greater grosses than 300000000?"
+    ):
+    # Create a sample DataFrame
+    df = pd.read_csv(dataset_path)
+
+    # decompose query into subqueries
+    decomposed_ans = test_call_api_1(
+                    question=question,
+                    template_key=TemplateKey.QUERY_DECOMPOSE
+                )
+    parser, prompter = AnsParser(), Prompter()
+    sub_queries = parser.parse_dec_reasoning(decomposed_ans[0])
+
+    # inject cot prompt with sub queries
+    dec_prompt = prompter.build_prompt(
+                    template_key=TemplateKey.DEC_REASONING,
+                    table=df,
+                    question=question,
+                    num_rows=3
+                )
+    for query in sub_queries:
+        dec_prompt.append({
+            "role": "user", 
+            "content": query
+        })
+        response = test_call_api_2(dec_prompt)
+        dec_prompt.append({
+            "role": "assistant",
+            "content": response[0]
+        })
+    print(dec_prompt)
+    return dec_prompt[-1]
+
+test_dec_reasoning()
+
+    

@@ -1,0 +1,4 @@
+INFO:root:Calling function: test_dec_reasoning
+INFO:root:Arguments: (), {}
+INFO:root:Return Value: {'role': 'assistant', 'content': 'Since there are only 2 movies with grosses greater than 300000000, and (2 == 2), the statement "There are only two movies that have greater grosses than 300000000" is true.'}
+INFO:root:Execution Time: 1690670757.1042535

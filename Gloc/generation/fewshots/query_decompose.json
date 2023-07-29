@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "please decompose the following questions into sub-questions that you can query a database to obtain answers step-by-step."
+        "content": "Please decompose the following questions into sub-questions that you can query a database to obtain answers step-by-step."
     },
     {
         "role": "user",

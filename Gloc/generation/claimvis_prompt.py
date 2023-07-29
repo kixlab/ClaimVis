@@ -18,7 +18,7 @@ class TemplateKey(str, enum.Enum):
     COL_DECOMPOSE = 'col'
     QUERY_DECOMPOSE = 'que'
     COT_REASONING = 'cot'
-    DECOMPOSE_REASONING = 'dec'
+    DEC_REASONING = 'dec'
     
 
 class Prompter(object):
@@ -35,15 +35,15 @@ class Prompter(object):
         """Returns a template given the key which identifies it."""
         if template_key == TemplateKey.COL_DECOMPOSE:
             return self._COL_DECOMPOSE_
-        elif template_key == TemplateKey.DECOMPOSE_REASONING:
-            return self._COT_DEC_REASONING_
+        elif template_key == TemplateKey.DEC_REASONING:
+            return self._DEC_REASONING_
         elif template_key == TemplateKey.QUERY_DECOMPOSE:
             return self._QUERY_DECOMPOSE_
         elif template_key == TemplateKey.SUMMARY:
             return self._SUMMARY_
         elif template_key == TemplateKey.COT_REASONING:
             return self._COT_REASONING_
-        else:
+        else: # row decompose
             return self._ROW_DECOMPOSE_        
 
     def build_prompt(
@@ -78,6 +78,16 @@ class Prompter(object):
             template.append({
                 "role": "user",
                 "content": question
+            })
+        elif template_key == TemplateKey.DEC_REASONING:
+            template.append({
+                "role": "system",
+                "content": pb._select_x_wtq_end2end_prompt(
+                        question=question,
+                        caption=title,
+                        df=table,
+                        num_rows=num_rows
+                    )
             })
 
         return template
