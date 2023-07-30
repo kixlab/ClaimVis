@@ -18,6 +18,7 @@ from common.functionlog import log_decorator
 file_name = "movies-w-year.csv"
 dataset_path = "../Datasets/" + file_name
 
+@log_decorator
 def test_select_x_col_prompt():
     prompter = PromptBuilder(1000)
     df = pd.read_csv(dataset_path)
@@ -33,6 +34,7 @@ def test_select_x_col_prompt():
 
 # test_select_x_col_prompt()
 
+@log_decorator
 def test_build_prompt(template_key, table, question):
     table = """Year | Democrats | Republicans | Independents
     2004 | 68.1% | 45.0% | 53.0%"""
@@ -51,6 +53,7 @@ _TABLE = """Year | Democrats | Republicans | Independents
 2013 | 72.0% | 41.0% | 60.0%"""
 # test_build_prompt(TemplateKey.QA, _TABLE, question="What's the highest man?")
 
+@log_decorator
 def test_table_linearization():
     # Create a sample DataFrame
     df = pd.read_csv(dataset_path)
@@ -61,12 +64,14 @@ def test_table_linearization():
 
 # test_table_linearization()
 
+@log_decorator
 def test_prompt_builder_1():
     prmpt = PromptBuilder()
     print(prmpt._DEC_REASONING_)
 
 # test_prompt_builder()
 
+@log_decorator
 def test_prompt_builder_2(
         question = "How many movies have funny adjective in their names",
         template_key = TemplateKey.COL_DECOMPOSE
@@ -105,7 +110,7 @@ def test_call_api_1(
         prompt=prompt,
         samples=1
     )
-    # print(question, response)
+    print(question, response)
     # print(prompt)
     return response
 
@@ -160,6 +165,9 @@ def test_dec_reasoning(
     print(dec_prompt)
     return dec_prompt[-1]
 
-test_dec_reasoning()
+# test_dec_reasoning()
 
-    
+test_call_api_1(
+    question=  "The US has the highest electricity consumption in 2010",
+    template_key=TemplateKey.QUERY_GENERATION
+)

@@ -19,6 +19,7 @@ class TemplateKey(str, enum.Enum):
     QUERY_DECOMPOSE = 'que'
     COT_REASONING = 'cot'
     DEC_REASONING = 'dec'
+    QUERY_GENERATION = 'gen'
     
 
 class Prompter(object):
@@ -33,18 +34,10 @@ class Prompter(object):
 
     def _get_template(self, template_key):
         """Returns a template given the key which identifies it."""
-        if template_key == TemplateKey.COL_DECOMPOSE:
-            return self._COL_DECOMPOSE_
-        elif template_key == TemplateKey.DEC_REASONING:
-            return self._DEC_REASONING_
-        elif template_key == TemplateKey.QUERY_DECOMPOSE:
-            return self._QUERY_DECOMPOSE_
-        elif template_key == TemplateKey.SUMMARY:
-            return self._SUMMARY_
-        elif template_key == TemplateKey.COT_REASONING:
-            return self._COT_REASONING_
-        else: # row decompose
-            return self._ROW_DECOMPOSE_        
+        attributes = ['COL_DECOMPOSE', 'DEC_REASONING', 'QUERY_DECOMPOSE', 'SUMMARY', 'COT_REASONING', 'QUERY_GENERATION', 'ROW_DECOMPOSE']
+        for attr in attributes:
+            if getattr(TemplateKey, attr) == template_key:
+                return getattr(self, '_' + attr + '_')
 
     def build_prompt(
             self, 
@@ -74,7 +67,7 @@ class Prompter(object):
                     select_type=template_key
                 )
             })
-        elif template_key == TemplateKey.QUERY_DECOMPOSE:
+        elif template_key in [TemplateKey.QUERY_DECOMPOSE, TemplateKey.QUERY_GENERATION]:
             template.append({
                 "role": "user",
                 "content": question
