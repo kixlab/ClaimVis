@@ -95,7 +95,7 @@ def test_prompt_builder_2(
 
 @log_decorator
 def test_call_api_1(
-        question = "There are two movies that have higher gross than The Phantom.",
+        question = "Only a handful of movies have high ratings.",
         template_key = TemplateKey.COL_DECOMPOSE
     ):
     prompt = test_prompt_builder_2(
@@ -114,7 +114,7 @@ def test_call_api_1(
     # print(prompt)
     return response
 
-# test_call_api_1(template_key=TemplateKey.ROW_DECOMPOSE)
+# test_call_api_1(template_key=TemplateKey.COL_DECOMPOSE)
 
 @log_decorator
 def test_call_api_2(prompt):
@@ -132,7 +132,7 @@ def test_call_api_2(prompt):
 @log_decorator
 def test_dec_reasoning(
         # question = "Is the largest gross twice the amount of the lowest gross?"
-        question = "Are there only two movies that have greater grosses than 300000000?"
+        question = "Are there movies with much higher gross than the Phantom?"
     ):
     # Create a sample DataFrame
     df = pd.read_csv(dataset_path)
@@ -165,9 +165,9 @@ def test_dec_reasoning(
     print(dec_prompt)
     return dec_prompt[-1]
 
-# test_dec_reasoning()
+test_dec_reasoning()
 
-test_call_api_1(
-    question=  "The US has the highest electricity consumption in 2010",
-    template_key=TemplateKey.QUERY_GENERATION
-)
+# test_call_api_1(
+#     question=  "The US's economy is larger than China's in 2020",
+#     template_key=TemplateKey.QUERY_GENERATION
+# )

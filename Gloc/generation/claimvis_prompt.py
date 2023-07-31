@@ -26,18 +26,21 @@ class Prompter(object):
     def __init__(self) -> None:
         # respectively read pre-prompt files in fewshots folders and 
         # set corresponding attributes
+        self.attributes = []
+
         _path_ = "generation/fewshots/"
         for file_name in os.listdir(_path_):
             attr_name = '_' + file_name.upper()[:-5] + '_'
+            self.attributes.append(attr_name)
+
             with open(_path_ + file_name, "r") as file:
                 setattr(self, attr_name, json.loads(file.read()))        
 
     def _get_template(self, template_key):
         """Returns a template given the key which identifies it."""
-        attributes = ['COL_DECOMPOSE', 'DEC_REASONING', 'QUERY_DECOMPOSE', 'SUMMARY', 'COT_REASONING', 'QUERY_GENERATION', 'ROW_DECOMPOSE']
-        for attr in attributes:
-            if getattr(TemplateKey, attr) == template_key:
-                return getattr(self, '_' + attr + '_')
+        for attr in self.attributes:
+            if getattr(TemplateKey, attr[1:-1]) == template_key:
+                return getattr(self, attr)
 
     def build_prompt(
             self, 

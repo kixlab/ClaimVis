@@ -188,7 +188,7 @@ class PromptBuilder(object):
             table: pd.DataFrame,
             question: str = None,
             title: str = None,
-            num_rows: int = 3,
+            num_rows: int = 5,
             select_type: str = 'col',
             **kwargs
     ):

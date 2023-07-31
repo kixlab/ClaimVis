@@ -1,7 +1,7 @@
 [
     {
         "role": "system", 
-        "content": "please generate potential questions from the following claims that you can query a database to obtain answers, also give reasons if answering each generated question would verify the original claim or not."
+        "content": "please generate unambiguous claims from the following claims."
     },
     {
         "role": "user",
@@ -9,7 +9,7 @@
     },
     {
         "role": "assistant",
-        "content": "We can directly ask the database to query for this claim as it doesn't contain any ambiguity.\nThe answer is: [\n{'question': 'Is the number of people who died in the 2010 Haiti earthquake 316,000?', 'is_direct': 'true', 'reason': 'Answering this question will help verify the claim directly.'}\n]"
+        "content": "We can directly ask the database to query for this claim as it doesn't contain any ambiguity.\nThe answer is: [\"The number of people who died in the 2010 Haiti earthquake was 316,000.\"]"
     },
     {
         "role": "user",
@@ -17,7 +17,15 @@
     },
     {
         "role": "assistant",
-        "content": "As economy is not a quantitative term, we will have to find relevant metrics that can be used to compare the two countries' economies, e.g. GDP, Trade Volume,...\nThe answer is: [\n{'question': 'Is the GDP of the US larger than China's in 2019?', 'is_direct': 'true', 'reason': 'As GDP is a reliable metrics for economy size, comparing GDPs of US and China will answer whether one's economy is larger than the other's'},\n{'question': 'Is the Trade Volume of the US larger than China's in 2019?', 'is_direct': 'false', 'reason': 'Eventhough Trade Volume is a good economic metrics that can give us some valueable insights, it is not sufficient to use Trade Volume to compare the economy size of the two countries as some countries might have very active trade flow yet small economy scale in general.'},\n{'question': 'Is the GDP per capita of the US larger than China's in 2019?', 'is_direct': 'false', 'reason': 'Eventhough GDP per capita is a good economic metrics that can give us some valueable insights, it is not sufficient to use GDP per capita to compare the economy size of the two countries as some countries. The reason is that some countries like Singapore have very high GDP per capita. Yet their economy is not as large as the US or China due to their small population.'}\n]"
+        "content": "As economy is not a quantitative term, we will have to find relevant metrics that can be used to compare the two countries' economies, e.g. GDP, Trade Volume,...\nThe answer is: [\"The US' GDP was larger than China's in 2019.\", \"The US' Trade Volume was larger than China's in 2019.\", \"The US' GDP per capita was larger than China's in 2019.\"]"
+    },
+    {
+        "role": "user",
+        "content": "The US's electricity production rivals China's in 2023."
+    },
+    {
+        "role": "assistant",
+        "content": "Since electricity production is not a quantitative terms, we infer it to include either amount of generated electricity, or electricity per capita.\"]"
     },
     {
         "role": "user",
@@ -25,7 +33,7 @@
     },
     {
         "role": "assistant",
-        "content": "Since the time frame is not given, we can interpret this in several ways such as taking the current time as reference point.\nThe answer is: [\n{'question': 'Is the US' GDP higher than China's at the moment', 'is_direct': 'false', 'reason': 'Since the real time frame is not given in the claim, speculating the current time as frame of reference would not suffice to clarify the claim.'}\n]"
+        "content": "Since the time frame is not given, we infer current time as reference point.\nThe answer is: [\"The US' GDP higher than China's in 2023.\"]"
     },
     {
         "role": "user",
@@ -33,6 +41,6 @@
     },
     {
         "role": "assistant",
-        "content": "We can infer the axis of comparison is among countries and the time frame is the present.\nThe answer is: [\n{'question': 'Is the US's electricity consumption the highest among countries at the moment?', 'is_direct': 'true', 'reason': 'Answering this question will help verify the claim directly.'}\n]"
+        "content": "We can infer the axis of comparison is among countries and the time frame, as not provided, is inferred to be the present.\nThe answer is: [\"The US's electricity consumption was the highest among countries in 2023.\"]"
     }
 ]
