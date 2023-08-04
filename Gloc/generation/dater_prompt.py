@@ -2,8 +2,8 @@ import random
 from typing import Dict, Tuple
 import pandas as pd
 import copy
-from utils.table import table_linearization,twoD_list_transpose
-from utils.json import NoIndent, MyEncoder
+from Gloc.utils.table import table_linearization,twoD_list_transpose
+from Gloc.utils.json import NoIndent, MyEncoder
 import json
 
 class PromptBuilder(object):
@@ -80,7 +80,7 @@ class PromptBuilder(object):
             }
         linear_dic = json.dumps(dic,cls=MyEncoder,ensure_ascii=False,sort_keys=False,indent=2)
         #------------
-        prompt = '\n' + prompt + linear_dic +  '\n'
+        prompt = '\n/*\n' + prompt + linear_dic +  '\n*/\n'
         prompt += ' statement : '+ question
         # prompt += "If you are not sure which columns are useful, please link more value in statement.\n"
         #---------------

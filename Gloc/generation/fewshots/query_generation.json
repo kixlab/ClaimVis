@@ -1,7 +1,7 @@
 [
     {
         "role": "system", 
-        "content": "please generate unambiguous claims from the following claims."
+        "content": "Resolve ambiguities and give suggestions for the following claims so that they can be queried using a database."
     },
     {
         "role": "user",
@@ -9,7 +9,7 @@
     },
     {
         "role": "assistant",
-        "content": "We can directly ask the database to query for this claim as it doesn't contain any ambiguity.\nThe answer is: [\"The number of people who died in the 2010 Haiti earthquake was 316,000.\"]"
+        "content": "The query doesn't contain any ambiguity.\nThe answer is: \"The number of people who died in the 2010 Haiti earthquake was 316,000.\""
     },
     {
         "role": "user",
@@ -17,15 +17,15 @@
     },
     {
         "role": "assistant",
-        "content": "As economy is not a quantitative term, we will have to find relevant metrics that can be used to compare the two countries' economies, e.g. GDP, Trade Volume,...\nThe answer is: [\"The US' GDP was larger than China's in 2019.\", \"The US' Trade Volume was larger than China's in 2019.\", \"The US' GDP per capita was larger than China's in 2019.\"]"
+        "content": "As economy is not a quantitative term, we will have to find relevant metrics that can be used to compare the two countries' economies such as GDP, Trade Volume,...\nThe answer is: \"The US' {GDP, GDP per capita, Trade Volume} was larger than China's in 2019.\""
     },
     {
         "role": "user",
-        "content": "The US's electricity production rivals China's in 2023."
+        "content": "The US' electricity production rivals China's in 2023."
     },
     {
         "role": "assistant",
-        "content": "Since electricity production is not a quantitative terms, we infer it to include either amount of generated electricity, or electricity per capita.\"]"
+        "content": "Since electricity production is not a quantitative terms, we will have to find relevant metrics such as amount of generated electricity, or electricity per capita.\nThe answer is \"The US's {total amount of generated electricity, electricity per capita} rivals China's in 2023.\"]"
     },
     {
         "role": "user",
@@ -33,14 +33,14 @@
     },
     {
         "role": "assistant",
-        "content": "Since the time frame is not given, we infer current time as reference point.\nThe answer is: [\"The US' GDP higher than China's in 2023.\"]"
+        "content": "Since the time frame is not given, we infer the time.\nThe answer is: \"The US' GDP higher than China's in {the present, 2023, the last 5 years}.\""
     },
     {
         "role": "user",
-        "content": "The US's electricity consumption is the highest."
+        "content": "The US's electricity consumption is the highest in 2023."
     },
     {
         "role": "assistant",
-        "content": "We can infer the axis of comparison is among countries and the time frame, as not provided, is inferred to be the present.\nThe answer is: [\"The US's electricity consumption was the highest among countries in 2023.\"]"
+        "content": "Since the claim is a comparison, but the object is not defined, we infer the comparative objects.\nThe answer is: \"The US's electricity consumption was the highest {among countries} in 2023.\""
     }
 ]

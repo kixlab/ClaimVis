@@ -1,16 +1,15 @@
 """ClaimVis Prompts."""
-
 import enum
 import random
 from typing import Dict, Tuple
 import pandas as pd
 import copy
-from utils.table import table_linearization, twoD_list_transpose
-from utils.json import NoIndent, MyEncoder
+from ..utils.table import table_linearization, twoD_list_transpose
+from ..utils.json import NoIndent, MyEncoder
 import json
 import os
 import math
-from generation.dater_prompt import PromptBuilder
+from Gloc.generation.dater_prompt import PromptBuilder
 
 class TemplateKey(str, enum.Enum):
     SUMMARY = "sum"
@@ -19,8 +18,9 @@ class TemplateKey(str, enum.Enum):
     QUERY_DECOMPOSE = 'que'
     COT_REASONING = 'cot'
     DEC_REASONING = 'dec'
+    DEC_REASONING_2 = 'dec2'
     QUERY_GENERATION = 'gen'
-    
+    QUERY_GENERATION_2 = 'gen2'
 
 class Prompter(object):
     def __init__(self) -> None:
@@ -28,7 +28,7 @@ class Prompter(object):
         # set corresponding attributes
         self.attributes = []
 
-        _path_ = "generation/fewshots/"
+        _path_ = "../Gloc/generation/fewshots/"
         for file_name in os.listdir(_path_):
             attr_name = '_' + file_name.upper()[:-5] + '_'
             self.attributes.append(attr_name)
@@ -48,7 +48,7 @@ class Prompter(object):
             table: pd.DataFrame,
             question: str = None,
             title: str = None,
-            num_rows: int = 10,
+            num_rows: int = 3,
             **kwargs
         ):
         """
@@ -75,7 +75,7 @@ class Prompter(object):
                 "role": "user",
                 "content": question
             })
-        elif template_key == TemplateKey.DEC_REASONING:
+        elif template_key in [TemplateKey.DEC_REASONING, TemplateKey.DEC_REASONING_2]:
             template.append({
                 "role": "system",
                 "content": pb._select_x_wtq_end2end_prompt(
@@ -84,6 +84,11 @@ class Prompter(object):
                         df=table,
                         num_rows=num_rows
                     )
+            })
+        elif template_key == TemplateKey.QUERY_GENERATION_2:
+            template.append({
+                "role": "user",
+                "content": f"statement: {question}"
             })
 
         return template

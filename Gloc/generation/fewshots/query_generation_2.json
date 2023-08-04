@@ -1,0 +1,54 @@
+[
+    {
+        "role": "system",
+        "content": "From a claim, suggest me a list of at max 3 suggestions, each containing:\n        1. a query that can verified using a database.\n        2. a visualization task that is consistent with the query."
+    },
+    {
+        "role": "user",
+        "content": "statement: The number of COVID in US has dwindled to below 2000 cases per day in June 26, 2023."
+    },
+    {
+        "role": "assistant",
+        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the number of COVID cases in US below 2000 per day in 26th June 2023?\",\n                vis: \"Show the number of COVID cases in US per day in 26th June 2023.\"\n                explain: \"Showing the number of COVID cases in US per day in 26th June 2023 helps to verify the claim.\"\n            }\n        ]"
+    },
+    {
+        "role": "user",
+        "content": "statement: US'economy has outgrown China's in 2023."
+    },
+    {
+        "role": "assistant",
+        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the GDP of US greater than China in 2023?\",\n                vis: \"Show the GDP of US and China in 2023.\",\n                explain: \"Since GDP is a quantitative metric that measures economy,                     showing the GDP of US and China in 2023 helps to verify the claim.\"\n            },\n            {\n                query: \"Is the Trade Volume of US greater than China in 2023?\",\n                vis: \"Show the Trade Volume of US and China in 2023.\",\n                explain: \"Trade Volume is also a good economic metric, showing it could give                 more information to verify the claim.\"\n            }\n        ]"
+    },
+    {
+        "role": "user",
+        "content": "statement: US'economy outweighs the whole South Asia's."
+    },
+    {
+        "role": "assistant",
+        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the GDP of US greater than the sum of GDP of all South Asian countries in 2023?\",\n                vis: \"Show the GDP of US and all South Asian countries in 2023.\",\n                explain: \"Since GDP is a quantitative metric that measures economy,                     showing the GDP of US and all South Asian countries in 2023 helps to verify the claim.\"\n            }\n        ]"
+    },
+    {
+        "role": "user",
+        "content": "statement: All countries in East Asia produce less than 200 kWh of electricity per capita per day in 2019."
+    },
+    {
+        "role": "assistant",
+        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the electricity production per capita of all East Asian countries less than 200 kWh per day in 2019?\",\n                vis: \"Show the electricity production per capita per day of all East Asian countries in 2019.\",\n                explain: \"Showing the electricity production per capita per day of all East Asian countries in 2019 helps to verify the claim.\"\n            }\n        ]"
+    },
+    {
+        "role": "user",
+        "content": "statement: As the temperature in China rises, the number of COVID cases in China decreases."
+    },
+    {
+        "role": "assistant",
+        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the temperature in China and the number of COVID cases in China negatively correlated?\",\n                vis: \"Show the relationship between the temperature in China and the number of COVID cases in China.\",\n                explain: \"Showing the relationship between the temperature in China and the number of COVID cases in China helps to verify the claim.\"\n            }\n        ]"
+    },
+    {
+        "role": "user",
+        "content": "statement: The movie production of US is better than that of China in 2023."
+    },
+    {
+        "role": "assistant",
+        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the total box office of US greater than China in 2023?\",\n                vis: \"Show the total box office of US and China in 2023.\",\n                explain: \"Showing the total box office of US and China in 2023 helps to give more information to verify the claim.\"\n            },\n            {\n                query: \"Is the number of movies produced in US greater than China in 2023?\",\n                vis: \"Show the number of movies produced in US and China in 2023.\",\n                explain: \"Showing the number of movies produced in US and China in 2023 helps to give more information to verify the claim.\"\n            }\n        ]"
+    }
+]

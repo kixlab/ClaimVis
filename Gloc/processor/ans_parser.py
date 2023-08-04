@@ -23,3 +23,6 @@ class AnsParser(object):
             return [col.strip() for col in match.group(1).split(',')]
         else:
             return []        
+    
+    def parse_gen_query(self, message: str):
+        return re.findall(r'query: "(.*?)"', message)

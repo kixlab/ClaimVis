@@ -3,20 +3,28 @@ import sys
 sys.path.append("..")
 
 # from generation.dater_prompt import PromptBuilder
-from generation.claimvis_prompt import *
+from Gloc.generation.claimvis_prompt import *
 # from generation.dater_generator import Generator
-from generation.deplot_prompt import build_prompt
-from utils.table import table_linearization
-from processor.ans_parser import *
-from utils.llm import *
+from Gloc.generation.deplot_prompt import build_prompt
+from Gloc.utils.table import table_linearization
+from Gloc.processor.ans_parser import *
+from Gloc.utils.llm import *
 import pandas as pd
 import json
 import csv
-from common.functionlog import log_decorator
+from Gloc.common.functionlog import log_decorator
+from Gloc.processor.table_truncate import RowDeleteTruncate
+from Gloc.processor.table_linearize import IndexedRowTableLinearize
 
-# file_name = "owid-energy-data.csv"
-file_name = "movies-w-year.csv"
+file_name = "owid-energy-data.csv"
+# file_name = "movies-w-year.csv"
 dataset_path = "../Datasets/" + file_name
+df = pd.read_csv(dataset_path)
+table = df.iloc[:10, :10]
+
+# save df[:3, :] to Datasets/owid-energy-data-2.csv
+df.iloc[:3, :].to_csv("../Datasets/owid-energy-data-2.csv", index=False)
+
 
 @log_decorator
 def test_select_x_col_prompt():
@@ -73,17 +81,17 @@ def test_prompt_builder_1():
 
 @log_decorator
 def test_prompt_builder_2(
+        table: pd.DataFrame = None,
         question = "How many movies have funny adjective in their names",
         template_key = TemplateKey.COL_DECOMPOSE
     ):
     # set prompt builder
     prompter = Prompter()
-    # load dataset
-    df = pd.read_csv(dataset_path)
+
     # return prompt
     prompt = prompter.build_prompt(
         template_key=template_key,
-        table=df.iloc[:5, :5],
+        table=table,
         question=question,
         title=None
     )
@@ -95,13 +103,17 @@ def test_prompt_builder_2(
 
 @log_decorator
 def test_call_api_1(
-        question = "Only a handful of movies have high ratings.",
+        table: pd.DataFrame = None,
+        question = "US' car production is better than China's.",
         template_key = TemplateKey.COL_DECOMPOSE
     ):
     prompt = test_prompt_builder_2(
+                table=table,
                 question=question,
                 template_key=template_key
             )
+    # print(prompt)
+
     response = call_model(
         model=Model.GPT3,
         use_code=False,
@@ -114,7 +126,7 @@ def test_call_api_1(
     # print(prompt)
     return response
 
-# test_call_api_1(template_key=TemplateKey.COL_DECOMPOSE)
+test_call_api_1(template_key=TemplateKey.QUERY_GENERATION_2, table=table)
 
 @log_decorator
 def test_call_api_2(prompt):
@@ -165,9 +177,57 @@ def test_dec_reasoning(
     print(dec_prompt)
     return dec_prompt[-1]
 
-test_dec_reasoning()
+# test_dec_reasoning()
 
 # test_call_api_1(
-#     question=  "The US's economy is larger than China's in 2020",
+#     question=  "The US's economy is larger than China's.",
 #     template_key=TemplateKey.QUERY_GENERATION
 # )
+
+
+@log_decorator
+def test_break_big_columns_1(
+    question = "The US's economy is larger than China's.",
+):
+    # Create a sample DataFrame
+    df = pd.read_csv(dataset_path)
+    df_dict = {
+        'header': df.columns.tolist()[:20],
+        'rows': [row[:20] for row in df.values.tolist()]
+    }
+
+    # truncate table rows
+    truncator = RowDeleteTruncate(
+        table_linearize=IndexedRowTableLinearize(), 
+        # max_input_length=1024
+    )
+    truncator.truncate_table(
+        table_content=df_dict,
+        question=question,
+        answer=[]
+    )
+
+    new_table = pd.DataFrame(columns=df_dict['header'], data=df_dict['rows'])
+
+    # use LLM to infer related columns
+    decomposed_cols = test_call_api_1(
+        table=new_table,
+        question=question,
+        template_key=TemplateKey.COL_DECOMPOSE
+    )
+
+    print(decomposed_cols)
+
+# test_break_big_columns_1()
+
+@log_decorator
+def test_pipeline_1(
+    question = "The US's economy is larger than China's."
+):
+    # without the generation module
+    # Create a sample DataFrame
+    df = pd.read_csv(dataset_path)
+    
+
+
+    

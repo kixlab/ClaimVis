@@ -5,7 +5,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"south wales derby\",\n  \"columns\": [\"competition\", \"total matches\", \"cardiff win\", \"draw\", \"swansea win\"],\n  \"table_column_priority\": [\n    [\"competition\", \"league\", \"fa cup\", \"league cup\"],\n    [\"total matches\", \"55\", \"2\", \"5\"],\n    [\"cardiff win\", \"19\", \"0\", \"2\"],\n    [\"draw\", \"16\", \"27\", \"0\"],\n    [\"swansea win\", \"20\", \"2\", \"3\"]\n  ]\n}\n statement : there are no cardiff wins that have a draw greater than 27."
+        "content": "/*\n{\n  \"table_caption\": \"south wales derby\",\n  \"columns\": [\"competition\", \"total matches\", \"cardiff win\", \"draw\", \"swansea win\"],\n  \"table_column_priority\": [\n    [\"competition\", \"league\", \"fa cup\", \"league cup\"],\n    [\"total matches\", \"55\", \"2\", \"5\"],\n    [\"cardiff win\", \"19\", \"0\", \"2\"],\n    [\"draw\", \"16\", \"27\", \"0\"],\n    [\"swansea win\", \"20\", \"2\", \"3\"]\n  ]\n}\n*/\n statement : there are no cardiff wins that have a draw greater than 27."
     },
     {
         "role": "assistant",
@@ -13,7 +13,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"gambrinus liga\",\n  \"columns\": [\"season\", \"champions\", \"runner - up\", \"third place\", \"top goalscorer\", \"club\"],\n  \"table_column_priority\": [\n    [\"season\", \"1993 - 94\", \"1994 - 95\", \"1995 - 96\"],\n    [\"champions\", \"sparta prague (1)\", \"sparta prague (2)\", \"slavia prague (1)\"],\n    [\"runner - up\", \"slavia prague\", \"slavia prague\", \"sigma olomouc\"],\n    [\"third place\", \"ban\u00edk ostrava\", \"fc brno\", \"baumit jablonec\"],\n    [\"top goalscorer\", \"horst siegl (20)\", \"radek drul\u00e1k (15)\", \"radek drul\u00e1k (22)\"],\n    [\"club\", \"sparta prague\", \"drnovice\", \"drnovice\"]\n  ]\n}\n statement : the top goal scorer for the season 2010 - 2011 was david lafata."
+        "content": "/*\n{\n  \"table_caption\": \"gambrinus liga\",\n  \"columns\": [\"season\", \"champions\", \"runner - up\", \"third place\", \"top goalscorer\", \"club\"],\n  \"table_column_priority\": [\n    [\"season\", \"1993 - 94\", \"1994 - 95\", \"1995 - 96\"],\n    [\"champions\", \"sparta prague (1)\", \"sparta prague (2)\", \"slavia prague (1)\"],\n    [\"runner - up\", \"slavia prague\", \"slavia prague\", \"sigma olomouc\"],\n    [\"third place\", \"ban\u00edk ostrava\", \"fc brno\", \"baumit jablonec\"],\n    [\"top goalscorer\", \"horst siegl (20)\", \"radek drul\u00e1k (15)\", \"radek drul\u00e1k (22)\"],\n    [\"club\", \"sparta prague\", \"drnovice\", \"drnovice\"]\n  ]\n}\n*/\n statement : the top goal scorer for the season 2010 - 2011 was david lafata."
     },
     {
         "role": "assistant",
@@ -21,7 +21,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"head of the river (queensland)\",\n  \"columns\": [\"crew\", \"open 1st viii\", \"senior 2nd viii\", \"senior 3rd viii\", \"senior iv\", \"year 12 single scull\", \"year 11 single scull\"],\n  \"table_column_priority\": [\n    [\"crew\", \"2009\", \"2010\", \"2011\"],\n    [\"open 1st viii\", \"stm\", \"splc\", \"stm\"],\n    [\"senior 2nd viii\", \"sta\", \"som\", \"stu\"],\n    [\"senior 3rd viii\", \"sta\", \"som\", \"stu\"],\n    [\"senior iv\", \"som\", \"sth\", \"sta\"],\n    [\"year 12 single scull\", \"stm\", \"splc\", \"stm\"],\n    [\"year 11 single scull\", \"splc\", \"splc\", \"splc\"]\n  ]\n}\n statement : the crew that had a senior 2nd viii of som and senior iv of stm was that of 2013."
+        "content": "/*\n{\n  \"table_caption\": \"head of the river (queensland)\",\n  \"columns\": [\"crew\", \"open 1st viii\", \"senior 2nd viii\", \"senior 3rd viii\", \"senior iv\", \"year 12 single scull\", \"year 11 single scull\"],\n  \"table_column_priority\": [\n    [\"crew\", \"2009\", \"2010\", \"2011\"],\n    [\"open 1st viii\", \"stm\", \"splc\", \"stm\"],\n    [\"senior 2nd viii\", \"sta\", \"som\", \"stu\"],\n    [\"senior 3rd viii\", \"sta\", \"som\", \"stu\"],\n    [\"senior iv\", \"som\", \"sth\", \"sta\"],\n    [\"year 12 single scull\", \"stm\", \"splc\", \"stm\"],\n    [\"year 11 single scull\", \"splc\", \"splc\", \"splc\"]\n  ]\n}\n*/\n statement : the crew that had a senior 2nd viii of som and senior iv of stm was that of 2013."
     },
     {
         "role": "assistant",
@@ -29,7 +29,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"2007 - 08 boston celtics season\",\n  \"columns\": [\"game\", \"date\", \"team\", \"score\", \"high points\", \"high rebounds\", \"high assists\", \"location attendance\", \"record\"],\n  \"table_column_priority\": [\n    [\"game\", \"74\", \"75\", \"76\"],\n    [\"date\", \"april 1\", \"april 2\", \"april 5\"],\n    [\"team\", \"chicago\", \"indiana\", \"charlotte\"],\n    [\"score\", \"106 - 92\", \"92 - 77\", \"101 - 78\"],\n    [\"high points\", \"allen (22)\", \"garnett (20)\", \"powe (22)\"],\n    [\"high rebounds\", \"perkins (9)\", \"garnett (11)\", \"powe (9)\"],\n    [\"high assists\", \"rondo (10)\", \"rondo (6)\", \"rondo (5)\"],\n    [\"location attendance\", \"united center 22225\", \"td banknorth garden 18624\", \"charlotte bobcats arena 19403\"],\n    [\"record\", \"59 - 15\", \"60 - 15\", \"61 - 15\"]\n  ]\n}\n statement : in game 74 against chicago , perkins had the most rebounds (9) and allen had the most points (22)."
+        "content": "/*\n{\n  \"table_caption\": \"2007 - 08 boston celtics season\",\n  \"columns\": [\"game\", \"date\", \"team\", \"score\", \"high points\", \"high rebounds\", \"high assists\", \"location attendance\", \"record\"],\n  \"table_column_priority\": [\n    [\"game\", \"74\", \"75\", \"76\"],\n    [\"date\", \"april 1\", \"april 2\", \"april 5\"],\n    [\"team\", \"chicago\", \"indiana\", \"charlotte\"],\n    [\"score\", \"106 - 92\", \"92 - 77\", \"101 - 78\"],\n    [\"high points\", \"allen (22)\", \"garnett (20)\", \"powe (22)\"],\n    [\"high rebounds\", \"perkins (9)\", \"garnett (11)\", \"powe (9)\"],\n    [\"high assists\", \"rondo (10)\", \"rondo (6)\", \"rondo (5)\"],\n    [\"location attendance\", \"united center 22225\", \"td banknorth garden 18624\", \"charlotte bobcats arena 19403\"],\n    [\"record\", \"59 - 15\", \"60 - 15\", \"61 - 15\"]\n  ]\n}\n*/\n statement : in game 74 against chicago , perkins had the most rebounds (9) and allen had the most points (22)."
     },
     {
         "role": "assistant",
@@ -37,7 +37,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"dan hardy\",\n  \"columns\": [\"res\", \"record\", \"opponent\", \"method\", \"event\", \"round\", \"time\", \"location\"],\n  \"table_column_priority\": [\n    [\"res\", \"win\", \"win\", \"loss\"],\n    [\"record\", \"25 - 10 (1)\", \"24 - 10 (1)\", \"23 - 10 (1)\"],\n    [\"opponent\", \"amir sadollah\", \"duane ludwig\", \"chris lytle\"],\n    [\"method\", \"decision (unanimous)\", \"ko (punch and elbows)\", \"submission (guillotine choke)\"],\n    [\"event\", \"ufc on fuel tv : struve vs miocic\", \"ufc 146\", \"ufc live : hardy vs lytle\"],\n    [\"round\", \"3\", \"1\", \"5\"],\n    [\"time\", \"5:00\", \"3:51\", \"4:16\"],\n    [\"location\", \"nottingham , england\", \"las vegas , nevada , united states\", \"milwaukee , wisconsin , united states\"]\n  ]\n}\n statement : the record of the match was a 10 - 3 (1) score , resulting in a win in round 5 with a time of 5:00 minutes."
+        "content": "/*\n{\n  \"table_caption\": \"dan hardy\",\n  \"columns\": [\"res\", \"record\", \"opponent\", \"method\", \"event\", \"round\", \"time\", \"location\"],\n  \"table_column_priority\": [\n    [\"res\", \"win\", \"win\", \"loss\"],\n    [\"record\", \"25 - 10 (1)\", \"24 - 10 (1)\", \"23 - 10 (1)\"],\n    [\"opponent\", \"amir sadollah\", \"duane ludwig\", \"chris lytle\"],\n    [\"method\", \"decision (unanimous)\", \"ko (punch and elbows)\", \"submission (guillotine choke)\"],\n    [\"event\", \"ufc on fuel tv : struve vs miocic\", \"ufc 146\", \"ufc live : hardy vs lytle\"],\n    [\"round\", \"3\", \"1\", \"5\"],\n    [\"time\", \"5:00\", \"3:51\", \"4:16\"],\n    [\"location\", \"nottingham , england\", \"las vegas , nevada , united states\", \"milwaukee , wisconsin , united states\"]\n  ]\n}\n statement : the record of the match was a 10 - 3 (1) score , resulting in a win in round 5 with a time of 5:00 minutes."
     },
     {
         "role": "assistant",
@@ -45,7 +45,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"list of largest airlines in central america & the caribbean\",\n  \"columns\": [\"rank\", \"airline\", \"country\", \"fleet size\", \"remarks\"],\n  \"table_column_priority\": [\n    [\"rank\", \"1\", \"2\", \"3\"],\n    [\"airline\", \"caribbean airlines\", \"liat\", \"cubana de aviaci\u00e3 cubicn\"],\n    [\"country\", \"trinidad and tobago\", \"antigua and barbuda\", \"cuba\"],\n    [\"fleet size\", \"22\", \"17\", \"14\"],\n    [\"remarks\", \"largest airline in the caribbean\", \"second largest airline in the caribbean\", \"operational since 1929\"]\n  ]\n}\n statement : the remark on airline of dutch antilles express with fleet size over 4 is curacao second national carrier."
+        "content": "/*\n{\n  \"table_caption\": \"list of largest airlines in central america & the caribbean\",\n  \"columns\": [\"rank\", \"airline\", \"country\", \"fleet size\", \"remarks\"],\n  \"table_column_priority\": [\n    [\"rank\", \"1\", \"2\", \"3\"],\n    [\"airline\", \"caribbean airlines\", \"liat\", \"cubana de aviaci\u00e3 cubicn\"],\n    [\"country\", \"trinidad and tobago\", \"antigua and barbuda\", \"cuba\"],\n    [\"fleet size\", \"22\", \"17\", \"14\"],\n    [\"remarks\", \"largest airline in the caribbean\", \"second largest airline in the caribbean\", \"operational since 1929\"]\n  ]\n}\n statement : the remark on airline of dutch antilles express with fleet size over 4 is curacao second national carrier."
     },
     {
         "role": "assistant",
@@ -53,7 +53,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"cnbc prime 's the profit 200\",\n  \"columns\": [\"year\", \"date\", \"driver\", \"team\", \"manufacturer\", \"laps\", \"-\", \"race time\", \"average speed (mph)\"],\n  \"table_column_priority\": [\n    [\"year\", \"1990\", \"1990\", \"1991\"],\n    [\"date\", \"july 15\", \"october 14\", \"july 14\"],\n    [\"driver\", \"tommy ellis\", \"rick mast\", \"kenny wallace\"],\n    [\"team\", \"john jackson\", \"ag dillard motorsports\", \"rusty wallace racing\"],\n    [\"manufacturer\", \"buick\", \"buick\", \"pontiac\"],\n    [\"laps\", \"300\", \"250\", \"300\"],\n    [\"-\", \"317.4 (510.805)\", \"264.5 (425.671)\", \"317.4 (510.805)\"],\n    [\"race time\", \"3:41:58\", \"2:44:37\", \"2:54:38\"],\n    [\"average speed (mph)\", \"85.797\", \"94.405\", \"109.093\"]\n  ]\n}\n statement : on june 26th , 2010 kyle busch drove a total of 211.6 miles at an average speed of 110.673 miles per hour."
+        "content": "/*\n{\n  \"table_caption\": \"cnbc prime 's the profit 200\",\n  \"columns\": [\"year\", \"date\", \"driver\", \"team\", \"manufacturer\", \"laps\", \"-\", \"race time\", \"average speed (mph)\"],\n  \"table_column_priority\": [\n    [\"year\", \"1990\", \"1990\", \"1991\"],\n    [\"date\", \"july 15\", \"october 14\", \"july 14\"],\n    [\"driver\", \"tommy ellis\", \"rick mast\", \"kenny wallace\"],\n    [\"team\", \"john jackson\", \"ag dillard motorsports\", \"rusty wallace racing\"],\n    [\"manufacturer\", \"buick\", \"buick\", \"pontiac\"],\n    [\"laps\", \"300\", \"250\", \"300\"],\n    [\"-\", \"317.4 (510.805)\", \"264.5 (425.671)\", \"317.4 (510.805)\"],\n    [\"race time\", \"3:41:58\", \"2:44:37\", \"2:54:38\"],\n    [\"average speed (mph)\", \"85.797\", \"94.405\", \"109.093\"]\n  ]\n}\n*/\n statement : on june 26th , 2010 kyle busch drove a total of 211.6 miles at an average speed of 110.673 miles per hour."
     },
     {
         "role": "assistant",
@@ -61,7 +61,7 @@
     },
     {
         "role": "user",
-        "content": "{\n  \"table_caption\": \"2000 ansett australia cup\",\n  \"columns\": [\"home team\", \"home team score\", \"away team\", \"away team score\", \"ground\", \"crowd\", \"date\"],\n  \"table_column_priority\": [\n    [\"home team\", \"brisbane lions\", \"kangaroos\", \"richmond\"],\n    [\"home team score\", \"13.6 (84)\", \"10.16 (76)\", \"11.16 (82)\"],\n    [\"away team\", \"sydney\", \"richmond\", \"brisbane lions\"],\n    [\"away team score\", \"17.10 (112)\", \"9.11 (65)\", \"15.9 (99)\"],\n    [\"ground\", \"bundaberg rum stadium\", \"waverley park\", \"north hobart oval\"],\n    [\"crowd\", \"8818\", \"16512\", \"4908\"],\n    [\"date\", \"friday , 28 january\", \"friday , 28 january\", \"saturday , 5 february\"]\n  ]\n}\n statement : sydney scored the same amount of points in the first game of the 2000 afl ansett australia cup as their opponent did in their second."
+        "content": "/*\n{\n  \"table_caption\": \"2000 ansett australia cup\",\n  \"columns\": [\"home team\", \"home team score\", \"away team\", \"away team score\", \"ground\", \"crowd\", \"date\"],\n  \"table_column_priority\": [\n    [\"home team\", \"brisbane lions\", \"kangaroos\", \"richmond\"],\n    [\"home team score\", \"13.6 (84)\", \"10.16 (76)\", \"11.16 (82)\"],\n    [\"away team\", \"sydney\", \"richmond\", \"brisbane lions\"],\n    [\"away team score\", \"17.10 (112)\", \"9.11 (65)\", \"15.9 (99)\"],\n    [\"ground\", \"bundaberg rum stadium\", \"waverley park\", \"north hobart oval\"],\n    [\"crowd\", \"8818\", \"16512\", \"4908\"],\n    [\"date\", \"friday , 28 january\", \"friday , 28 january\", \"saturday , 5 february\"]\n  ]\n}\n*/\n statement : sydney scored the same amount of points in the first game of the 2000 afl ansett australia cup as their opponent did in their second."
     },
     {
         "role": "assistant",

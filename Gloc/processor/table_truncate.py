@@ -7,7 +7,7 @@ import random
 from typing import List, Dict, Tuple
 import logging
 from transformers import AutoTokenizer, BasicTokenizer
-from processor.table_linearize import TableLinearize
+from Gloc.processor.table_linearize import TableLinearize
 
 logger = logging.getLogger(__name__)
 

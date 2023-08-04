@@ -66,7 +66,7 @@ class IndexedRowTableLinearize(TableLinearize):
         row_str = ""
         row_cell_values = []
         for cell_value in row:
-            if isinstance(cell_value, int):
+            if isinstance(cell_value, int) or isinstance(cell_value, float):
                 row_cell_values.append(str(cell_value))
             else:
                 row_cell_values.append(cell_value)

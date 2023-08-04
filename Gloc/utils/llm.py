@@ -11,12 +11,15 @@ import openai
 import tensorflow as tf
 from Credentials.info import *
 
+from Gloc.common.functionlog import TokenCount
+
 # _OPENAI_CREDENTIALS = flags.DEFINE_list(
 #     'openai_credentials', None, 'Credentials to call OpenAI.', required=True)
 openai.api_key = openai_api
 
 class Model(enum.Enum):
   GPT3 = 'gpt-3.5-turbo'
+  GPT4 = 'gpt-4'
 
 def retry(
     try_count = 3,
@@ -41,10 +44,11 @@ def retry(
 
 
 @retry(try_count=3, sleep_seconds=1)
+@TokenCount
 def _call_openai(
-    prompt,
-    engine,
-    max_decode_steps,
+    prompt = [],
+    engine = Model.GPT3,
+    max_decode_steps = 500,
     temperature = 0,
     top_p = 1,
     frequency_penalty = 0,
@@ -80,7 +84,9 @@ def _call_openai(
         presence_penalty=presence_penalty,
         n=samples,
         stop=stop)
-    return [choice['message']['content'] for choice in reply['choices']] if reply else []
+    
+    contents = [choice['message']['content'] for choice in reply['choices']] if reply else []
+    return contents, reply['usage']['total_tokens']
 
   except openai.error.RateLimitError as e:
     print('Sleeping 60 secs.')
@@ -91,7 +97,7 @@ def _call_openai(
 def call_model(
     model,
     prompt,
-    use_code,
+    use_code, # to control model: False = GPT-3.5, True = Code-Davinci
     temperature,
     max_decode_steps,
     samples,
@@ -102,11 +108,12 @@ def call_model(
     if model == Model.GPT3:
       results.extend(
           _call_openai(
-              prompt,
+              prompt=prompt,
               engine='code-davinci-003' if use_code else 'gpt-3.5-turbo',
               temperature=temperature,
               max_decode_steps=max_decode_steps,
-              samples=samples))
+              samples=samples)
+      )
     else:
       raise ValueError(f'Unknown model_type={model}')
   return results[:samples]
