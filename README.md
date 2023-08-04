@@ -7,6 +7,6 @@ The current pipeline:
 
 First version of the justification pipeline:
 <p align="center">
-  <img src="https://github.com/kixlab/ClaimVis/assets/93929554/3ac14de1-39ab-463c-856c-d8c7361be514" width="700">
+  <img src="https://github.com/kixlab/ClaimVis/assets/93929554/3ac14de1-39ab-463c-856c-d8c7361be514" width="500">
 <p>
 
