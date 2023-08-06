@@ -3,8 +3,7 @@ import sys
 sys.path.append("..")
 
 import pandas as pd
-from Gloc.generation.claimvis_prompt import Prompter
-from Gloc.generation.claimvis_prompt import TemplateKey
+from Gloc.generation.claimvis_prompt import Prompter, TemplateKey
 from Gloc.utils.llm import *
 from Gloc.processor.ans_parser import AnsParser
 from Gloc.common.functionlog import log_decorator
@@ -43,6 +42,22 @@ class TableReasoner(object):
 
         return response
         
+    def _call_api_2(self, prompt: list):
+        """
+            Call API for CoT
+            Input: prompt
+            Output: response
+        """
+        response = call_model(
+            model=Model.GPT3,
+            use_code=False,
+            temperature=0,
+            max_decode_steps=500,
+            prompt=prompt,
+            samples=1
+        )
+
+        return response
 
     def _suggest_queries(self, claim: str):
         """
@@ -70,23 +85,6 @@ class TableReasoner(object):
         )[0]
 
         return self.parser.parse_dec_reasoning(decomposed_ans)
-        
-    def _call_api_2(self, prompt: list):
-        """
-            Call API for CoT
-            Input: prompt
-            Output: response
-        """
-        response = call_model(
-            model=Model.GPT3,
-            use_code=False,
-            temperature=0,
-            max_decode_steps=500,
-            prompt=prompt,
-            samples=1
-        )
-
-        return response
     
     def _decompose_table(self, claim: str, table: pd.DataFrame):
         """
@@ -126,23 +124,23 @@ class TableReasoner(object):
             table=table,
             question=first_query,
         )
-        content = "\n".join(f"Q{str(i+1)}: {query}" for i, query in enumerate(sub_queries[:-1]))
+        content = "\n".join(f"Q{str(i+1)}: {query}" for i, query in enumerate(sub_queries))
         dec_prompt.append({
             "role": "user", 
             "content": content
         })
 
-        # call API for decomposed reasoning
-        response = self._call_api_2(dec_prompt)
+        # # call API for decomposed reasoning
+        # response = self._call_api_2(dec_prompt)
 
-        # final query
-        dec_prompt.extend([{
-            "role": "assistant", 
-            "content": response
-            },{
-            "role": "user",
-            "content": f"Q{len(sub_queries)}: {sub_queries[-1]}"
-        }])
+        # # final query
+        # dec_prompt.extend([{
+        #     "role": "assistant", 
+        #     "content": response
+        #     },{
+        #     "role": "user",
+        #     "content": f"Q{len(sub_queries)}: {sub_queries[-1]}"
+        # }])
 
         print(f"full prompt:\n{dec_prompt}")
 

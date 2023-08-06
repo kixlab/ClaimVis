@@ -1492,3 +1492,22 @@ INFO:root:Arguments: (<__main__.TableReasoner object at 0x00000266C8E84FA0>, 'Th
 INFO:root:Return Value: None
 INFO:root:Execution Time: 2023-08-04 13:24:52
 INFO:root:Token used: 950
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason_1st_query
+INFO:root:Arguments: (<__main__.TableReasoner object at 0x000001BB0AA94FA0>, 'The total gross of the top 3 movies surpasses 300000000.',                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns]), {}
+INFO:root:Return Value: ["A1: Let's find the column of Worldwide Gross. Then let's extract the gross of the first movie, it's 163,379,330. The answer is 163,379,330.\nA2: Let's find the column of Worldwide Gross. Then let's extract the gross of the second movie, it's 620,495,432. The answer is 620,495,432.\nA3: Let's find the column of Worldwide Gross. Then let's extract the gross of the third movie, it's 237,702,596. The answer is 237,702,596.\nA4: Let's sum the gross of the top 3 movies: 163,379,330 + 620,495,432 + 237,702,596 = 1,021,577,358. The total gross of the top 3 movies is 1,021,577,358.\nA5: Since the total gross of the top 3 movies is 1,021,577,358 and (1,021,577,358 > 300,000,000), the answer is yes."]
+INFO:root:Execution Time: 2023-08-04 17:03:06
+INFO:root:Token used: 3362
