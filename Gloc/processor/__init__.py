@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-from .table_linearize import IndexedRowTableLinearize
-from .table_truncate import CellLimitTruncate, RowDeleteTruncate
-from .table_processor import TableProcessor
+from processor.table_linearize import IndexedRowTableLinearize
+from processor.table_truncate import CellLimitTruncate, RowDeleteTruncate
+from processor.table_processor import TableProcessor
 from transformers import AutoTokenizer
 
 

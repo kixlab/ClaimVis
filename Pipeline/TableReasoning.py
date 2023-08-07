@@ -1,12 +1,12 @@
 # CoT few-shot prompting 
 import sys
-sys.path.append("..")
+sys.path.append("../Gloc")
 
 import pandas as pd
-from Gloc.generation.claimvis_prompt import Prompter, TemplateKey
-from Gloc.utils.llm import *
-from Gloc.processor.ans_parser import AnsParser
-from Gloc.common.functionlog import log_decorator
+from generation.claimvis_prompt import Prompter, TemplateKey
+from utils.llm import *
+from processor.ans_parser import AnsParser
+from common.functionlog import log_decorator
 import re
 
 class TableReasoner(object):
@@ -150,6 +150,10 @@ class TableReasoner(object):
 
 if __name__ == "__main__":
     table_reasoner = TableReasoner()
-    claim = "The total gross of the top 3 movies surpasses 300000000."
+    claim = "No movie has a rating better than 66.6."
     df = pd.read_csv("../Datasets/movies-w-year.csv")
-    print(table_reasoner.reason_1st_query(claim, df))
+    # print(table_reasoner.reason_1st_query(claim, df))
+    print(table_reasoner._call_api_1(
+            question=claim,
+            template_key=TemplateKey.QUERY_GENERATION
+        )[0])

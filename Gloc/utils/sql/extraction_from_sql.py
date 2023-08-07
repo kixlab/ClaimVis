@@ -618,5 +618,3 @@ if __name__ == "__main__":
           low_freq_txt.write(template + "\n")
         fout_txt.write(template + "\n")
 
-
-

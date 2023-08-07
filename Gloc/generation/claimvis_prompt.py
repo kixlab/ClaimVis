@@ -4,23 +4,30 @@ import random
 from typing import Dict, Tuple
 import pandas as pd
 import copy
-from ..utils.table import table_linearization, twoD_list_transpose
-from ..utils.json import NoIndent, MyEncoder
+from utils.table import table_linearization, twoD_list_transpose
+from utils.json import NoIndent, MyEncoder
 import json
 import os
 import math
-from Gloc.generation.dater_prompt import PromptBuilder
+from generation.dater_prompt import PromptBuilder
+from generation.binder_prompt import PromptBuilder as BinderPromptBuilder
 
 class TemplateKey(str, enum.Enum):
     SUMMARY = "sum"
+
     ROW_DECOMPOSE = 'row'
     COL_DECOMPOSE = 'col'
+
     QUERY_DECOMPOSE = 'que'
+
     COT_REASONING = 'cot'
     DEC_REASONING = 'dec'
     DEC_REASONING_2 = 'dec2'
+
     QUERY_GENERATION = 'gen'
     QUERY_GENERATION_2 = 'gen2'
+    QUERY_GENERATION_3 = 'gen3'
+    NSQL_GENERATION = 'nsql'
 
 class Prompter(object):
     def __init__(self) -> None:
@@ -57,6 +64,7 @@ class Prompter(object):
             some new modules 
         """
         pb = PromptBuilder() # dater promptbuilder
+        bd = BinderPromptBuilder(None) # binder promptbuilder
 
         template = self._get_template(template_key)
         if template_key in [TemplateKey.COL_DECOMPOSE, TemplateKey.ROW_DECOMPOSE]:
@@ -89,6 +97,17 @@ class Prompter(object):
             template.append({
                 "role": "user",
                 "content": f"statement: {question}"
+            })
+        elif template_key == TemplateKey.NSQL_GENERATION:
+            template.append({
+                "role": "user",
+                "content": bd.build_one_shot_prompt(
+                    prompt_type=("question", "nsql"),
+                    table=table,
+                    question=question,
+                    answer_text=None,
+                    nsql=""
+                )
             })
 
         return template

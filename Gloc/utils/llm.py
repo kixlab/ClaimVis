@@ -11,7 +11,7 @@ import openai
 import tensorflow as tf
 from Credentials.info import *
 
-from Gloc.common.functionlog import TokenCount
+from common.functionlog import TokenCount
 
 # _OPENAI_CREDENTIALS = flags.DEFINE_list(
 #     'openai_credentials', None, 'Credentials to call OpenAI.', required=True)

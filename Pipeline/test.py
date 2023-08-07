@@ -1,29 +1,30 @@
 import os
 import sys
+sys.path.append("../Gloc")
 sys.path.append("..")
 
 # from generation.dater_prompt import PromptBuilder
-from Gloc.generation.claimvis_prompt import *
+from generation.claimvis_prompt import *
 # from generation.dater_generator import Generator
-from Gloc.generation.deplot_prompt import build_prompt
-from Gloc.utils.table import table_linearization
-from Gloc.processor.ans_parser import *
-from Gloc.utils.llm import *
+from generation.deplot_prompt import build_prompt
+from utils.table import table_linearization
+from processor.ans_parser import *
+from utils.llm import *
 import pandas as pd
 import json
 import csv
-from Gloc.common.functionlog import log_decorator
-from Gloc.processor.table_truncate import RowDeleteTruncate
-from Gloc.processor.table_linearize import IndexedRowTableLinearize
+from common.functionlog import log_decorator
+from processor.table_truncate import RowDeleteTruncate
+from processor.table_linearize import IndexedRowTableLinearize
 
-file_name = "owid-energy-data.csv"
-# file_name = "movies-w-year.csv"
+# file_name = "owid-energy-data.csv"
+file_name = "movies-w-year.csv"
 dataset_path = "../Datasets/" + file_name
 df = pd.read_csv(dataset_path)
 table = df.iloc[:10, :10]
 
 # save df[:3, :] to Datasets/owid-energy-data-2.csv
-df.iloc[:3, :].to_csv("../Datasets/owid-energy-data-2.csv", index=False)
+# df.iloc[:3, :].to_csv("../Datasets/owid-energy-data-2.csv", index=False)
 
 
 @log_decorator
@@ -104,7 +105,7 @@ def test_prompt_builder_2(
 @log_decorator
 def test_call_api_1(
         table: pd.DataFrame = None,
-        question = "US' car production is better than China's.",
+        question = "The second movie has an IMDB rating higher than the third movie.",
         template_key = TemplateKey.COL_DECOMPOSE
     ):
     prompt = test_prompt_builder_2(
@@ -112,7 +113,7 @@ def test_call_api_1(
                 question=question,
                 template_key=template_key
             )
-    # print(prompt)
+    print(prompt)
 
     response = call_model(
         model=Model.GPT3,
@@ -126,7 +127,7 @@ def test_call_api_1(
     # print(prompt)
     return response
 
-test_call_api_1(template_key=TemplateKey.QUERY_GENERATION_2, table=table)
+test_call_api_1(template_key=TemplateKey.NSQL_GENERATION, table=table)
 
 @log_decorator
 def test_call_api_2(prompt):
@@ -180,8 +181,8 @@ def test_dec_reasoning(
 # test_dec_reasoning()
 
 # test_call_api_1(
-#     question=  "The US's economy is larger than China's.",
-#     template_key=TemplateKey.QUERY_GENERATION
+#     question=  "No movie has a rating better than 66.6.",
+#     template_key=TemplateKey.QUERY_GENERATION_2
 # )
 
 
