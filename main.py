@@ -36,7 +36,17 @@ def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
                     category = 'fixed',
                     country = 'variable',
                     date = 'fixed',
-                    allCategories = ['Nuclear energy consumption', 'Coal energy consumption', 'Solar energy consumption'], ## All relelant field names in the dataset? human readable ones?
+                    allCategories = [{
+                        'label': 'Nuclear energy consumption',
+                        'value': 'nuclear_consumption'
+                    }, {
+                        'label': 'Coal energy consumption',
+                        'value': 'coal_consumption'
+                    },
+                    {
+                        'label': 'Solar energy consumption',
+                        'value': 'solar_consumption'
+                    }], ## All relelant field names in the dataset? human readable ones?
                     allCountries = ['United States', 'United Kingdom', 'Greece', 'Germany', 'South Korea', 'Japan', 'Vietnam'], # basically all countries in the dataset
                     date_start = 2000,
                     date_end = 2020 # basically all years in the dataset
