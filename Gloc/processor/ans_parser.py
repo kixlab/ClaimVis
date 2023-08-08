@@ -26,3 +26,9 @@ class AnsParser(object):
     
     def parse_gen_query(self, message: str):
         return re.findall(r'query: "(.*?)"', message)
+    
+    def parse_sql(self, message: str):
+        return re.search(r'SQL: "(.*?)"', message).group(1)
+    
+    def parse_nsql(self, message: str):
+        return re.search(r'NeuralSQL: "(.*?)"', message).group(1)

@@ -27,7 +27,9 @@ class TemplateKey(str, enum.Enum):
     QUERY_GENERATION = 'gen'
     QUERY_GENERATION_2 = 'gen2'
     QUERY_GENERATION_3 = 'gen3'
+
     NSQL_GENERATION = 'nsql'
+    SQL_GENERATION = 'sql'
 
 class Prompter(object):
     def __init__(self) -> None:
@@ -98,7 +100,7 @@ class Prompter(object):
                 "role": "user",
                 "content": f"statement: {question}"
             })
-        elif template_key == TemplateKey.NSQL_GENERATION:
+        elif template_key in [TemplateKey.NSQL_GENERATION, TemplateKey.SQL_GENERATION]:
             template.append({
                 "role": "user",
                 "content": bd.build_one_shot_prompt(

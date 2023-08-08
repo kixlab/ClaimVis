@@ -1,0 +1,70 @@
+[
+    {
+        "role": "system",
+        "content": "Generate SQL given the statement and table to verify the statement correctly"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE jason chambers(\n\trow_id int,\n\tres text,\n\trecord text,\n\topponent text,\n\tmethod text,\n\tevent text,\n\tround text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tres\trecord\topponent\tmethod\tevent\tround\n0\twin\t18 - 5 - 2\tdan new\tsubmission (rear naked choke)\ttfc - power fights\t1\n1\twin\t17 - 5 - 2\trene gonzalez\tdecision (split)\tmainstream mma - cold war\tn / a\n2\tloss\t16 - 5 - 2\ttristan yunker\tsubmission ( armbar )\ttfc 7 - total fight challenge 7\t1\n*/\nQ: in mac - midwest absolute challenge , the player be defeat by dan spychalski in 1 round"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT opponent, round FROM w WHERE event = \"mac - midwest absolute challenge\")=(\"dan spychalski\", 1)"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE 1943 vfl season(\n\trow_id int,\n\thome team text,\n\thome team score text,\n\taway team text,\n\taway team score text,\n\tvenue text,\n\tcrowd int,\n\tdate text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\thome team\thome team score\taway team\taway team score\tvenue\tcrowd\tdate\n0\tfootscray\t10.11 (71)\tsouth melbourne\t6.14 (50)\twestern oval\t7500\t1943-06-26 00:00:00\n1\tcollingwood\t10.21 (81)\tmelbourne\t13.9 (87)\tvictoria park\t5000\t1943-06-26 00:00:00\n2\tcarlton\t15.16 (106)\tfitzroy\t9.13 (67)\tprinces park\t12000\t1943-06-26 00:00:00\n*/\nQ: western oval be the venue when the home team footscray score 10.11 (71)"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT venue FROM w WHERE `home team`=\"footscray\" AND `home team score`=\"10.11 (71)\") = \"western oval\" "
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE 2005 pba draft(\n\trow_id int,\n\tpick int,\n\tplayer text,\n\tcountry of origin text,\n\tpba team text,\n\tcollege text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tpick\tplayer\tcountry of origin\tpba team\tcollege\n0\t1\tjay washington\tunited states\tair21 express\teckerd\n1\t2\talex cabagnot\tunited states\tsta lucia realtors\thawaii - hilo\n2\t3\tdennis miranda\tphilippines\tcoca - cola tigers\tfeu\n*/\nQ: leo najorda be from philippine"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT `country of origin` FROM w WHERE player=\"leo najorda\") = \"philippines\" "
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE none(\n\trow_id int,\n\tevent text,\n\tlong course / short course text,\n\tyear set int,\n\ttime text,\n\tmeet text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tevent\tlong course / short course\tyear set\ttime\tmeet\n0\t100 m freestyle\tlong course\t2007\t54.08\t2007 fina world aquatic championships\n1\t200 m individual medley\tlong course\t2011\t2:11.23\t2011 canadian world championship trials\n2\t4 x 100 m medley relay\tlong course\t2010\t3:38.14\t2010 pan pacific championships\n*/\nQ: in 2009 the record be set in 7:51:80"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT  time FROM w WHERE `year set` = 2009) = \"7:51:80\" "
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE turkish cup(\n\trow_id int,\n\tround text,\n\tclubs remaining int,\n\tclubs involved int,\n\twinners from previous round real,\n\tnew entries this round real,\n\tleagues entering at this round text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tround\tclubs remaining\tclubs involved\twinners from previous round\tnew entries this round\tleagues entering at this round\n0\tfirst round\t156\t86\tnan\t86.0\ttff third league & turkish regional amateur league\n1\tsecond round\t113\t108\t43.0\t65.0\ts\u00fcper lig & tff first league & tff second league\n2\tthird round\t59\t54\t54.0\tnan\tnone\n*/\nQ: during the 3rd round of the turkish cup , there be no new entry during that stage"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT `new entries this round` FROM w WHERE round = 'third round') IS NULL"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE turkish cup(\n\trow_id int,\n\tround text,\n\tclubs remaining int,\n\tclubs involved int,\n\twinners from previous round real,\n\tnew entries this round real,\n\tleagues entering at this round text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tround\tclubs remaining\tclubs involved\twinners from previous round\tnew entries this round\tleagues entering at this round\n0\tfirst round\t156\t86\tnan\t86.0\ttff third league & turkish regional amateur league\n1\tsecond round\t113\t108\t43.0\t65.0\ts\u00fcper lig & tff first league & tff second league\n2\tthird round\t59\t54\t54.0\tnan\tnone\n*/\nQ: the lowest number of new entry conclude a round in the turkish cup be 5"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT MIN(`new entries this round`) FROM w) = 5"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE jeev milkha singh(\n\trow_id int,\n\ttournament text,\n\twins int,\n\ttop - 10 int,\n\ttop - 25 int,\n\tevents int,\n\tcuts made int)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\ttournament\twins\ttop - 10\ttop - 25\tevents\tcuts made\n0\tmasters tournament\t0\t0\t1\t3\t2\n1\tus open\t0\t0\t0\t4\t3\n2\tthe open championship\t0\t0\t0\t2\t1\n*/\nQ: the number of cut made in the pga championship tournament be smaller than the number of event"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT `cuts made` FROM w WHERE tournament = 'pga championship') < (SELECT events FROM w WHERE tournament = 'pga championship')"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE 2008 women 's british open(\n\trow_id int,\n\tplace text,\n\tplayer text,\n\tcountry text,\n\tscore int,\n\tto par int)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tplace\tplayer\tcountry\tscore\tto par\n0\t1\tjuli inkster\tunited states\t65\t7\n1\tt2\tmomoko ueda\tjapan\t66\t6\n2\tt2\tlaura diaz\tunited states\t66\t6\n*/\nQ: the 3 player from japan have the same score"
+    },
+    {
+        "role": "assistant",
+        "content": "SQL: SELECT (SELECT COUNT(DISTINCT score) FROM w WHERE country = 'japan' GROUP BY score) = 1"
+    }
+]

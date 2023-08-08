@@ -44,7 +44,7 @@ class TableReasoner(object):
         
     def _call_api_2(self, prompt: list):
         """
-            Call API for CoT
+            Call API
             Input: prompt
             Output: response
         """
@@ -100,6 +100,36 @@ class TableReasoner(object):
 
         cols = self.parser.parse_col_dec(decomposed_cols)
         return table.loc[:, cols]
+
+    def _generate_sql(self, claim: str, table: pd.DataFrame):
+        """
+            Generate SQL query
+            Input: claim, table
+            Output: SQL query
+        """
+        sql = self._call_api_1(
+            question=claim,
+            template_key=TemplateKey.SQL_GENERATION,
+            table=table
+        )[0]
+
+        return self.parser.parse_sql(sql)
+
+    def _generate_nsql(self, claim: str, table: pd.DataFrame):
+        """
+            Generate NSQL query
+            Input: claim, table
+            Output: NSQL query
+        """
+        nsql = self._call_api_1(
+            question=claim,
+            template_key=TemplateKey.NSQL_GENERATION,
+            table=table
+        )[0]
+
+        refined_nsql = self.parser.parse_nsql(nsql)
+        return refined_nsql
+        # return post_process_nsql(refined_nsql)
 
     @log_decorator
     def reason_1st_query(self, claim: str, table: pd.DataFrame):
