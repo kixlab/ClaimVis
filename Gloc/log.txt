@@ -1908,3 +1908,22 @@ INFO:root:Arguments: (), {'template_key': <TemplateKey.NSQL_GENERATION: 'nsql'>,
 INFO:root:Return Value: ['NeuralSQL: SELECT (SELECT `IMDB Rating` FROM w LIMIT 1,1) > (SELECT `IMDB Rating` FROM w LIMIT 2,1)']
 INFO:root:Execution Time: 2023-08-07 17:50:14
 INFO:root:Token used: 3363
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason_1st_query
+INFO:root:Arguments: (<__main__.TableReasoner object at 0x0000026912D9D910>, 'The top 2 countries total gdp do not surpass 300000.',              country  year  ... wind_share_elec  wind_share_energy
+0      ASEAN (Ember)  2000  ...             0.0                NaN
+1      ASEAN (Ember)  2001  ...             0.0                NaN
+2      ASEAN (Ember)  2002  ...             0.0                NaN
+3      ASEAN (Ember)  2003  ...             0.0                NaN
+4      ASEAN (Ember)  2004  ...             0.0                NaN
+...              ...   ...  ...             ...                ...
+22007       Zimbabwe  2018  ...             0.0                NaN
+22008       Zimbabwe  2019  ...             0.0                NaN
+22009       Zimbabwe  2020  ...             0.0                NaN
+22010       Zimbabwe  2021  ...             0.0                NaN
+22011       Zimbabwe  2022  ...             NaN                NaN
+
+[22012 rows x 129 columns]), {}
+INFO:root:Return Value: ["A1: Let's find the column of GDP. Then let's extract the GDP of the top country, it's nan (not available in the data).\nA2: Let's find the column of GDP. Then let's extract the GDP of the second top country, it's nan (not available in the data).\nA3: Since the GDP of the top country and the second top country are not available in the data, we cannot determine if the total GDP of the top 2 countries is less than or equal to 300,000."]
+INFO:root:Execution Time: 2023-08-08 14:40:13
+INFO:root:Token used: 5177
