@@ -1,12 +1,14 @@
 # CoT few-shot prompting 
 import sys
 sys.path.append("../Gloc")
+sys.path.append("..")
 
 import pandas as pd
 from generation.claimvis_prompt import Prompter, TemplateKey
 from utils.llm import *
 from processor.ans_parser import AnsParser
 from common.functionlog import log_decorator
+from utils.normalizer import post_process_sql
 import re
 
 class TableReasoner(object):
@@ -128,8 +130,10 @@ class TableReasoner(object):
         )[0]
 
         refined_nsql = self.parser.parse_nsql(nsql)
-        return refined_nsql
-        # return post_process_nsql(refined_nsql)
+        return post_process_sql(
+            sql_str=refined_nsql,
+            df=table
+        )
 
     @log_decorator
     def reason_1st_query(self, claim: str, table: pd.DataFrame):
@@ -180,10 +184,10 @@ class TableReasoner(object):
 
 if __name__ == "__main__":
     table_reasoner = TableReasoner()
-    claim = "No movie has a rating better than 66.6."
-    df = pd.read_csv("../Datasets/movies-w-year.csv")
-    # print(table_reasoner.reason_1st_query(claim, df))
-    print(table_reasoner._call_api_1(
-            question=claim,
-            template_key=TemplateKey.QUERY_GENERATION
-        )[0])
+    claim = "The top 2 countries total gdp do not surpass 300000."
+    df = pd.read_csv("../Datasets/owid-energy-data.csv")
+    print(table_reasoner.reason_1st_query(claim, df))
+    # print(table_reasoner._call_api_1(
+    #         question=claim,
+    #         template_key=TemplateKey.QUERY_GENERATION
+    #     )[0])
