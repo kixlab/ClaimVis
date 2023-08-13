@@ -4,28 +4,44 @@ sys.path.append("../Gloc")
 sys.path.append("..")
 
 import pandas as pd
-from generation.claimvis_prompt import Prompter, TemplateKey
-from utils.llm import *
-from processor.ans_parser import AnsParser
-from common.functionlog import log_decorator
-from utils.normalizer import post_process_sql
-import re
+from Gloc.generation.claimvis_prompt import Prompter, TemplateKey
+
+# this import also acquires log_decor, don't import it again
+from Gloc.utils.llm import *
+
+from Gloc.processor.ans_parser import AnsParser
+from Gloc.utils.normalizer import post_process_sql
+from Gloc.nsql.database import NeuralDB
+from Gloc.utils.utils import majority_vote
 
 class TableReasoner(object):
-    def __init__(self):
+    def __init__(
+            self, 
+            temperature=0.0, 
+            max_decode_steps=500, 
+            samples=1, 
+            model=Model.GPT3
+        ):
         self.prompter = Prompter()
         self.parser = AnsParser()
 
+        self.temperature = temperature # to change
+        self.max_decode_steps = max_decode_steps # fixed
+        self.samples = samples # to change
+        self.model = model # fixed
+        
     def _call_api_1(
         self: object, 
         question: str,
         template_key: TemplateKey,
-        table: pd.DataFrame = None
+        table: pd.DataFrame = None,
+        samples: int = -1,
+        temperature: float = -1,
     ):
         """
-            Call API for few-shot prompting
+            Call API for few-shot prompting using a question, a template, and a table 
             Input: question, template_key, table
-            Output: response
+            Output: prompt, response
         """
         prompt = self.prompter.build_prompt(
             template_key=template_key,
@@ -35,45 +51,51 @@ class TableReasoner(object):
 
         response = call_model(
             model=Model.GPT3,
-            use_code=False,
-            max_decode_steps=500,
-            temperature=0,
+            max_decode_steps=self.max_decode_steps,
+            temperature=temperature if temperature > 0 else self.temperature,
             prompt=prompt,
-            samples=1
+            samples=samples if samples > 0 else self.samples
         )
 
-        return response
+        return prompt, response
         
-    def _call_api_2(self, prompt: list):
+    def _call_api_2(
+            self, 
+            prompt: list,
+            temperature: float = -1,
+            samples: int = -1
+        ):
         """
-            Call API
+            Call API using a provide prompt
             Input: prompt
             Output: response
         """
         response = call_model(
             model=Model.GPT3,
-            use_code=False,
-            temperature=0,
-            max_decode_steps=500,
+            temperature=temperature if temperature > 0 else self.temperature,
+            max_decode_steps=self.max_decode_steps,
             prompt=prompt,
-            samples=1
+            samples=samples if samples > 0 else self.samples
         )
 
         return response
 
-    def _suggest_queries(self, claim: str):
+    @log_decorator
+    def _suggest_queries(self, claim: str, table: pd.DataFrame=None):
         """
-            Suggest queries given a claim
+            Suggest queries given a claim (and a table)
             Input: claim
             Output: list of suggested queries
         """
         # suggest different queries in form of "[{query: ...}, {query: ...}}]"
-        suggestions = self._call_api_1(
+        template = TemplateKey.QUERY_GENERATION_2 if table is None else TemplateKey.QUERY_GENERATION_3
+        _, suggestions = self._call_api_1(
             question=claim,
-            template_key=TemplateKey.QUERY_GENERATION_2
-        )[0]
+            template_key=template,
+            table=table
+        )
 
-        return self.parser.parse_gen_query(suggestions)
+        return self.parser.parse_gen_query(suggestions[0])
     
     def _decompose_query(self, query: str):
         """
@@ -81,113 +103,206 @@ class TableReasoner(object):
             Input: query
             Output: list of subqueries
         """
-        decomposed_ans = self._call_api_1(
+        _, decomposed_ans = self._call_api_1(
             question=query,
             template_key=TemplateKey.QUERY_DECOMPOSE
-        )[0]
+        )
 
-        return self.parser.parse_dec_reasoning(decomposed_ans)
+        return self.parser.parse_dec_reasoning(decomposed_ans[0])
     
-    def _decompose_table(self, claim: str, table: pd.DataFrame):
+    def _decompose_colunns(self, claim: str, table: pd.DataFrame):
         """
-            Decompose table into subtable
+            Decompose table into subtable using column decomposition
             Input: claim, table
             Output: subtable
         """
-        decomposed_cols = self._call_api_1(
+        _, decomposed_cols = self._call_api_1(
             question=claim,
             template_key=TemplateKey.COL_DECOMPOSE,
             table=table
-        )[0]
-
-        cols = self.parser.parse_col_dec(decomposed_cols)
-        return table.loc[:, cols]
-
-    def _generate_sql(self, claim: str, table: pd.DataFrame):
-        """
-            Generate SQL query
-            Input: claim, table
-            Output: SQL query
-        """
-        sql = self._call_api_1(
-            question=claim,
-            template_key=TemplateKey.SQL_GENERATION,
-            table=table
-        )[0]
-
-        return self.parser.parse_sql(sql)
-
-    def _generate_nsql(self, claim: str, table: pd.DataFrame):
-        """
-            Generate NSQL query
-            Input: claim, table
-            Output: NSQL query
-        """
-        nsql = self._call_api_1(
-            question=claim,
-            template_key=TemplateKey.NSQL_GENERATION,
-            table=table
-        )[0]
-
-        refined_nsql = self.parser.parse_nsql(nsql)
-        return post_process_sql(
-            sql_str=refined_nsql,
-            df=table
         )
 
+        cols = self.parser.parse_col_dec(decomposed_cols[0])
+        return table.loc[:, cols]
+
+    def _generate_sql(
+            self, 
+            query: str, 
+            table: pd.DataFrame,
+            template_key: TemplateKey,
+            samples: int = 5,
+            temperature: float = 0.4,
+            fuzzy_match: bool = False
+        ):
+        """
+            Generate SQL queries based on the provided query and table.
+            The type of SQL generation is determined by the template_key.
+            The number of samples and the temperature can be adjusted.
+            If fuzzy_match is set to True, the function will return post-processed SQL queries.
+
+            Parameters:
+                query (str): The query based on which SQL queries are generated.
+                table (pd.DataFrame): The table used for SQL generation.
+                template_key (TemplateKey): The key determining the type of SQL generation.
+                samples (int, optional): The number of samples to generate. Defaults to 5.
+                temperature (float, optional): The temperature for generation. Defaults to 0.4.
+                fuzzy_match (bool, optional): Whether to return post-processed SQL queries. Defaults to False.
+
+            Returns:
+                list: A list of generated SQL queries.
+        """
+        
+        if template_key not in [TemplateKey.NSQL_GENERATION, TemplateKey.SQL_GENERATION, TemplateKey.SQL_GENERATION_2]:
+            raise ValueError("Invalid template key for SQL generation")
+        
+        _, sqls = self._call_api_1(
+                        question=query,
+                        template_key=template_key,
+                        table=table,
+                        samples=samples if samples > 0 else self.samples, # need samples to aggregate
+                        temperature=temperature if temperature > 0 else self.temperature # need some creativity
+                    )
+
+        if template_key == TemplateKey.NSQL_GENERATION:
+            psqls = [self.parser.parse_nsql(sql) for sql in sqls]
+        elif template_key == TemplateKey.SQL_GENERATION:
+            psqls = [self.parser.parse_sql(sql) for sql in sqls]
+        elif template_key == TemplateKey.SQL_GENERATION_2:
+            psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
+
+        if fuzzy_match:
+            return [post_process_sql(
+                        sql_str=psql, 
+                        table=table,
+                        fuzzy_match=True,
+                        verbose=True
+                    ) for psql in psqls]
+        else:
+            return psqls
+    
+    def _exec_sqls_from_sub_queries(
+            self,
+            db: NeuralDB,
+            table: pd.DataFrame,
+            queries: list,
+            is_sequential: bool=True, 
+            verbose: bool=False
+        ):
+        answers = []
+        if is_sequential: # sequential prompting
+            sqlss = [self._generate_sql(
+                        query=query, 
+                        tbale=table, 
+                        template_key=TemplateKey.SQL_GENERATION
+                    ) for query in queries]
+        else: # parallel prompting
+            sqlss = self._generate_sql(
+                        query=queries,
+                        table=table,
+                        template_key=TemplateKey.SQL_GENERATION_2
+                    )
+            # transpose sqlss
+            sqlss = list(map(list, zip(*sqlss)))
+        
+        for sqls, query in zip(sqlss, queries):
+            if verbose: print(f"{query}: {sqls}")
+
+            preds = []
+            for sql in sqls:
+                try:
+                    res = db.execute_query(sql.lower())
+                    refined_res = self.parser.parse_sql_result(res)
+                    if verbose: print(f"refined: {refined_res}")
+                    preds.append(refined_res)
+                except Exception as e:
+                    continue
+            
+            top_ans, pred_sqls = majority_vote(
+                nsqls=sqls,
+                pred_answer_list=preds
+            )
+            if verbose: print(query, top_ans)
+            answers.append(top_ans)
+
+        return answers
+    
     @log_decorator
-    def reason_1st_query(self, claim: str, table: pd.DataFrame):
+    def reason(self, claim: str, table: pd.DataFrame, verbose=False):
         """
             Reasoning pipeline for CoT
             Input: claim, table
             Output: justification
         """
-        
+
+        def build_dec_prompt(sub_queries: list, answers: list):
+            dec_prompt = self.prompter.build_prompt(
+                            template_key=TemplateKey.DEC_REASONING_2,
+                            table=table,
+                            question=query,
+                        )
+            dec_prompt.extend([{
+                "role": "user", 
+                "content": "\n".join(sub_queries)
+                },{
+                "role": "assistant", 
+                "content": "\n".join(answers)
+                },{
+                "role": "user",
+                "content": sub_queries[-1]
+            }])
+            return dec_prompt
+            
+        db = NeuralDB(
+            tables=[table],
+            add_row_id=True,
+            normalize=False,
+            lower_case=True
+        )
         # take first query from suggested queries
         suggestions = self._suggest_queries(claim)
-        print(f"generated queries: {suggestions}")
-        first_query = suggestions[0]
+        if verbose: print(f"generated queries: {suggestions}")
 
-        # decompose queries
-        sub_queries = self._decompose_query(first_query)
-        print(f"steps of reasoning: {sub_queries}")
+        justifications = []
+        for query in suggestions:
+            # decompose queries
+            sub_queries = self._decompose_query(query)
+            if verbose: print(f"steps of reasoning: {sub_queries}")
 
-        # build prompt for decomposed subqueries uptil the last query
-        dec_prompt = self.prompter.build_prompt(
-            template_key=TemplateKey.DEC_REASONING_2,
-            table=table,
-            question=first_query,
-        )
-        content = "\n".join(f"Q{str(i+1)}: {query}" for i, query in enumerate(sub_queries))
-        dec_prompt.append({
-            "role": "user", 
-            "content": content
-        })
+            # execute sql corresponding to each subquery
+            answers = self._exec_sqls_from_sub_queries(
+                            db, table,
+                            sub_queries[:-1], 
+                            is_sequential=False,
+                            verbose=verbose
+                        )
+            
+            sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
+            answers = [f"A{i+1}: {str(ans)}" for i, ans in enumerate(answers)]
+            # generate prompt for decomposed reasoning
+            dec_prompt = build_dec_prompt(sub_queries, answers)
+            # if verbose: print(f"full prompt:\n{dec_prompt}")
 
-        # # call API for decomposed reasoning
-        # response = self._call_api_2(dec_prompt)
+            answers.extend(self._call_api_2(dec_prompt))
+            # print("answers: ", answers)
+            justification = self._call_api_2(
+                prompt = [
+                    {"role": "system", "content": "You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."},
+                    {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(sub_queries, answers))},
+                ]
+            )
+            justifications.append(justification)
 
-        # # final query
-        # dec_prompt.extend([{
-        #     "role": "assistant", 
-        #     "content": response
-        #     },{
-        #     "role": "user",
-        #     "content": f"Q{len(sub_queries)}: {sub_queries[-1]}"
-        # }])
+        if verbose: print(f"final justifications: {justifications}")
+        return justifications   
 
-        print(f"full prompt:\n{dec_prompt}")
-
-        answer = self._call_api_2(dec_prompt)
-
-        return answer
 
 if __name__ == "__main__":
     table_reasoner = TableReasoner()
-    claim = "The top 2 countries total gdp do not surpass 300000."
+    claim = "US' carbon emission is higher than every North America countries."
     df = pd.read_csv("../Datasets/owid-energy-data.csv")
-    print(table_reasoner.reason_1st_query(claim, df))
-    # print(table_reasoner._call_api_1(
-    #         question=claim,
-    #         template_key=TemplateKey.QUERY_GENERATION
-    #     )[0])
+
+    # claim = "Africa has the highest population."
+    # df = pd.read_csv("../Datasets/owid-energy-data.csv")
+
+    res = table_reasoner._suggest_queries(claim)
+    print(res)

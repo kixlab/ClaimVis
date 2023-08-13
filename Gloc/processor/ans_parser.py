@@ -1,4 +1,7 @@
 import re
+import pandas as pd
+from Gloc.nsql.parser import extract_answers
+
 class AnsParser(object):
     def __init__(self) -> None:
         pass
@@ -28,7 +31,32 @@ class AnsParser(object):
         return re.findall(r'query: "(.*?)"', message)
     
     def parse_sql(self, message: str):
-        return re.search(r'SQL: "(.*?)"', message).group(1)
+        match = re.search(r'SQL: (.*)', message)
+        
+        return match.group(1) if match else None
+    
+    def parse_sql_2(self, message: str):
+        strs = message.split('\n')
+        return [re.search(r'A\d+: (.*)', s).group(1) for s in strs]
     
     def parse_nsql(self, message: str):
-        return re.search(r'NeuralSQL: "(.*?)"', message).group(1)
+        match = re.search(r'NeuralSQL: (.*)', message)
+        
+        return match.group(1) if match else None
+    
+    def parse_sql_result(self, sub_table: pd.DataFrame or dict):
+        if isinstance(sub_table, dict):
+            return extract_answers(sub_table)
+        else: # is dataframe
+            if sub_table.empty or sub_table.columns.empty:
+                return []
+            answer = []
+            if 'row_id' in sub_table.columns:
+                for _, row in sub_table.iterrows():
+                    answer.extend(row.values[1:])
+                return answer
+            else:
+                for _, row in sub_table.iterrows():
+                    answer.extend(row.values)
+                return answer
+    

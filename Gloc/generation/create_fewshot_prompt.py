@@ -644,7 +644,303 @@ Q: 2 of the 7 top - ranked figure skate team be from france"""
     }
 ]
 
+
+
+
+sql_gen_2 = [
+    {"role": "system", "content": "Generate SQL given the question and table."},
+
+    {"role": "user", "content": """CREATE TABLE jason chambers(
+	row_id int,
+	res text,
+	record text,
+	opponent text,
+	method text,
+	event text,
+	round text)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	res	record	opponent	method	event	round
+0	win	18 - 5 - 2	dan new	submission (rear naked choke)	tfc - power fights	1
+1	win	17 - 5 - 2	rene gonzalez	decision (split)	mainstream mma - cold war	n / a
+2	loss	16 - 5 - 2	tristan yunker	submission ( armbar )	tfc 7 - total fight challenge 7	1
+*/
+Q1: How many win are there when the opponent is dan spychalski?
+Q2: What is the number of records with a nan round ended in 2 or began with 2."""},
+    {"role": "assistant", "content": """A1: SELECT COUNT(*) FROM w WHERE opponent = 'dan spychalski'
+    A2: SELECT COUNT(*) FROM w WHERE round = 'n / a' AND (record LIKE '% - % - 2' OR record LIKE '2 - % - %')"""},
+
+    {"role": "user", "content": """CREATE TABLE 2005 pba draft(
+    row_id int,
+    pick int,
+    player text,
+    country of origin text,
+    pba team text,
+    college text)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	pick	player	country of origin	pba team	college
+0	1	jay washington	united states	air21 express	eckerd
+1	2	alex cabagnot	united states	sta lucia realtors	hawaii - hilo
+2	3	dennis miranda	philippines	coca - cola tigers	feu
+*/
+Q1: How many feu players are from from us?
+Q2: Is dennis miranda a player from us?"""},
+    {"role": "assistant", "content": """A1: SELECT COUNT(*) FROM w WHERE college = 'feu' AND country of origin = 'united states'
+    A2: SELECT COUNT(*) FROM w WHERE player = 'dennis miranda' AND country of origin = 'united states'"""},
+
+    {"role": "user", "content": """CREATE TABLE turkish cup(
+	row_id int,
+	round text,
+	clubs remaining int,
+	clubs involved int,
+	winners from previous round real,
+	new entries this round real,
+	leagues entering at this round text)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	round	clubs remaining	clubs involved	winners from previous round	new entries this round	leagues entering at this round
+0	first round	156	86	nan	86.0	tff third league & turkish regional amateur league
+1	second round	113	108	43.0	65.0	süper lig & tff first league & tff second league
+2	third round	59	54	54.0	nan	none
+*/
+Q1: What is the lowest number of clubs remaining?"""},
+    {"role": "assistant", "content": """A1: SELECT MIN("clubs remaining") FROM w"""},
+
+    {"role": "user", "content": """CREATE TABLE cultural interest fraternities and sororities(
+	row_id int,
+	letters text,
+	organization text,
+	nickname text,
+	founding time text,
+	founding university text,
+	type text)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	letters	organization	nickname	founding time	founding university	type
+0	αεπ	alpha epsilon pi 1	aepi	1913-11-07 00:00:00	new york university	fraternity
+1	αεφ	alpha epsilon phi 2	aephi	1909-10-24 00:00:00	barnard college	sorority
+2	σαεπ	sigma alpha epsilon pi 3	sigma	1998-10-01 00:00:00	university of california , davis	sorority
+*/
+Q1 : What is the number of of the cultural interest fraternity?
+Q2 : How many records are both sorority and founded in 1990s?
+Q3 : How many organizations are founded in 2003 with a type of fraternity?"""},
+    {"role": "assistant", "content": """A1: SELECT COUNT(*) FROM w WHERE type = 'fraternity'
+A2: SELECT COUNT(*) FROM w WHERE type = 'sorority' AND "founding time" LIKE '199%-%-%'
+A3: SELECT COUNT(DISTINCT(organization)) FROM w WHERE type = 'sorority'"""},
+
+    {"role": "user", "content": """CREATE TABLE jeev milkha singh(
+	row_id int,
+	tournament text,
+	wins int,
+	top - 10 int,
+	top - 25 int,
+	events int,
+	cuts made int,
+	win rate text)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	tournament	wins	top - 10	top - 25	events	cuts made	win rate
+0	masters tournament	0	0	1	3	2	12%
+1	us open	0	0	0	4	3	24%
+2	the open championship	0	0	0	2	1	26%
+*/
+Q1: What is the number of cut made in the pga championship?
+Q2: What is the number of event in the pga championship?
+Q3: What is the average win rate of all games?"""},
+    {"role": "assistant", "content": """A1: SELECT "cuts made" FROM w WHERE tournament = 'pga championship'
+A2: SELECT events FROM w WHERE tournament = 'pga championship'
+A3: SELECT AVERAGE(CAST(REPLACE(`win rate`,'%','')) AS INT) FROM w"""},
+
+    {"role": "user", "content": """CREATE TABLE 2008 women 's british open(
+	row_id int,
+	place text,
+	player text,
+	country text,
+	score int,
+	to par int)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	place	player	country	score	to par	records
+0	1	juli inkster	united states	65	7	3 - 2
+1	t2	momoko ueda	japan	66	6	4 - 11
+2	t2	laura diaz	united states	66	6	12 - 3
+*/
+Q1: How many players from japan have the same score?
+Q2: How many records have a records where the first number larger than the second number?"""},
+{"role": "assistant", "content": """A1: SELECT COUNT(DISTINCT score) FROM w WHERE country = 'japan'
+A2: SELECT COUNT(*) FROM w WHERE records LIKE '% - %' AND (CAST(SUBSTR(score, 1, INSTR(score, '-') - 1) AS INT) - CAST(SUBSTR(score, INSTR(score, '-') + 1, LENGTH(score) - (INSTR(score, ' - ') + 1)) AS INT)) > 0"""},
+
+    {"role": "user", "content": """CREATE TABLE 1976 world junior figure skating championships(
+    row_id int,
+    rank int,
+    name text,
+    nation text,
+    points real,
+    places int)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	rank	name	nation	points	places
+0	1	sherri baier / robin cowan	canada	128.39	9
+1	2	lorene mitchell / donald mitchell	united states	124.94	16
+2	3	elizabeth cain / peter cain	australia	116.67	33
+*/
+Q1: How many of the 7 top - ranked figure skate teams are from france?"""},
+    {"role": "assistant", "content": """A1: SELECT COUNT(*) FROM w WHERE nation = 'france' AND rank <= 7"""}
+]
+
+# 
+query_gen_3 = [
+    {"role": "system", "content": """You are an amazing data analyst! You are given a table and a statement. Please suggest me a list of suggestions, each containing:
+        1. A query that is related to both the data within table and the original statement.
+        2. A visualization task that is consistent with the query and the statement.
+        3. An explanation of why the query is a good fit to the statement."""},
+
+    {"role": "user", "content": """CREATE TABLE jason chambers(
+	row_id int,
+	res text,
+	record text,
+	opponent text,
+	method text,
+	event text,
+	round text)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	res	record	opponent	method	event	round
+0	win	18 - 5 - 2	dan new	submission (rear naked choke)	tfc - power fights	1
+1	win	17 - 5 - 2	rene gonzalez	decision (split)	mainstream mma - cold war	n / a
+2	loss	16 - 5 - 2	tristan yunker	submission ( armbar )	tfc 7 - total fight challenge 7	1
+*/
+Statement: Jason Chambers has the most win against Dan New among all of his wins."""},
+    {"role": "assistant", "content": """Suggestions:
+    [
+        {
+            query: "Does Jason Chambers have more win in his record against Dan New than against everyone else?",
+            vis: "Show a bar chart representing the number of wins of Jason Chambers against each opponent.",
+            explain: "The query is good because the number of win is tracked as the first number in the record column. It can easily be verified using the table."
+        }
+    ]"""},
+
+    {
+        "role": "user", "content": """CREATE TABLE movies(
+    row_id int,
+    title text,
+    year int,
+    length int,
+    budget int,
+    IMDB rating real,
+    Rotten Tomatoes rating real,
+    votes int)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	title	year	length	budget	IMDB rating Rotten Tomatoes rating votes
+0	avatar	2009	162	237000000	7.9   44.5   890617
+1	titanic	1997	194	200000000	7.7	  66.2   843881
+2	the avengers	2012	143	220000000    8.1	820847
+*/
+Statement: The movie with the highest rating is The Avengers."""},
+    {
+        "role": "assistant",
+        "content": """Suggestions:
+        [
+            {
+                query: "Is The Avengers the movie with the highest IMDB rating?",
+                vis: "Show a bar chart representing the IMDB rating of each movie.",
+                explain: "Since IMDB rating is a good metric for evaluating movie quality in the table. Compare the IMDB rating between The Avengers and other movies would  help clarify the original statement."
+            },
+            {
+                query: "Is The Avengers the movie with the highest Rotten Tomatoes rating?",
+                vis: "Show a bar chart representing the Rotten Tomatoes rating of each movie.",
+                explain: "Since Rotten Tomatoes rating is a good metric for evaluating movie quality in the table. Compare the Rotten Tomatoes rating between The Avengers and other movies would help clarify the original statement."
+            }
+        ]"""
+    },
+
+    {
+        "role": "user", "content": """CREATE TABLE economy(
+    row_id int,
+    country text,
+    year int,
+    GDP real,
+    Trade Volume real,
+    Inflation real,
+    Unemployment real,
+    Population real)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	country	year	GDP	Trade Volume	Inflation	Unemployment	Population
+0	United States	2010	14992000.0	3.9	1.6	9.6	309.3
+1	China	2010	5937000.0	2.4	3.3	4.1	1339.7
+2	United States	2011	15542000.0	4.6	3.2	8.9	311.6
+*/
+Statement: US'economy has outgrown China's in 2023."""
+    },
+    {
+        "role": "assistant",
+        "content": """Suggestions:
+        [
+            {
+                query: "Is the GDP of US higher than that of China in 2023?",
+                vis: "Show the GDP of US and China in 2023.",
+                explain: "Since GDP is a good metric for evaluating economy in the table. Compare the GDP between US and China would help clarify the original statement."
+            },
+            {
+                query: "Is the Trade Volume of US higher than that of China in 2023?",
+                vis: "Show the Trade Volume of US and China in 2023.",
+                explain: "Since Trade Volume is a good metric for evaluating economy in the table. Compare the Trade Volume between US and China would help clarify the original statement."
+            }
+        ]"""
+    },
+
+    {
+        "role": "user", "content": """CREATE TABLE American housing(
+    row_id int,
+    year int,
+    month int,
+    house_price real,
+    house_price_change real,
+    mortgage_rate real,
+    mortgage_rate_change real,
+    unemployment_rate real,
+    unemployment_rate_change real)
+/*
+3 example rows:
+SELECT * FROM w LIMIT 3;
+row_id	year	month	house_price	house_price_change	mortgage_rate	mortgage_rate_change	unemployment_rate	unemployment_rate_change
+0	2010	1	221.3	0.0	5.03	0.0	9.8	0.0
+1	2010	2	221.3	0.0	4.99	-0.8	9.8	0.0
+2	2010	3	221.3	0.0	4.97	-0.4	9.9	1.0
+*/
+Statement: American's housing in 2023 is more active than that in 2010."""
+    },
+    {
+        "role": "assistant",
+        "content": """Suggestions:
+        [
+            {
+                query: "Is the average American house price in 2023 higher than that in 2010?",
+                vis: "Show the average American house price in 2023 and 2010.",
+                explain: "Since house price is a good metric for evaluating housing market in the table. Compare the house price between 2023 and 2010 would help clarify the original statement."
+            },
+            {
+                query: "Is the average mortgage rate in 2023 higher than that in 2010?",
+                vis: "Show the average mortgage rate in 2023 and 2010.",
+                explain: "Since mortgage rate is a good metric for evaluating housing market in the table. Compare the mortgage rate between 2023 and 2010 would help clarify the original statement."
+            }
+        ]"""
+    }
+]
 import json
 # save pro to query_generation_2.json
-with open("fewshots/nsql_generation.json", "w") as f:
-    json.dump(sql_generation, f, indent=4)
+with open("fewshots/query_generation_3.json", "w") as f:
+    json.dump(query_gen_3, f, indent=4)

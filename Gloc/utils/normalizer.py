@@ -5,12 +5,23 @@ from recognizers_suite import Culture
 import re
 import unicodedata
 from fuzzywuzzy import fuzz
+from multiprocessing import Pool
+from itertools import repeat
 
 from utils.sql.extraction_from_sql import *
 from utils.sql.all_keywords import ALL_KEY_WORDS
 
 culture = Culture.English
 
+# def normalize_column(header, df):
+#     df[header] = df[header].map(lambda x: str_normalize(x))
+
+def get_headers_and_rows(table: Dict or pd.DataFrame):
+    if isinstance(table, pd.DataFrame):
+        headers, rows = table.columns.tolist(), table.values.tolist()
+    else: # standard table dict format
+        headers, rows = table['header'], table['rows']
+    return headers, rows
 
 def str_normalize(user_input, recognition_types=None):
     """A string normalizer which recognize and normalize value based on recognizers_suite"""
@@ -72,8 +83,29 @@ def str_normalize(user_input, recognition_types=None):
     return user_input
 
 
-def prepare_df_for_neuraldb_from_table(table: Dict, add_row_id=True, normalize=True, lower_case=True):
-    header, rows = table['header'], table['rows']
+def process_raw_table(
+        table: Dict or pd.DataFrame, 
+        add_row_id=True, 
+        normalize=False, # this is **** expensive
+        lower_case=True
+    ):
+    """
+		A simple table normalizer which process datatype and return a common table format:
+		{
+			"title": "table_title",
+            "table": {
+				"header": ["col1", "col2", ...],
+				"rows": [
+					["row1_col1", "row1_col2", ...],
+					["row2_col1", "row2_col2", ...],
+					...
+				]
+        	}
+        }
+    """
+    header, rows = get_headers_and_rows(table)
+
+	# prepare dataframe
     if add_row_id and 'row_id' not in header:
         header = ["row_id"] + header
         rows = [["{}".format(i)] + row for i, row in enumerate(rows)]
@@ -81,24 +113,26 @@ def prepare_df_for_neuraldb_from_table(table: Dict, add_row_id=True, normalize=T
         df = convert_df_type(pd.DataFrame(data=rows, columns=header), lower_case=lower_case)
     else:
         df = pd.DataFrame(data=rows, columns=header)
+        if lower_case:
+            df.columns = df.columns.str.lower()
+            df = df.applymap(lambda s:s.lower() if type(s) == str else s)            
+    
+    return {
+        "title": table['title'] if 'title' in table else None,
+        "table": df    
+	}
 
-    return df
-
-
+# this mf takes 3 minutes for 21000 rows
 def convert_df_type(df: pd.DataFrame, lower_case=True):
     """
     A simple converter of dataframe data type from string to int/float/datetime.
     """
 
     def get_table_content_in_column(table):
-        if isinstance(table, pd.DataFrame):
-            header = table.columns.tolist()
-            rows = table.values.tolist()
-        else:
-            # Standard table dict format
-            header, rows = table['header'], table['rows']
+        headers, rows = get_headers_and_rows(table)
+        
         all_col_values = []
-        for i in range(len(header)):
+        for i in range(len(headers)):
             one_col_values = []
             for _row in rows:
                 one_col_values.append(_row[i])
@@ -148,6 +182,10 @@ def convert_df_type(df: pd.DataFrame, lower_case=True):
             df[_header] = df[_header].map(lambda x: "NaN" if x in [str(None), str(None).lower()] else x)
 
     # Normalize cell values.
+    # Should move this to offline processing
+    # with Pool() as p:
+    #     p.starmap(normalize_column, zip(df.columns, repeat(df)))
+
     for header in df.columns:
         df[header] = df[header].map(lambda x: str_normalize(x))
 
@@ -267,8 +305,20 @@ def normalize(x):
     return x
 
 
-def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_match_on_db=True, verbose=False):
+def post_process_sql(
+        sql_str: str, 
+        df: pd.DataFrame, 
+        table_title: str=None, 
+        process_program_with_fuzzy_match_on_db=True, 
+        verbose=False,
+        use_corenlp=True,
+        use_duckdb=True
+    ):
     """Post process SQL: including basic fix and further fuzzy match on cell and SQL to process"""
+
+    # rules of quotation marker differ between normal SQL and duckdb SQL
+    COLQ = '"' if use_duckdb else '`'
+    STRQs = ['\''] if use_duckdb else ['\'', '"'] # string quotation(s)
 
     def basic_fix(sql_str, all_headers, table_title=None):
         def finditer(sub_str: str, mother_str: str):
@@ -287,7 +337,7 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
             sql_str = sql_str.replace("FROM " + table_title, "FROM w")
             sql_str = sql_str.replace("FROM " + table_title.lower(), "FROM w")
 
-        """Case 1: Fix the `` missing. """
+        """Case 1: Fix the COLQ COLQ missing. """
         # Remove the null header.
         while '' in all_headers:
             all_headers.remove('')
@@ -298,7 +348,7 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
         sql_str = sql_str.replace("\\n", "\n")
         sql_str = sql_str.replace("\n", "\\n")
 
-        # Add `` in SQL.
+        # Add COLQ COLQ in SQL.
 
         all_headers.sort(key=lambda x: len(x), reverse=True)
         have_matched = [0 for i in range(len(sql_str))]
@@ -321,8 +371,8 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
                 all_matched_of_this_header = finditer(header, sql_str)
                 for matched_of_this_header in all_matched_of_this_header:
                     start_idx, end_idx = matched_of_this_header
-                    if all(have_matched[start_idx: end_idx]) == 0 and (not sql_str[start_idx - 1] == "`") and (
-                            not sql_str[end_idx] == "`"):
+                    if all(have_matched[start_idx: end_idx]) == 0 and (not sql_str[start_idx - 1] == COLQ) and (
+                            not sql_str[end_idx] == COLQ):
                         have_matched[start_idx: end_idx] = [1 for _ in range(end_idx - start_idx)]
                         # a bit ugly, but anyway.
 
@@ -341,7 +391,7 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
             spans.append(sql_str[start_idx:end_idx + 1])
             current_idx = end_idx + 1
         spans.append(sql_str[current_idx:])
-        sql_str = '`'.join(spans)
+        sql_str = COLQ.join(spans)
 
         return sql_str
 
@@ -397,14 +447,22 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
         sql_str = sql_str.rstrip('```').rstrip('\n')
 
         # Replace QA module with placeholder
-        qa_pattern = "QA\(.+?;.*?`.+?`.*?\)"
+        qa_pattern = f"QA\(.+?;.*?{COLQ}.+?{COLQ}.*?\)"
         qas = re.findall(qa_pattern, sql_str)
         for idx, qa in enumerate(qas):
             sql_str = sql_str.replace(qa, f"placeholder{idx}")
 
         # Parse and replace SQL value with table contents
-        sql_tokens = tokenize(sql_str)
-        sql_template_tokens = extract_partial_template_from_sql(sql_str)
+        sql_tokens = tokenize(
+                        string=sql_str, 
+                        use_corenlp=use_corenlp, 
+                        use_duckdb=use_duckdb
+                    )
+        sql_template_tokens = extract_partial_template_from_sql(
+                                sql=sql_str, 
+                                use_corenlp=use_corenlp,
+                                use_duckdb=use_duckdb
+                            )  
         # Fix 'between' keyword bug in parsing templates
         fixed_sql_template_tokens = []
         sql_tok_bias = 0
@@ -431,9 +489,9 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
             if value_idx >= 2 and sql_tokens[value_idx - 2].startswith('placeholder'):
                 continue
             value_str = sql_tokens[value_idx]
-            # Drop \"\" for fuzzy match
+            # Drop STRQ ... STRQ for fuzzy match
             is_string = False
-            if value_str[0] == "\"" and value_str[-1] == "\"":
+            if value_str[0] in STRQs and value_str[-1] in STRQs:
                 value_str = value_str[1:-1]
                 is_string = True
             # If already fuzzy match, skip
@@ -452,16 +510,17 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
                 for matched_cell, fuzz_score in matched_cells:
                     if _check_valid_fuzzy_match(value_str, matched_cell):
                         new_value_str = matched_cell
+                        print(new_value_str, value_str)
                         if verbose and new_value_str != value_str:
                             print("\tfuzzy match replacing!", value_str, '->', matched_cell, f'fuzz_score:{fuzz_score}')
                         break
             if is_string:
-                new_value_str = f"\"{new_value_str}\""
+                new_value_str = f"{STRQs[0]}{new_value_str}{STRQs[0]}"
             sql_tokens[value_idx] = new_value_str
         # Compose new sql string
         # Clean column name in SQL since columns may have been tokenized in the postprocessing, e.g., (ppp) -> ( ppp )
         new_sql_str = ' '.join(sql_tokens)
-        sql_columns = re.findall('`\s(.*?)\s`', new_sql_str)
+        sql_columns = re.findall(f'{COLQ}\s(.*?)\s{COLQ}', new_sql_str)
         for sql_col in sql_columns:
             matched_columns = []
             for col in df.columns:
@@ -474,9 +533,9 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
             matched_columns = sorted(matched_columns, key=lambda x: x[1], reverse=True)
             if matched_columns:
                 matched_col = matched_columns[0][0]
-                new_sql_str = new_sql_str.replace(f"` {sql_col} `", f"`{matched_col}`")
+                new_sql_str = new_sql_str.replace(f"{COLQ} {sql_col} {COLQ}", f"{COLQ}{matched_col}{COLQ}")
             else:
-                new_sql_str = new_sql_str.replace(f"` {sql_col} `", f"`{sql_col}`")
+                new_sql_str = new_sql_str.replace(f"{COLQ} {sql_col} {COLQ}", f"{COLQ}{sql_col}{COLQ}")
 
         # Restore QA modules
         for idx, qa in enumerate(qas):
@@ -484,15 +543,15 @@ def post_process_sql(sql_str, df, table_title=None, process_program_with_fuzzy_m
 
         # Fix '<>' when composing the new sql
         new_sql_str = new_sql_str.replace('< >', '<>')
-
         return new_sql_str
 
     sql_str = basic_fix(sql_str, list(df.columns), table_title)
+    # print(sql_str)
 
     if process_program_with_fuzzy_match_on_db:
         try:
             sql_str = fuzzy_match_process(sql_str, df, verbose)
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
     return sql_str

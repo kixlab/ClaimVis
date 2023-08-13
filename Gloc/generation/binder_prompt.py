@@ -14,7 +14,7 @@ from utils.errors import DuplicateColumnsError
 # from utils.mmqa.image_stuff import get_caption_map
 from retrieval.retrieve_pool import QAItem
 
-from utils.normalizer import prepare_df_for_neuraldb_from_table
+from utils.normalizer import process_raw_table
 
 
 def _create_table_prompt(df: pd.DataFrame, title: str):
@@ -109,7 +109,7 @@ class PromptBuilder(object):
             for passage in passages:
                 _header.append(passage['title'])
                 _rows[0].append(passage['text'])
-            passage_table = prepare_df_for_neuraldb_from_table({"header": _header, "rows": _rows})
+            passage_table = process_raw_table({"header": _header, "rows": _rows})
             passage_table_prompt += _create_table_prompt(passage_table, "Passages")
             if not only_title:
                 passage_table_prompt += self._select_x_prompt(
@@ -141,7 +141,7 @@ class PromptBuilder(object):
             for image in images:
                 _header.append(image['title'])
                 _rows[0].append(image['caption'])
-            image_table = prepare_df_for_neuraldb_from_table({"header": _header, "rows": _rows})
+            image_table = process_raw_table({"header": _header, "rows": _rows})
             image_table_prompt += _create_table_prompt(image_table, "Images")
             if not only_title:
                 image_table_prompt += self._select_x_prompt(
@@ -262,13 +262,19 @@ class PromptBuilder(object):
         # question and nsql pairs
         if prompt_type == ('question', 'nsql'):
             one_shot_prompt += 'Q: {}'.format(question)
-            # one_shot_prompt += 'NeuralSQL: {}\n'.format(nsql)
+            one_shot_prompt += 'NeuralSQL: {}\n'.format(nsql)
         elif prompt_type == ('question', 'sql'):
             one_shot_prompt += 'Q: {}\n'.format(question)
             one_shot_prompt += 'SQL: {}\n'.format(nsql)
         elif prompt_type == ('question', 'answer'):
             one_shot_prompt += 'Q: {}\n'.format(question)
             one_shot_prompt += 'A: {}\n'.format(', '.join(answer_text))
+        elif prompt_type == ('question', ):
+            one_shot_prompt += 'Q: {}'.format(question)
+        elif prompt_type == ('questions', ): # question is a list of queries
+            one_shot_prompt += "\n".join(f"Q{str(i+1)}: {query}" for i, query in enumerate(question))
+        elif prompt_type == ('statement', ):
+            one_shot_prompt += f"Statement: {question}"
         else:
             raise ValueError(f'Prompt type {prompt_type} is not supported.')
 

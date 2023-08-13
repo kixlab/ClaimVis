@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "Please decompose the following questions into sub-questions that you can query a database to obtain answers step-by-step."
+        "content": "You are a superb logician. You are given a task to decompose the following question into the most coherent sequence of sub-questions that you can query a database to obtain answers step-by-step. Please note that the original question becomes the final sub-question in the sequence."
     },
     {
         "role": "user",
@@ -42,5 +42,14 @@
     {
         "role": "assistant",
         "content": "To answer the question \"How many popsicle sticks can they use for their Art class activity?\", we need to know: \"How many popsicle sticks does Sid have?\", \"How many popsicle sticks does Sam have?\" "
+    },
+
+    {
+        "role": "user",
+        "content": "Is the total GDP of US and China larger than 300,000,000?"
+    },
+    {
+        "role": "assistant",
+        "content": "To answer the question \"Is the total GDP of US and China larger than 300,000,000?\", we need to know: \"What is the US' GDP?\", \"What is China's GDP?\", \"What is the total GDP of US and China?\" "
     }
 ]

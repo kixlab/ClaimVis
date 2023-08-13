@@ -11,14 +11,16 @@ import openai
 import tensorflow as tf
 from Credentials.info import *
 
-from common.functionlog import TokenCount
+from common.functionlog import *
 
 # _OPENAI_CREDENTIALS = flags.DEFINE_list(
 #     'openai_credentials', None, 'Credentials to call OpenAI.', required=True)
 openai.api_key = openai_api
 
-class Model(enum.Enum):
+class Model(str, enum.Enum):
   GPT3 = 'gpt-3.5-turbo'
+  GPT3_4k = 'gpt-3.5-turbo'
+  GPT3_16k = 'gpt-3.5-turbo-16k'
   GPT4 = 'gpt-4'
 
 def retry(
@@ -33,10 +35,14 @@ def retry(
       for idx in range(try_count):
         try:
           return fn(*args, **kwargs)
-        except ValueError as e:
+        except ValueError as e: # rate limit hit
           time.sleep(sleep_seconds * (2**idx))
           if idx == try_count - 1:
             raise ValueError('No more retries') from e
+        except RuntimeError as e: # context overshot
+          kwargs["engine"] = Model.GPT3_16k
+          
+
 
     return newfn
 
@@ -92,12 +98,12 @@ def _call_openai(
     print('Sleeping 60 secs.')
     time.sleep(60)
     raise ValueError('RateLimitError') from e
-
+  except openai.error.InvalidRequestError as e:
+    raise RuntimeError('InvalidRequestError') from e
 
 def call_model(
     model,
     prompt,
-    use_code, # to control model: False = GPT-3.5, True = Code-Davinci
     temperature,
     max_decode_steps,
     samples,
@@ -105,11 +111,11 @@ def call_model(
   """Calls model given a prompt."""
   results = []
   while len(results) < samples:
-    if model == Model.GPT3:
+    if model in [Model.GPT3, Model.GPT3_16k, Model.GPT4, Model.GPT3_4k]:
       results.extend(
           _call_openai(
               prompt=prompt,
-              engine='code-davinci-003' if use_code else 'gpt-3.5-turbo',
+              engine=model,
               temperature=temperature,
               max_decode_steps=max_decode_steps,
               samples=samples)

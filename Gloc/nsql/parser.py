@@ -1,6 +1,7 @@
 from typing import List
 import re
 import sqlparse
+import pandas as pd
 
 
 class TreeNode(object):
@@ -165,7 +166,8 @@ def remove_duplicate(original_list):
     return no_duplicate_list
 
 
-def extract_answers(sub_table):
+def extract_answers(sub_table):    
+    # sub_table is a dict with keys: header, rows, (row_id)
     if not sub_table or sub_table['header'] is None:
         return []
     answer = []

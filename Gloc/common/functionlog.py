@@ -18,20 +18,31 @@ def log_decorator(func):
         logging.info(f"Arguments: {args}, {kwargs}")
         logging.info(f"Return Value: {result}")
         logging.info(f"Execution Time: {start_time}")
-        logging.info(f"Token used: {TokenCount.token_count}")
+        logging.info(f"Token used: {TokenCount.get_token_count()}")
 
-        TokenCount.token_count = 0 # reset token count
+        TokenCount.reset() 
         return result
     return wrapper
 
 class TokenCount(object):
     token_count = 0
-
+    
     def __init__(self, func) -> None:
         self.func = func
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         contents, tokens = self.func(*args, **kwds)
-        # rack up token count
-        TokenCount.token_count += tokens
+        TokenCount.add_token_count(tokens)
         return contents
+    
+    @staticmethod
+    def reset():
+        TokenCount.token_count = 0
+    
+    @staticmethod
+    def get_token_count():
+        return TokenCount.token_count
+    
+    @staticmethod
+    def add_token_count(tokens):
+        TokenCount.token_count += tokens
