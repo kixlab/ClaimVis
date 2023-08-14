@@ -51,11 +51,11 @@ class Pipeline(object):
 
 if __name__ == "__main__":
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "africa population has been increasing."
+    text = "there are a total of 130 pg-13 movies ever produced."
     claim_map, claims = pipeline.run(text)
     for claim in claims:
         # save subtable to csv
-        data_url="temp/trial3/sub_table.csv"
+        data_url="temp/trial4/sub_table.csv"
         claim_map[claim][0]["sub_table"].to_csv(data_url)        
         label_attribute = None
         dependency_parser_config = {
@@ -70,7 +70,7 @@ if __name__ == "__main__":
                             dependency_parser_config=dependency_parser_config
                             )
         vega = nl4dv_instance.analyze_query(claim_map[claim][0]["suggestions"][0]["visualization"])
-        with open('temp/trial3/vega.json', 'w') as json_file:
+        with open('temp/trial4/vega.json', 'w') as json_file:
             json.dump(vega, json_file)
         
 
