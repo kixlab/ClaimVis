@@ -33,7 +33,7 @@ class Pipeline(object):
             if score > THRE_SHOLD:
                 if verbose: print(f"claim: {claim}")
                 # find top k datasets
-                top_k_datasets = self.data_matcher.find_top_k_datasets(claim, k=1)
+                top_k_datasets = self.data_matcher.find_top_k_datasets(claim, k=2)
                 if verbose: print(f"top k datasets: {top_k_datasets}")
 
                 # reason the claim
@@ -51,12 +51,12 @@ class Pipeline(object):
 
 if __name__ == "__main__":
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "there are a total of 130 pg-13 movies ever produced."
+    text = "albania's population in 2020 outnumbers that of algeria by 30%."
     claim_map, claims = pipeline.run(text)
     for claim in claims:
         # save subtable to csv
-        data_url="temp/trial4/sub_table.csv"
-        claim_map[claim][0]["sub_table"].to_csv(data_url)        
+        data_url="temp/trial5/sub_table.csv"
+        claim_map[claim][1]["sub_table"].to_csv(data_url)        
         label_attribute = None
         dependency_parser_config = {
                         "name": "corenlp-server", 
@@ -69,8 +69,8 @@ if __name__ == "__main__":
                             label_attribute=label_attribute, 
                             dependency_parser_config=dependency_parser_config
                             )
-        vega = nl4dv_instance.analyze_query(claim_map[claim][0]["suggestions"][0]["visualization"])
-        with open('temp/trial4/vega.json', 'w') as json_file:
+        vega = nl4dv_instance.analyze_query(claim_map[claim][1]["suggestions"][0]["visualization"])
+        with open('temp/trial5/vega.json', 'w') as json_file:
             json.dump(vega, json_file)
         
 
