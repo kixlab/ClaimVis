@@ -35,7 +35,8 @@ def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
                     ],
                     fields = [Field(
                         name="date",
-                        type="temporal"
+                        type="temporal",
+                        timeUnit= "year"
                     ),
                     Field(
                         name="country",
@@ -44,7 +45,7 @@ def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
                     ranges = Ranges(
                         date = {
                             'date_start': {
-                                'label': '2015',
+                                'label': '2015', 
                                 'value': '2015'
                             },
                             'date_end': {
@@ -53,10 +54,10 @@ def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
                             }
                         },
                         values = [{
-                            'label': 'Nuclear energy consumption',
-                            'value': 'nuclear_consumption',
-                            'unit': 'TWh',
-                            'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).'
+                            'label': 'Nuclear energy consumption', # human readable column name
+                            'value': 'nuclear_consumption', # name in the table
+                            'unit': 'TWh', # unit of measurement
+                            'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).' # where the data came from
                         }, {
                             'label': 'Coal energy consumption',
                             'value': 'coal_consumption',
