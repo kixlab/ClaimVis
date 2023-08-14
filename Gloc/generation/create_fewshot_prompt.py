@@ -798,10 +798,11 @@ Q1: How many of the 7 top - ranked figure skate teams are from france?"""},
 
 # 
 query_gen_3 = [
-    {"role": "system", "content": """You are an amazing data analyst! You are given a table and a statement. Please suggest me a list of suggestions, each containing:
-        1. A query that is related to both the data within table and the original statement.
+    {"role": "system", "content": """You are an amazing data analyst and logician! You are given a table and a statement. Please suggest me a list of suggestions, each containing:
+        1. A query that can be verified using the data attributes within the table. The query must be an improved version of the orginal statement.
         2. A visualization task that is consistent with the query and the statement.
-        3. An explanation of why the query is a good fit to the statement."""},
+        3. An explanation of why the query is a good fit to the statement.
+        4. A list of data attributes that are used in the query."""},
 
     {"role": "user", "content": """CREATE TABLE jason chambers(
 	row_id int,
@@ -826,6 +827,7 @@ Statement: Jason Chambers has the most win against Dan New among all of his wins
             query: "Does Jason Chambers have more win in his record against Dan New than against everyone else?",
             vis: "Show a bar chart representing the number of wins of Jason Chambers against each opponent.",
             explain: "The query is good because the number of win is tracked as the first number in the record column. It can easily be verified using the table."
+            attributes: ["record", "opponent"]
         }
     ]"""},
 
@@ -856,11 +858,13 @@ Statement: The movie with the highest rating is The Avengers."""},
                 query: "Is The Avengers the movie with the highest IMDB rating?",
                 vis: "Show a bar chart representing the IMDB rating of each movie.",
                 explain: "Since IMDB rating is a good metric for evaluating movie quality in the table. Compare the IMDB rating between The Avengers and other movies would  help clarify the original statement."
+                attributes: ["title", "IMDB rating"]
             },
             {
                 query: "Is The Avengers the movie with the highest Rotten Tomatoes rating?",
                 vis: "Show a bar chart representing the Rotten Tomatoes rating of each movie.",
                 explain: "Since Rotten Tomatoes rating is a good metric for evaluating movie quality in the table. Compare the Rotten Tomatoes rating between The Avengers and other movies would help clarify the original statement."
+                attributes: ["title", "Rotten Tomatoes rating"]
             }
         ]"""
     },
@@ -893,11 +897,13 @@ Statement: US'economy has outgrown China's in 2023."""
                 query: "Is the GDP of US higher than that of China in 2023?",
                 vis: "Show the GDP of US and China in 2023.",
                 explain: "Since GDP is a good metric for evaluating economy in the table. Compare the GDP between US and China would help clarify the original statement."
+                attributes: ["country", "GDP"]
             },
             {
                 query: "Is the Trade Volume of US higher than that of China in 2023?",
                 vis: "Show the Trade Volume of US and China in 2023.",
                 explain: "Since Trade Volume is a good metric for evaluating economy in the table. Compare the Trade Volume between US and China would help clarify the original statement."
+                attributes: ["country", "Trade Volume"]
             }
         ]"""
     },
@@ -931,11 +937,13 @@ Statement: American's housing in 2023 is more active than that in 2010."""
                 query: "Is the average American house price in 2023 higher than that in 2010?",
                 vis: "Show the average American house price in 2023 and 2010.",
                 explain: "Since house price is a good metric for evaluating housing market in the table. Compare the house price between 2023 and 2010 would help clarify the original statement."
+                attributes: ["year", "house_price"]
             },
             {
                 query: "Is the average mortgage rate in 2023 higher than that in 2010?",
                 vis: "Show the average mortgage rate in 2023 and 2010.",
                 explain: "Since mortgage rate is a good metric for evaluating housing market in the table. Compare the mortgage rate between 2023 and 2010 would help clarify the original statement."
+                attributes: ["year", "mortgage_rate"]
             }
         ]"""
     }

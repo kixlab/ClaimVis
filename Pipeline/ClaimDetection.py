@@ -3,6 +3,7 @@ from debater_python_api.api.debater_api import DebaterApi
 from Credentials.info import *
 import requests
 import json
+import re
 
 # set credentials
 openai.organization = organization
@@ -14,7 +15,7 @@ class ClaimDetector():
     def __init__(self):
         pass
     
-    def detect(self, sentence: str):
+    def detect(self, sentence: str, verbose: bool=False):
         """ 
             Check if there is check-worthy claims in the sentence
             using ClaimBuster API
@@ -25,39 +26,49 @@ class ClaimDetector():
 
         # Send the GET request to the API and store the api response
         api_response = requests.get(url=api_endpoint, headers=request_headers).json()
+        if verbose: print(api_response)
 
         # if the score is > .5 --> checkworthy
         if api_response['results'][0]['score'] > .5:
             """
-                create prompt chat to detect if the claim is "statistically interesting".
-                Somehow ChatGPT does well with this abstract definition of statistical interest.
-                It defines the term as "a claim or statement that raises curiosity or suggests 
-                the need for statistical analysis to investigate its validity".
+                create prompt chat to detect if the claim is check-worthy and data related.
             """
             res = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": """Label the following claims as 'Y' if they are statistically interesting, otherwise 'N'. Give detailed explanation."""},
+                    {"role": "system", "content": """Label the following claims as 'Y' if they are data related, otherwise 'N' according to the following format.
+                    \{
+                        "verdict": "<TODO: Y or N>",
+                        "explain": "<TODO: explain why the claim can be verified using data or not>"
+                    \}"""},
                     {"role": "user", "content": f"{sentence}"},
                 ]
-            )
-            print(res['choices'][0]['message']['content'])
-            # if res['choices'][0]['message']['content'] == 'Y':
-            #     print(f"statistically interesting: {api_response['results'][0]['score']}")
+            )["choices"][0]['message']['content']
 
-            #     # extract the boundary
-            #     sentences = [sentence]
-            #     boundaries_dicts = claim_boundaries_client.run(sentences)
-            #     for i in range(len(sentences)):
-            #         print ('In sentence: '+sentences[i])
-            #         print ('['+str(boundaries_dicts[i]['span'][0])+', '+str(boundaries_dicts[i]['span'][1])+']: '
-            #             +boundaries_dicts[i]['claim'])
-            #         print ()
-            # else:
-            #     print("statistically uninteresting")
+            verdict = re.search(r'"verdict": "(Y|N)"', res).group(1)
+            if verdict == 'Y':
+                if verbose: 
+                    print(f"statistically interesting: {api_response['results'][0]['score']}")
+                    explain = re.search(r'"explain": "(.+)"', res).group(1)
+                    print(f"explain: {explain}")
+
+                # extract the boundary
+                sentences = [sentence]
+                boundaries_dicts = claim_boundaries_client.run(sentences)
+                if verbose:
+                    print ('In sentence: '+sentences[0])
+                    print ('['+str(boundaries_dicts[0]['span'][0])+', '+str(boundaries_dicts[0]['span'][1])+']: '
+                        +boundaries_dicts[0]['claim'])
+                    print ()
+                return boundaries_dicts[0]['claim'], api_response['results'][0]['score']
+            else:
+                if verbose: print("statistically unrelated")
+                # negative means unrelated to data
+                return "", -api_response['results'][0]['score']
             
         else:
-            print(f"non-checkworthy: {api_response['results'][0]['score']}")
+            if verbose: print(f"non-checkworthy: {api_response['results'][0]['score']}")
+            return "", api_response['results'][0]['score']
 
 if __name__ == "__main__":
     detector = ClaimDetector()

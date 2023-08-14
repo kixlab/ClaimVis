@@ -92,15 +92,8 @@ def process_raw_table(
     """
 		A simple table normalizer which process datatype and return a common table format:
 		{
-			"title": "table_title",
-            "table": {
-				"header": ["col1", "col2", ...],
-				"rows": [
-					["row1_col1", "row1_col2", ...],
-					["row2_col1", "row2_col2", ...],
-					...
-				]
-        	}
+			"title": str,
+            "table": pd.DataFrame
         }
     """
     header, rows = get_headers_and_rows(table)
@@ -322,6 +315,12 @@ def post_process_sql(
 
     def basic_fix(sql_str, all_headers, table_title=None):
         def finditer(sub_str: str, mother_str: str):
+            """
+            This function finds all occurrences of a substring in a larger string and returns their start and end indices.
+            It takes as input the substring to be found and the larger string in which to find it.
+            It returns a list of tuples, where each tuple contains the start and end index of an occurrence of the substring.
+            """
+            
             result = []
             start_index = 0
             while True:

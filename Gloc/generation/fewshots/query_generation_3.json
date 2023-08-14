@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "You are an amazing data analyst and logician! You are given a table and a statement. Please suggest me a list of suggestions, each containing:\n        1. A query that can be verified using the data attributes within the table. The query must also share strong relation with the original statement.\n        2. A visualization task that is consistent with the query and the statement.\n        3. An explanation of why the query is a good fit to the statement."
+        "content": "You are an amazing data analyst and logician! You are given a table and a statement. Please suggest me a list of suggestions, each containing:\n        1. A query that can be verified using the data attributes within the table. The query must be an improved version of the orginal statement.\n        2. A visualization task that is consistent with the query and the statement.\n        3. An explanation of why the query is a good fit to the statement.\n        4. A list of data attributes that are used in the query."
     },
     {
         "role": "user",
@@ -9,7 +9,7 @@
     },
     {
         "role": "assistant",
-        "content": "Suggestions:\n    [\n        {\n            query: \"Does Jason Chambers have more win in his record against Dan New than against everyone else?\",\n            vis: \"Show a bar chart representing the number of wins of Jason Chambers against each opponent.\",\n            explain: \"The query is good because the number of win is tracked as the first number in the record column. It can easily be verified using the table.\"\n        }\n    ]"
+        "content": "Suggestions:\n    [\n        {\n            query: \"Does Jason Chambers have more win in his record against Dan New than against everyone else?\",\n            vis: \"Show a bar chart representing the number of wins of Jason Chambers against each opponent.\",\n            explain: \"The query is good because the number of win is tracked as the first number in the record column. It can easily be verified using the table.\"\n            attributes: [\"record\", \"opponent\"]\n        }\n    ]"
     },
     {
         "role": "user",
@@ -17,7 +17,7 @@
     },
     {
         "role": "assistant",
-        "content": "Suggestions:\n        [\n            {\n                query: \"Is The Avengers the movie with the highest IMDB rating?\",\n                vis: \"Show a bar chart representing the IMDB rating of each movie.\",\n                explain: \"Since IMDB rating is a good metric for evaluating movie quality in the table. Compare the IMDB rating between The Avengers and other movies would  help clarify the original statement.\"\n            },\n            {\n                query: \"Is The Avengers the movie with the highest Rotten Tomatoes rating?\",\n                vis: \"Show a bar chart representing the Rotten Tomatoes rating of each movie.\",\n                explain: \"Since Rotten Tomatoes rating is a good metric for evaluating movie quality in the table. Compare the Rotten Tomatoes rating between The Avengers and other movies would help clarify the original statement.\"\n            }\n        ]"
+        "content": "Suggestions:\n        [\n            {\n                query: \"Is The Avengers the movie with the highest IMDB rating?\",\n                vis: \"Show a bar chart representing the IMDB rating of each movie.\",\n                explain: \"Since IMDB rating is a good metric for evaluating movie quality in the table. Compare the IMDB rating between The Avengers and other movies would  help clarify the original statement.\"\n                attributes: [\"title\", \"IMDB rating\"]\n            },\n            {\n                query: \"Is The Avengers the movie with the highest Rotten Tomatoes rating?\",\n                vis: \"Show a bar chart representing the Rotten Tomatoes rating of each movie.\",\n                explain: \"Since Rotten Tomatoes rating is a good metric for evaluating movie quality in the table. Compare the Rotten Tomatoes rating between The Avengers and other movies would help clarify the original statement.\"\n                attributes: [\"title\", \"Rotten Tomatoes rating\"]\n            }\n        ]"
     },
     {
         "role": "user",
@@ -25,7 +25,7 @@
     },
     {
         "role": "assistant",
-        "content": "Suggestions:\n        [\n            {\n                query: \"Is the GDP of US higher than that of China in 2023?\",\n                vis: \"Show the GDP of US and China in 2023.\",\n                explain: \"Since GDP is a good metric for evaluating economy in the table. Compare the GDP between US and China would help clarify the original statement.\"\n            },\n            {\n                query: \"Is the Trade Volume of US higher than that of China in 2023?\",\n                vis: \"Show the Trade Volume of US and China in 2023.\",\n                explain: \"Since Trade Volume is a good metric for evaluating economy in the table. Compare the Trade Volume between US and China would help clarify the original statement.\"\n            }\n        ]"
+        "content": "Suggestions:\n        [\n            {\n                query: \"Is the GDP of US higher than that of China in 2023?\",\n                vis: \"Show the GDP of US and China in 2023.\",\n                explain: \"Since GDP is a good metric for evaluating economy in the table. Compare the GDP between US and China would help clarify the original statement.\"\n                attributes: [\"country\", \"GDP\"]\n            },\n            {\n                query: \"Is the Trade Volume of US higher than that of China in 2023?\",\n                vis: \"Show the Trade Volume of US and China in 2023.\",\n                explain: \"Since Trade Volume is a good metric for evaluating economy in the table. Compare the Trade Volume between US and China would help clarify the original statement.\"\n                attributes: [\"country\", \"Trade Volume\"]\n            }\n        ]"
     },
     {
         "role": "user",
@@ -33,6 +33,6 @@
     },
     {
         "role": "assistant",
-        "content": "Suggestions:\n        [\n            {\n                query: \"Is the average American house price in 2023 higher than that in 2010?\",\n                vis: \"Show the average American house price in 2023 and 2010.\",\n                explain: \"Since house price is a good metric for evaluating housing market in the table. Compare the house price between 2023 and 2010 would help clarify the original statement.\"\n            },\n            {\n                query: \"Is the average mortgage rate in 2023 higher than that in 2010?\",\n                vis: \"Show the average mortgage rate in 2023 and 2010.\",\n                explain: \"Since mortgage rate is a good metric for evaluating housing market in the table. Compare the mortgage rate between 2023 and 2010 would help clarify the original statement.\"\n            }\n        ]"
+        "content": "Suggestions:\n        [\n            {\n                query: \"Is the average American house price in 2023 higher than that in 2010?\",\n                vis: \"Show the average American house price in 2023 and 2010.\",\n                explain: \"Since house price is a good metric for evaluating housing market in the table. Compare the house price between 2023 and 2010 would help clarify the original statement.\"\n                attributes: [\"year\", \"house_price\"]\n            },\n            {\n                query: \"Is the average mortgage rate in 2023 higher than that in 2010?\",\n                vis: \"Show the average mortgage rate in 2023 and 2010.\",\n                explain: \"Since mortgage rate is a good metric for evaluating housing market in the table. Compare the mortgage rate between 2023 and 2010 would help clarify the original statement.\"\n                attributes: [\"year\", \"mortgage_rate\"]\n            }\n        ]"
     }
 ]

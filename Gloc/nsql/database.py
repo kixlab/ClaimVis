@@ -67,6 +67,18 @@ class NeuralDB(object):
     def save_table(self, path):
         self.get_table_df().to_csv(path, index=False)
 
+    def update_table(self, attributes: set):
+        """
+        Filter the table with the relevant attributes.
+        @param attributes: set
+        @return: pd.DataFrame
+        """
+        global w
+        try:
+            self.tables[0]['table'] = w = self.get_table_df()[list(attributes)]
+        except KeyError:
+            raise KeyError("Attributes {} not in table.".format(attributes))
+
     def execute_query(self, sql_query: str, return_dict=False):
         """
         Basic operation. Execute the sql query on the database we hold.

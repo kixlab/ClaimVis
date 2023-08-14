@@ -13,6 +13,7 @@ from Gloc.processor.ans_parser import AnsParser
 from Gloc.utils.normalizer import post_process_sql
 from Gloc.nsql.database import NeuralDB
 from Gloc.utils.utils import majority_vote
+from fuzzywuzzy import fuzz
 
 class TableReasoner(object):
     def __init__(
@@ -37,6 +38,7 @@ class TableReasoner(object):
         table: pd.DataFrame = None,
         samples: int = -1,
         temperature: float = -1,
+        model: Model = Model.GPT3
     ):
         """
             Call API for few-shot prompting using a question, a template, and a table 
@@ -50,7 +52,7 @@ class TableReasoner(object):
         )
 
         response = call_model(
-            model=Model.GPT3,
+            model=model,
             max_decode_steps=self.max_decode_steps,
             temperature=temperature if temperature > 0 else self.temperature,
             prompt=prompt,
@@ -63,7 +65,8 @@ class TableReasoner(object):
             self, 
             prompt: list,
             temperature: float = -1,
-            samples: int = -1
+            samples: int = -1,
+            model: Model = Model.GPT3
         ):
         """
             Call API using a provide prompt
@@ -71,7 +74,7 @@ class TableReasoner(object):
             Output: response
         """
         response = call_model(
-            model=Model.GPT3,
+            model=model,
             temperature=temperature if temperature > 0 else self.temperature,
             max_decode_steps=self.max_decode_steps,
             prompt=prompt,
@@ -80,15 +83,19 @@ class TableReasoner(object):
 
         return response
 
-    @log_decorator
     def _suggest_queries(self, claim: str, table: pd.DataFrame=None):
         """
             Suggest queries given a claim (and a table)
-            Input: claim
-            Output: list of suggested queries
+            Input: @claim
+            Output: 
+                @query: list of suggested queries
+                @vis: a list of vis tasks
+                @explain: a list of exlanation for why the queries are suggested
+                @attributes: list of attribute used in the queries
         """
         # suggest different queries in form of "[{query: ...}, {query: ...}}]"
-        template = TemplateKey.QUERY_GENERATION_2 if table is None else TemplateKey.QUERY_GENERATION_3
+        template = TemplateKey.QUERY_GENERATION_2 if table is None \
+                                                else TemplateKey.QUERY_GENERATION_3
         _, suggestions = self._call_api_1(
             question=claim,
             template_key=template,
@@ -167,39 +174,51 @@ class TableReasoner(object):
             psqls = [self.parser.parse_nsql(sql) for sql in sqls]
         elif template_key == TemplateKey.SQL_GENERATION:
             psqls = [self.parser.parse_sql(sql) for sql in sqls]
+        # list of list of sqls --> be careful when handling this case
         elif template_key == TemplateKey.SQL_GENERATION_2:
             psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
-
+        
         if fuzzy_match:
-            return [post_process_sql(
-                        sql_str=psql, 
-                        table=table,
-                        fuzzy_match=True,
-                        verbose=True
-                    ) for psql in psqls]
+            def process_psqls(psqls):
+                processed_psqls = []
+                for psql in psqls:
+                    if isinstance(psql, str):
+                        processed_psqls.append(post_process_sql(
+                            sql_str=psql, 
+                            df=table,
+                            process_program_with_fuzzy_match_on_db=fuzzy_match,
+                            verbose=True
+                        ))
+                    elif isinstance(psql, list):
+                        processed_psqls.append(process_psqls(psql))
+                return processed_psqls
+            
+            return process_psqls(psqls)
         else:
             return psqls
     
     def _exec_sqls_from_sub_queries(
             self,
             db: NeuralDB,
-            table: pd.DataFrame,
             queries: list,
             is_sequential: bool=True, 
-            verbose: bool=False
+            verbose: bool=False,
+            fuzzy_match: bool=False
         ):
         answers = []
         if is_sequential: # sequential prompting
             sqlss = [self._generate_sql(
                         query=query, 
-                        tbale=table, 
-                        template_key=TemplateKey.SQL_GENERATION
+                        table=db.get_table(), 
+                        template_key=TemplateKey.SQL_GENERATION,
+                        fuzzy_match=fuzzy_match
                     ) for query in queries]
         else: # parallel prompting
             sqlss = self._generate_sql(
                         query=queries,
-                        table=table,
-                        template_key=TemplateKey.SQL_GENERATION_2
+                        table=db.get_table(),
+                        template_key=TemplateKey.SQL_GENERATION_2,
+                        fuzzy_match=fuzzy_match
                     )
             # transpose sqlss
             sqlss = list(map(list, zip(*sqlss)))
@@ -226,8 +245,24 @@ class TableReasoner(object):
 
         return answers
     
+    def _evaluate_soundness(self, reasoning:str):
+        evaluation = self._call_api_2(
+            prompt = [
+                {"role": "system", "content": """You are an amazing logician. You are given a sequence of logical deduction based on real-world data. 
+                You need to evaluate the soundness of the reasoning and fix the reasoning while still retain the core idea and be as informative as possible in the following format.
+                \{
+                    explain: "<TODO: explain why the reasoning is sound or not sound>"   
+                    revised: "<TODO: revised reasoning>"
+                \}"""},
+                {"role": "user", "content": reasoning},
+            ],
+            model=Model.GPT4
+        )
+
+        return self.parser.parse_evaluation(evaluation[0])
+    
     @log_decorator
-    def reason(self, claim: str, table: pd.DataFrame, verbose=False):
+    def reason(self, claim: str, table: pd.DataFrame, verbose=False, fuzzy_match=False):
         """
             Reasoning pipeline for CoT
             Input: claim, table
@@ -259,25 +294,33 @@ class TableReasoner(object):
             lower_case=True
         )
         # take first query from suggested queries
-        suggestions = self._suggest_queries(claim)
+        suggestions, vis_tasks, _, attributes = self._suggest_queries(claim, table=db.get_table_df())
+        if attributes: db.update_table(attributes) # update table with relevant attributes
         if verbose: print(f"generated queries: {suggestions}")
 
-        justifications = []
-        for query in suggestions:
+        reason_map = []
+        for idx, query in enumerate(suggestions):
             # decompose queries
             sub_queries = self._decompose_query(query)
             if verbose: print(f"steps of reasoning: {sub_queries}")
 
-            # execute sql corresponding to each subquery
+            # execute sql corresponding to each subquery (up to the second last one)
             answers = self._exec_sqls_from_sub_queries(
-                            db, table,
-                            sub_queries[:-1], 
+                            db=db,
+                            queries=sub_queries[:-1], 
                             is_sequential=False,
-                            verbose=verbose
+                            verbose=verbose,
+                            fuzzy_match=fuzzy_match
                         )
             
+            def process_ans(ans):
+                if isinstance(ans, list) and len(ans) > 10:
+                    # sometimes the answer is too long to fit into the prompt
+                    return f"Ranging from {str(min(ans))} to {str(max(ans))}"
+                return str(ans)
+            
             sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
-            answers = [f"A{i+1}: {str(ans)}" for i, ans in enumerate(answers)]
+            answers = [f"A{i+1}: {process_ans(ans)}" for i, ans in enumerate(answers)]
             # generate prompt for decomposed reasoning
             dec_prompt = build_dec_prompt(sub_queries, answers)
             # if verbose: print(f"full prompt:\n{dec_prompt}")
@@ -286,23 +329,56 @@ class TableReasoner(object):
             # print("answers: ", answers)
             justification = self._call_api_2(
                 prompt = [
-                    {"role": "system", "content": "You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."},
+                    {"role": "system", "content": """You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
+                     You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
                     {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(sub_queries, answers))},
                 ]
             )
-            justifications.append(justification)
 
-        if verbose: print(f"final justifications: {justifications}")
-        return justifications   
+            # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
+            evaluation = self._evaluate_soundness(justification[0])
+            reason_map.append({
+                "query": query,
+                "visualization": vis_tasks[idx],
+                "reasoning_steps": sub_queries,
+                "justification": evaluation,
+            })
+
+        if verbose: print(f"final justifications: {reason_map}")
+        
+        return {
+            "suggestions": reason_map,
+            "sub_table": db.get_table_df(),
+            "attributes": attributes
+        }
 
 
 if __name__ == "__main__":
     table_reasoner = TableReasoner()
-    claim = "US' carbon emission is higher than every North America countries."
-    df = pd.read_csv("../Datasets/owid-energy-data.csv")
+    claim = "The Phantom is the best movies in term of imdb rating."
+    df = pd.read_csv("../Datasets/movies-w-year.csv")
+    table_reasoner.reason(claim, df, verbose=True, fuzzy_match=False)
+    # db = NeuralDB(
+    #     tables=[df],
+    #     add_row_id=True,
+    #     normalize=False,
+    #     lower_case=True
+    # )
+    # print(db.get_table_df())
+    # attributes = ['title', 'imdb rating']
+    # db.update_table(attributes)
+    # print(db.get_table_df())
 
+    # sql = """SELECT "gdp" FROM w WHERE "country" = 'Chinaa' """
+    # psql = post_process_sql(
+    #     sql_str=sql,
+    #     df=df,
+    #     process_program_with_fuzzy_match_on_db=True,
+    #     verbose=True
+    # )
+    # print(fuzz.ratio("US", "America"))
     # claim = "Africa has the highest population."
     # df = pd.read_csv("../Datasets/owid-energy-data.csv")
 
-    res = table_reasoner._suggest_queries(claim)
-    print(res)
+    # res = table_reasoner._suggest_queries(claim, df)
+    # print(res)
