@@ -2,16 +2,16 @@
     "status": "SUCCESS",
     "debug": {
         "execution_durations": {
-            "clean_query": 0.003989458084106445,
-            "extract_attributes": 1.2087664604187012,
+            "clean_query": 0.001994609832763672,
+            "extract_attributes": 1.1850254535675049,
             "extract_vis_type": 0.0,
-            "extract_tasks": 0.03989219665527344,
+            "extract_tasks": 0.03284597396850586,
             "get_vis_list": 0.0,
-            "total": 1.252648115158081
+            "total": 1.2198660373687744
         }
     },
-    "query_raw": "Show the IMDB rating of The Phantom and Dragon Heart.",
-    "query": "show the imdb rating of the phantom and dragon heart .",
+    "query_raw": "Show the IMDB rating of The Phantom and Dragonheart.",
+    "query": "show the imdb rating of the phantom and dragonheart .",
     "dataset": "temp/trial2/sub_table.csv",
     "alias": null,
     "visList": [
