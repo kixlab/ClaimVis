@@ -187,7 +187,7 @@ class TableReasoner(object):
                             sql_str=psql, 
                             df=table,
                             process_program_with_fuzzy_match_on_db=fuzzy_match,
-                            verbose=True
+                            verbose=False
                         ))
                     elif isinstance(psql, list):
                         processed_psqls.append(process_psqls(psql))
@@ -223,8 +223,8 @@ class TableReasoner(object):
             # transpose sqlss
             sqlss = list(map(list, zip(*sqlss)))
         
-        for sqls, query in zip(sqlss, queries):
-            if verbose: print(f"{query}: {sqls}")
+        for idx, (sqls, query) in enumerate(zip(sqlss, queries)):
+            if verbose: print(f"Q{idx+1}: {query}\nGenerated SQLs: {sqls}")
 
             preds = []
             for sql in sqls:
@@ -240,7 +240,7 @@ class TableReasoner(object):
                 nsqls=sqls,
                 pred_answer_list=preds
             )
-            if verbose: print(query, top_ans)
+            if verbose: print(f"A{idx+1}: {top_ans}\n{'*'*50}")
             answers.append(top_ans)
 
         return answers
@@ -355,27 +355,29 @@ class TableReasoner(object):
 
 if __name__ == "__main__":
     table_reasoner = TableReasoner()
-    claim = "The Phantom is the best movies in term of imdb rating."
+    # claim = "The Phantom is the best movies in term of imdb rating."
     df = pd.read_csv("../Datasets/movies-w-year.csv")
-    table_reasoner.reason(claim, df, verbose=True, fuzzy_match=False)
-    # db = NeuralDB(
-    #     tables=[df],
-    #     add_row_id=True,
-    #     normalize=False,
-    #     lower_case=True
-    # )
+    # table_reasoner.reason(claim, df, verbose=True, fuzzy_match=False)
+    db = NeuralDB(
+        tables=[df],
+        add_row_id=True,
+        normalize=False,
+        lower_case=True
+    )
     # print(db.get_table_df())
     # attributes = ['title', 'imdb rating']
     # db.update_table(attributes)
     # print(db.get_table_df())
 
-    # sql = """SELECT "gdp" FROM w WHERE "country" = 'Chinaa' """
-    # psql = post_process_sql(
-    #     sql_str=sql,
-    #     df=df,
-    #     process_program_with_fuzzy_match_on_db=True,
-    #     verbose=True
-    # )
+    sql = """SELECT content rating FROM w GROUP BY content rating ORDER BY SUM("production budget") DESC LIMIT 1 """
+    print(sql)
+    psql = post_process_sql(
+        sql_str=sql,
+        df=db.get_table_df(),
+        process_program_with_fuzzy_match_on_db=True,
+        verbose=True
+    )
+    print(psql)
     # print(fuzz.ratio("US", "America"))
     # claim = "Africa has the highest population."
     # df = pd.read_csv("../Datasets/owid-energy-data.csv")

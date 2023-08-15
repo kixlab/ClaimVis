@@ -9,6 +9,7 @@ from DataMatching import DataMatcher
 import pandas as pd
 from nltk.tokenize import sent_tokenize
 from nl4dv import NL4DV
+from collections import defaultdict
 import json
 
 class Pipeline(object):
@@ -25,15 +26,13 @@ class Pipeline(object):
         sentences = sent_tokenize(text)
 
         # detect claims
-        claim_map, claims = {}, []
+        claim_map, claims = defaultdict(list), []
         for sentence in sentences:
             claim, score = self.claim_detector.detect(sentence, verbose=verbose)
-            claims.append(claim)
-            claim_map[claim] = []
             if score > THRE_SHOLD:
                 if verbose: print(f"claim: {claim}")
                 # find top k datasets
-                top_k_datasets = self.data_matcher.find_top_k_datasets(claim, k=2)
+                top_k_datasets = self.data_matcher.find_top_k_datasets(claim, k=1)
                 if verbose: print(f"top k datasets: {top_k_datasets}")
 
                 # reason the claim
@@ -42,36 +41,38 @@ class Pipeline(object):
                         self.table_reasoner.reason(
                             claim=sentence,
                             table=pd.read_csv(f"{self.datasrc}/{dataset}"),
-                            verbose=False,
-                            fuzzy_match=False
+                            verbose=True,
+                            fuzzy_match=True
                         ))
+                    
+            claims.append(claim)
                     
         return claim_map, claims
     
 
 if __name__ == "__main__":
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "albania's population in 2020 outnumbers that of algeria by 30%."
+    text = "Average housing income exceeds 200000."
     claim_map, claims = pipeline.run(text)
-    for claim in claims:
-        # save subtable to csv
-        data_url="temp/trial5/sub_table.csv"
-        claim_map[claim][1]["sub_table"].to_csv(data_url)        
-        label_attribute = None
-        dependency_parser_config = {
-                        "name": "corenlp-server", 
-                        "url": "http://localhost:9000",
-                    }
+    # for claim in claims:
+    #     # save subtable to csv
+    #     data_url="temp/trial5/sub_table.csv"
+    #     claim_map[claim][0]["sub_table"].to_csv(data_url)        
+    #     label_attribute = None
+    #     dependency_parser_config = {
+    #                     "name": "corenlp-server", 
+    #                     "url": "http://localhost:9000",
+    #                 }
 
-        nl4dv_instance = NL4DV(verbose=False, 
-                            debug=True, 
-                            data_url=data_url, 
-                            label_attribute=label_attribute, 
-                            dependency_parser_config=dependency_parser_config
-                            )
-        vega = nl4dv_instance.analyze_query(claim_map[claim][1]["suggestions"][0]["visualization"])
-        with open('temp/trial5/vega.json', 'w') as json_file:
-            json.dump(vega, json_file)
+    #     nl4dv_instance = NL4DV(verbose=False, 
+    #                         debug=True, 
+    #                         data_url=data_url, 
+    #                         label_attribute=label_attribute, 
+    #                         dependency_parser_config=dependency_parser_config
+    #                         )
+    #     vega = nl4dv_instance.analyze_query(claim_map[claim][0]["suggestions"][0]["visualization"])
+    #     with open('temp/trial5/vega.json', 'w') as json_file:
+    #         json.dump(vega, json_file)
         
 
         # print(nl4dv_response)

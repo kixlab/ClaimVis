@@ -1,11 +1,11 @@
 [
     {
         "role": "system",
-        "content": "Generate SQL given the question and table."
+        "content": "Generate SQL given the question and table. Remember to wrap column name with double quotes if it contains spaces."
     },
     {
         "role": "user",
-        "content": "CREATE TABLE jason chambers(\n\trow_id int,\n\tres text,\n\trecord text,\n\topponent text,\n\tmethod text,\n\tevent text,\n\tround text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tres\trecord\topponent\tmethod\tevent\tround\n0\twin\t18 - 5 - 2\tdan new\tsubmission (rear naked choke)\ttfc - power fights\t1\n1\twin\t17 - 5 - 2\trene gonzalez\tdecision (split)\tmainstream mma - cold war\tn / a\n2\tloss\t16 - 5 - 2\ttristan yunker\tsubmission ( armbar )\ttfc 7 - total fight challenge 7\t1\n*/\nQ1: How many win are there when the opponent is dan spychalski?\nQ2: What is the number of records with a nan round ended in 2 or began with 2."
+        "content": "CREATE TABLE jason chambers(\n\trow_id int,\n\tres text,\n\trecord text,\n\topponent text,\n\tmethod text,\n\tevent text,\n\tround text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tres\trecord\topponent\tmethod\tevent\tround\n0\twin\t18 - 5 - 2\tdan new\tsubmission (rear naked choke)\ttfc - power fights\t1\n1\twin\t17 - 5 - 2\trene gonzalez\tdecision (split)\tmainstream mma - cold war\tn / a\n2\tloss\t16 - 5 - 2\ttristan yunker\tsubmission ( armbar )\ttfc 7 - total fight challenge 7\t1\n*/\nQ1: How many win are there when the opponent is dan spychalski?\nQ2: What is the number of records with a nan round ended in 2 or began with 2?"
     },
     {
         "role": "assistant",

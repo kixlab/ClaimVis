@@ -2586,3 +2586,631 @@ INFO:root:Return Value: {'suggestions': [{'query': 'Is The Phantom the movie wit
 [709 rows x 2 columns], 'attributes': ['title', 'production budget']}
 INFO:root:Execution Time: 2023-08-14 15:42:04
 INFO:root:Token used: 6996
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 945.7249641418457ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001D377003790>,), {'claim': 'The Phantom has higher imdb rating than Dragon Heart.', 'table':                                   Title  Worldwide Gross  Production Budget  Release Year  ...     Genre         Creative Type Rotten Tomatoes Rating IMDB Rating
+0                   From Dusk Till Dawn         25728961           20000000          1996  ...    Horror               Fantasy                     63         7.1
+1                          Broken Arrow        148345997           65000000          1996  ...    Action  Contemporary Fiction                     55         5.8
+2                             City Hall         20278055           40000000          1996  ...     Drama  Contemporary Fiction                     55         6.1
+3                         Happy Gilmore         38623460           10000000          1996  ...    Comedy  Contemporary Fiction                     58         6.9
+4                                 Fargo         51204567            7000000          1996  ...  Thriller  Contemporary Fiction                     94         8.3
+..                                  ...              ...                ...           ...  ...       ...                   ...                    ...         ...
+704  The City of Your Final Destination           493296            8300000          2010  ...     Drama  Contemporary Fiction                     40         6.6
+705                          Robin Hood        310885538          210000000          2010  ...    Action    Historical Fiction                     43         6.9
+706                           Inception        753830280          160000000          2010  ...  Thriller       Science Fiction                     87         9.1
+707         Scott Pilgrim vs. The World         43149143           85000000          2010  ...    Comedy  Contemporary Fiction                     81         8.1
+708                            The Town         33180607           37000000          2010  ...     Drama  Contemporary Fiction                     84         8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does The Phantom have a higher IMDB rating than Dragon Heart?', 'visualization': 'Show the IMDB rating of The Phantom and Dragon Heart.', 'reasoning_steps': ['Q1: What is the IMDB rating of The Phantom?', 'Q2: What is the IMDB rating of Dragon Heart?', 'Q3: Does The Phantom have a higher IMDB rating than Dragon Heart?'], 'justification': 'To determine whether The Phantom has a higher IMDB rating than Dragon Heart, we need to compare their ratings. The IMDB rating of The Phantom is 4.8, while the IMDB rating of Dragon Heart is currently not available. Therefore, we cannot definitively compare the two at this time. However, it may be possible to find the rating of Dragon Heart from other reliable sources or wait until the rating becomes available on IMDB.'}], 'sub_table':                                   title  imdb rating
+0                   from dusk till dawn          7.1
+1                          broken arrow          5.8
+2                             city hall          6.1
+3                         happy gilmore          6.9
+4                                 fargo          8.3
+..                                  ...          ...
+704  the city of your final destination          6.6
+705                          robin hood          6.9
+706                           inception          9.1
+707         scott pilgrim vs. the world          8.1
+708                            the town          8.7
+
+[709 rows x 2 columns], 'attributes': ['title', 'imdb rating']}
+INFO:root:Execution Time: 2023-08-14 15:57:38
+INFO:root:Token used: 6608
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1050.5938529968262ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000292C7603790>,), {'claim': 'the phantom has higher imdb rating than dragonheart.', 'table':                                   Title  Worldwide Gross  Production Budget  Release Year  ...     Genre         Creative Type Rotten Tomatoes Rating IMDB Rating
+0                   From Dusk Till Dawn         25728961           20000000          1996  ...    Horror               Fantasy                     63         7.1
+1                          Broken Arrow        148345997           65000000          1996  ...    Action  Contemporary Fiction                     55         5.8
+2                             City Hall         20278055           40000000          1996  ...     Drama  Contemporary Fiction                     55         6.1
+3                         Happy Gilmore         38623460           10000000          1996  ...    Comedy  Contemporary Fiction                     58         6.9
+4                                 Fargo         51204567            7000000          1996  ...  Thriller  Contemporary Fiction                     94         8.3
+..                                  ...              ...                ...           ...  ...       ...                   ...                    ...         ...
+704  The City of Your Final Destination           493296            8300000          2010  ...     Drama  Contemporary Fiction                     40         6.6
+705                          Robin Hood        310885538          210000000          2010  ...    Action    Historical Fiction                     43         6.9
+706                           Inception        753830280          160000000          2010  ...  Thriller       Science Fiction                     87         9.1
+707         Scott Pilgrim vs. The World         43149143           85000000          2010  ...    Comedy  Contemporary Fiction                     81         8.1
+708                            The Town         33180607           37000000          2010  ...     Drama  Contemporary Fiction                     84         8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does The Phantom have a higher IMDB rating than Dragonheart?', 'visualization': 'Show the IMDB rating of The Phantom and Dragonheart.', 'reasoning_steps': ['Q1: What is the IMDB rating of The Phantom?', 'Q2: What is the IMDB rating of Dragonheart?', 'Q3: Is the IMDB rating of The Phantom higher than Dragonheart?', 'Q4: Does The Phantom have a higher IMDB rating than Dragonheart?'], 'justification': 'The IMDB rating of The Phantom is 4.8, while the IMDB rating of Dragonheart is 6.2. Therefore, based on these ratings, it can be concluded that Dragonheart has a higher IMDB rating than The Phantom.'}], 'sub_table':                                   title  imdb rating
+0                   from dusk till dawn          7.1
+1                          broken arrow          5.8
+2                             city hall          6.1
+3                         happy gilmore          6.9
+4                                 fargo          8.3
+..                                  ...          ...
+704  the city of your final destination          6.6
+705                          robin hood          6.9
+706                           inception          9.1
+707         scott pilgrim vs. the world          8.1
+708                            the town          8.7
+
+[709 rows x 2 columns], 'attributes': ['title', 'imdb rating']}
+INFO:root:Execution Time: 2023-08-14 16:05:34
+INFO:root:Token used: 6873
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 937.4918937683105ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4255 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001BD4DF33790>,), {'claim': 'africa population has been increasing.', 'table':        row_id        country  year iso_code  population  ...  wind_elec_per_capita  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...         ...  ...                   ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  15052191.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  15354606.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  15669663.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  15993525.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  16320539.0  ...                   NaN               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Has the population of Africa been increasing over the years?', 'visualization': 'Show a line chart representing the population of Africa over the years.', 'reasoning_steps': ['Q1: What was the population of Africa in the past?', 'Q2: What is the current population of Africa?', 'Q3: Has the population of Africa been increasing over time?', 'Q4: Has the population of Africa been increasing over the years?'], 'justification': 'Historical data shows that the population of Africa has ranged from 138752199.0 to 1426736614.0. The current population of Africa is 1426736614.0, which is the highest it has ever been. This indicates a consistent increase in the population of Africa over time.'}], 'sub_table':        year  population        country
+0      2000         NaN  asean (ember)
+1      2001         NaN  asean (ember)
+2      2002         NaN  asean (ember)
+3      2003         NaN  asean (ember)
+4      2004         NaN  asean (ember)
+...     ...         ...            ...
+22007  2018  15052191.0       zimbabwe
+22008  2019  15354606.0       zimbabwe
+22009  2020  15669663.0       zimbabwe
+22010  2021  15993525.0       zimbabwe
+22011  2022  16320539.0       zimbabwe
+
+[22012 rows x 3 columns], 'attributes': ['year', 'population', 'country']}
+INFO:root:Execution Time: 2023-08-14 16:13:25
+INFO:root:Token used: 11351
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1005.3558349609375ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002510F573790>,), {'claim': 'there are a total of 130 pg-13 movies ever produced.', 'table':                                   Title  Worldwide Gross  Production Budget  Release Year  ...     Genre         Creative Type Rotten Tomatoes Rating IMDB Rating
+0                   From Dusk Till Dawn         25728961           20000000          1996  ...    Horror               Fantasy                     63         7.1
+1                          Broken Arrow        148345997           65000000          1996  ...    Action  Contemporary Fiction                     55         5.8
+2                             City Hall         20278055           40000000          1996  ...     Drama  Contemporary Fiction                     55         6.1
+3                         Happy Gilmore         38623460           10000000          1996  ...    Comedy  Contemporary Fiction                     58         6.9
+4                                 Fargo         51204567            7000000          1996  ...  Thriller  Contemporary Fiction                     94         8.3
+..                                  ...              ...                ...           ...  ...       ...                   ...                    ...         ...
+704  The City of Your Final Destination           493296            8300000          2010  ...     Drama  Contemporary Fiction                     40         6.6
+705                          Robin Hood        310885538          210000000          2010  ...    Action    Historical Fiction                     43         6.9
+706                           Inception        753830280          160000000          2010  ...  Thriller       Science Fiction                     87         9.1
+707         Scott Pilgrim vs. The World         43149143           85000000          2010  ...    Comedy  Contemporary Fiction                     81         8.1
+708                            The Town         33180607           37000000          2010  ...     Drama  Contemporary Fiction                     84         8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': "How many movies with a content rating of 'PG-13' are there in the table?", 'visualization': 'Show a bar chart representing the count of movies with each content rating.', 'reasoning_steps': ["Q1: What is the count of movies with a content rating of 'PG-13' in the table?", "Q2: How many movies with a content rating of 'PG-13' are there in the table?"], 'justification': "To determine the count of movies with a content rating of 'PG-13' in the table, we need to find the column of content rating and then count the number of movies with this specific rating. Upon doing so, we discover that there are 2 movies with a content rating of 'PG-13' in this particular data set. Therefore, based on this data set, the answer to the question is 2."}], 'sub_table':     content rating
+0                r
+1                r
+2                r
+3            pg-13
+4                r
+..             ...
+704          pg-13
+705          pg-13
+706          pg-13
+707          pg-13
+708              r
+
+[709 rows x 1 columns], 'attributes': ['content rating']}
+INFO:root:Execution Time: 2023-08-14 16:26:49
+INFO:root:Token used: 6563
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 898.1060981750488ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002517E683790>,), {'claim': 'there are a total of 130 pg-13 movies ever produced.', 'table':                                   Title  Worldwide Gross  Production Budget  Release Year  ...     Genre         Creative Type Rotten Tomatoes Rating IMDB Rating
+0                   From Dusk Till Dawn         25728961           20000000          1996  ...    Horror               Fantasy                     63         7.1
+1                          Broken Arrow        148345997           65000000          1996  ...    Action  Contemporary Fiction                     55         5.8
+2                             City Hall         20278055           40000000          1996  ...     Drama  Contemporary Fiction                     55         6.1
+3                         Happy Gilmore         38623460           10000000          1996  ...    Comedy  Contemporary Fiction                     58         6.9
+4                                 Fargo         51204567            7000000          1996  ...  Thriller  Contemporary Fiction                     94         8.3
+..                                  ...              ...                ...           ...  ...       ...                   ...                    ...         ...
+704  The City of Your Final Destination           493296            8300000          2010  ...     Drama  Contemporary Fiction                     40         6.6
+705                          Robin Hood        310885538          210000000          2010  ...    Action    Historical Fiction                     43         6.9
+706                           Inception        753830280          160000000          2010  ...  Thriller       Science Fiction                     87         9.1
+707         Scott Pilgrim vs. The World         43149143           85000000          2010  ...    Comedy  Contemporary Fiction                     81         8.1
+708                            The Town         33180607           37000000          2010  ...     Drama  Contemporary Fiction                     84         8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': "How many movies with a content rating of 'PG-13' are there in the table?", 'visualization': 'Show a bar chart representing the count of movies with each content rating.', 'reasoning_steps': ["Q1: What is the count of movies with a content rating of 'PG-13' in the table?", "Q2: How many movies with a content rating of 'PG-13' are there in the table?"], 'justification': "To determine the count of movies with a content rating of 'PG-13' in the table, we need to find the column of content rating and then count the number of movies with this specific rating. Upon doing so, we discover that there are 2 movies with a content rating of 'PG-13' out of a total of X movies in the table. Therefore, the answer to the question is 2, representing a percentage of (2/X)*100 of the total movies."}], 'sub_table':     content rating
+0                r
+1                r
+2                r
+3            pg-13
+4                r
+..             ...
+704          pg-13
+705          pg-13
+706          pg-13
+707          pg-13
+708              r
+
+[709 rows x 1 columns], 'attributes': ['content rating']}
+INFO:root:Execution Time: 2023-08-14 16:27:40
+INFO:root:Token used: 6587
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 986.9778156280518ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000018E720F3790>,), {'claim': 'albania population in 2020 outnumbers that of algeria by 30%.', 'table':                                   Title  Worldwide Gross  Production Budget  Release Year  ...     Genre         Creative Type Rotten Tomatoes Rating IMDB Rating
+0                   From Dusk Till Dawn         25728961           20000000          1996  ...    Horror               Fantasy                     63         7.1
+1                          Broken Arrow        148345997           65000000          1996  ...    Action  Contemporary Fiction                     55         5.8
+2                             City Hall         20278055           40000000          1996  ...     Drama  Contemporary Fiction                     55         6.1
+3                         Happy Gilmore         38623460           10000000          1996  ...    Comedy  Contemporary Fiction                     58         6.9
+4                                 Fargo         51204567            7000000          1996  ...  Thriller  Contemporary Fiction                     94         8.3
+..                                  ...              ...                ...           ...  ...       ...                   ...                    ...         ...
+704  The City of Your Final Destination           493296            8300000          2010  ...     Drama  Contemporary Fiction                     40         6.6
+705                          Robin Hood        310885538          210000000          2010  ...    Action    Historical Fiction                     43         6.9
+706                           Inception        753830280          160000000          2010  ...  Thriller       Science Fiction                     87         9.1
+707         Scott Pilgrim vs. The World         43149143           85000000          2010  ...    Comedy  Contemporary Fiction                     81         8.1
+708                            The Town         33180607           37000000          2010  ...     Drama  Contemporary Fiction                     84         8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the population of Albania in 2020 more than 30% higher than that of Algeria?', 'visualization': 'Show the population of Albania and Algeria in 2020.', 'reasoning_steps': ['Q1: What is the population of Albania in 2020?', 'Q2: What is the population of Algeria in 2020?', 'Q3: Is the population of Albania in 2020 more than 30% higher than that of Algeria?', 'Q4: Is the population of Albania in 2020 more than 30% higher than that of Algeria?'], 'justification': 'In order to determine the population of Albania in 2020, we need access to the relevant data. Unfortunately, I do not have access to the population data for Albania in 2020. My capabilities are limited to analyzing data tables provided to me.'}], 'sub_table':      worldwide gross                               title
+0           25728961                 from dusk till dawn
+1          148345997                        broken arrow
+2           20278055                           city hall
+3           38623460                       happy gilmore
+4           51204567                               fargo
+..               ...                                 ...
+704           493296  the city of your final destination
+705        310885538                          robin hood
+706        753830280                           inception
+707         43149143         scott pilgrim vs. the world
+708         33180607                            the town
+
+[709 rows x 2 columns], 'attributes': ['worldwide gross', 'title']}
+INFO:root:Execution Time: 2023-08-14 16:35:28
+INFO:root:Token used: 6913
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1062.1681213378906ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000021E616D3790>,), {'claim': "albania's population in 2020 outnumbers that of algeria by 30%.", 'table':                                   Title  Worldwide Gross  Production Budget  Release Year  ...     Genre         Creative Type Rotten Tomatoes Rating IMDB Rating
+0                   From Dusk Till Dawn         25728961           20000000          1996  ...    Horror               Fantasy                     63         7.1
+1                          Broken Arrow        148345997           65000000          1996  ...    Action  Contemporary Fiction                     55         5.8
+2                             City Hall         20278055           40000000          1996  ...     Drama  Contemporary Fiction                     55         6.1
+3                         Happy Gilmore         38623460           10000000          1996  ...    Comedy  Contemporary Fiction                     58         6.9
+4                                 Fargo         51204567            7000000          1996  ...  Thriller  Contemporary Fiction                     94         8.3
+..                                  ...              ...                ...           ...  ...       ...                   ...                    ...         ...
+704  The City of Your Final Destination           493296            8300000          2010  ...     Drama  Contemporary Fiction                     40         6.6
+705                          Robin Hood        310885538          210000000          2010  ...    Action    Historical Fiction                     43         6.9
+706                           Inception        753830280          160000000          2010  ...  Thriller       Science Fiction                     87         9.1
+707         Scott Pilgrim vs. The World         43149143           85000000          2010  ...    Comedy  Contemporary Fiction                     81         8.1
+708                            The Town         33180607           37000000          2010  ...     Drama  Contemporary Fiction                     84         8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the population of Albania in 2020 more than 30% higher than that of Algeria?', 'visualization': 'Show the population of Albania and Algeria in 2020.', 'reasoning_steps': ['Q1: What is the population of Albania in 2020?', 'Q2: What is the population of Algeria in 2020?', 'Q3: Is the population of Albania in 2020 more than 30% higher than that of Algeria?', 'Q4: Is the population of Albania in 2020 more than 30% higher than that of Algeria?'], 'justification': 'Without the necessary data about the population of Albania in 2020, it is impossible to provide an accurate answer. The table provided does not contain this information.'}], 'sub_table':                                   title  worldwide gross
+0                   from dusk till dawn         25728961
+1                          broken arrow        148345997
+2                             city hall         20278055
+3                         happy gilmore         38623460
+4                                 fargo         51204567
+..                                  ...              ...
+704  the city of your final destination           493296
+705                          robin hood        310885538
+706                           inception        753830280
+707         scott pilgrim vs. the world         43149143
+708                            the town         33180607
+
+[709 rows x 2 columns], 'attributes': ['title', 'worldwide gross']}
+INFO:root:Execution Time: 2023-08-14 16:36:42
+INFO:root:Token used: 6700
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 720.714807510376ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000167E2CE37C0>,), {'claim': "albania's population in 2020 outnumbers that of algeria by 30%.", 'table':                                   Title  Worldwide Gross  Production Budget  Release Year  ...     Genre         Creative Type Rotten Tomatoes Rating IMDB Rating
+0                   From Dusk Till Dawn         25728961           20000000          1996  ...    Horror               Fantasy                     63         7.1
+1                          Broken Arrow        148345997           65000000          1996  ...    Action  Contemporary Fiction                     55         5.8
+2                             City Hall         20278055           40000000          1996  ...     Drama  Contemporary Fiction                     55         6.1
+3                         Happy Gilmore         38623460           10000000          1996  ...    Comedy  Contemporary Fiction                     58         6.9
+4                                 Fargo         51204567            7000000          1996  ...  Thriller  Contemporary Fiction                     94         8.3
+..                                  ...              ...                ...           ...  ...       ...                   ...                    ...         ...
+704  The City of Your Final Destination           493296            8300000          2010  ...     Drama  Contemporary Fiction                     40         6.6
+705                          Robin Hood        310885538          210000000          2010  ...    Action    Historical Fiction                     43         6.9
+706                           Inception        753830280          160000000          2010  ...  Thriller       Science Fiction                     87         9.1
+707         Scott Pilgrim vs. The World         43149143           85000000          2010  ...    Comedy  Contemporary Fiction                     81         8.1
+708                            The Town         33180607           37000000          2010  ...     Drama  Contemporary Fiction                     84         8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the population of Albania in 2020 more than 30% higher than that of Algeria?', 'visualization': 'Show the population of Albania and Algeria in 2020.', 'reasoning_steps': ['Q1: What is the population of Albania in 2020?', 'Q2: What is the population of Algeria in 2020?', 'Q3: Is the population of Albania in 2020 more than 30% higher than that of Algeria?', 'Q4: Is the population of Albania in 2020 more than 30% higher than that of Algeria?'], 'justification': "Without the specific data for Albania's population in 2020, it is impossible to provide an accurate answer. The provided table does not contain information about the population of Albania or Algeria in 2020."}], 'sub_table':                                   title  worldwide gross
+0                   from dusk till dawn         25728961
+1                          broken arrow        148345997
+2                             city hall         20278055
+3                         happy gilmore         38623460
+4                                 fargo         51204567
+..                                  ...              ...
+704  the city of your final destination           493296
+705                          robin hood        310885538
+706                           inception        753830280
+707         scott pilgrim vs. the world         43149143
+708                            the town         33180607
+
+[709 rows x 2 columns], 'attributes': ['title', 'worldwide gross']}
+INFO:root:Execution Time: 2023-08-14 16:39:42
+INFO:root:Token used: 6825
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4486 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, you requested 4524 tokens (4024 in the messages, 500 in the completion). Please reduce the length of the messages or completion." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000167E2CE37C0>,), {'claim': "albania's population in 2020 outnumbers that of algeria by 30%.", 'table':        row_id        country  year iso_code  population  ...  wind_elec_per_capita  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN         NaN  ...                   NaN               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...         ...  ...                   ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  15052191.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  15354606.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  15669663.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  15993525.0  ...                   0.0               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  16320539.0  ...                   NaN               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': False, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the population of Albania in 2020 30% higher than that of Algeria?', 'visualization': 'Show the population of Albania and Algeria in 2020.', 'reasoning_steps': ['Q1: What is the population of Albania in 2020?', 'Q2: What is the population of Algeria in 2020?', 'Q3: Is the population of Albania in 2020 30% higher than the population of Algeria in 2020?', 'Q4: Is the population of Albania in 2020 30% higher than that of Algeria?'], 'justification': 'The population of Albania in 2020 is 2,866,850, while the population of Algeria in 2020 is 43,451,668. Therefore, the population of Albania is significantly smaller than that of Algeria, specifically, it is approximately 6.6% of the population of Algeria.'}], 'sub_table':        population        country  year
+0             NaN  asean (ember)  2000
+1             NaN  asean (ember)  2001
+2             NaN  asean (ember)  2002
+3             NaN  asean (ember)  2003
+4             NaN  asean (ember)  2004
+...           ...            ...   ...
+22007  15052191.0       zimbabwe  2018
+22008  15354606.0       zimbabwe  2019
+22009  15669663.0       zimbabwe  2020
+22010  15993525.0       zimbabwe  2021
+22011  16320539.0       zimbabwe  2022
+
+[22012 rows x 3 columns], 'attributes': ['population', 'country', 'year']}
+INFO:root:Execution Time: 2023-08-14 16:40:06
+INFO:root:Token used: 12510
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1233.976125717163ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000014A7FB20FA0>,), {'claim': 'Africam has the highest population in 2020.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': False, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does Africam have the highest population in 2020?', 'visualization': 'Show a bar chart representing the population of each country in 2020.', 'reasoning_steps': ['Q1: What is the population of Africa in 2020?', 'Q2: What is the population of other continents in 2020?', 'Q3: Which continent has the highest population in 2020?', 'Q4: Does Africa have the highest population in 2020?'], 'justification': 'Without access to the population data for Africa in 2020, it is not possible to make any definitive statements or conclusions about the population trends in that year.'}], 'sub_table':      worldwide gross                               title
+0           25728961                 from dusk till dawn
+1          148345997                        broken arrow
+2           20278055                           city hall
+3           38623460                       happy gilmore
+4           51204567                               fargo
+..               ...                                 ...
+704           493296  the city of your final destination
+705        310885538                          robin hood
+706        753830280                           inception
+707         43149143         scott pilgrim vs. the world
+708         33180607                            the town
+
+[709 rows x 2 columns], 'attributes': ['worldwide gross', 'title']}
+INFO:root:Execution Time: 2023-08-14 23:31:06
+INFO:root:Token used: 6562
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4470 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000014A7FB20FA0>,), {'claim': 'Africam has the highest population in 2020.', 'table':        row_id        country  year iso_code  ...  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN  ...               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN  ...               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN  ...               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN  ...               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN  ...               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...  ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  ...               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  ...               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  ...               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  ...               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  ...               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': False, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does Africam have the highest population in 2020?', 'visualization': 'Show a bar chart representing the population of each country in 2020.', 'reasoning_steps': ['Q1: What is the population of Africa in 2020?', 'Q2: What is the population of other continents in 2020?', 'Q3: Which continent has the highest population in 2020?', 'Q4: Does Africa have the highest population in 2020?'], 'justification': "In order to determine the population of Africa in 2020, we need accurate data. The data provided seems to have errors, as the population range for Africa and the population of other continents are unrealistic. Also, comparing the population of Africa to the 'world' is not valid, as 'world' represents the total population of all continents. Therefore, we need to correct the data and then compare the population of Africa with other individual continents to determine if Africa has the highest population in 2020."}], 'sub_table':        population        country
+0             NaN  asean (ember)
+1             NaN  asean (ember)
+2             NaN  asean (ember)
+3             NaN  asean (ember)
+4             NaN  asean (ember)
+...           ...            ...
+22007  15052191.0       zimbabwe
+22008  15354606.0       zimbabwe
+22009  15669663.0       zimbabwe
+22010  15993525.0       zimbabwe
+22011  16320539.0       zimbabwe
+
+[22012 rows x 2 columns], 'attributes': ['population', 'country']}
+INFO:root:Execution Time: 2023-08-14 23:31:30
+INFO:root:Token used: 11917
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1011.8000507354736ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000018BFB270FA0>,), {'claim': 'pg13 is the category with highest budget.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is PG-13 the content rating category with the highest production budget?', 'visualization': 'Show a bar chart representing the production budget of each content rating category.', 'reasoning_steps': ['Q1: What are the production budgets for each content rating category?', 'Q2: Which content rating category has the highest production budget?', 'Q3: Is PG-13 the content rating category with the highest production budget?'], 'justification': 'In order to determine the content rating category with the highest production budget, we need to examine the production budgets for each category. Unfortunately, the production budgets for each content rating category are not provided. Therefore, we cannot definitively say which category has the highest production budget.'}], 'sub_table':      production budget content rating
+0             20000000              r
+1             65000000              r
+2             40000000              r
+3             10000000          pg-13
+4              7000000              r
+..                 ...            ...
+704            8300000          pg-13
+705          210000000          pg-13
+706          160000000          pg-13
+707           85000000          pg-13
+708           37000000              r
+
+[709 rows x 2 columns], 'attributes': ['production budget', 'content rating']}
+INFO:root:Execution Time: 2023-08-14 23:34:46
+INFO:root:Token used: 6735
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 645.427942276001ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000020584DF0FA0>,), {'claim': 'pg13 is the category with highest budget.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is PG-13 the content rating category with the highest production budget?', 'visualization': 'Show a bar chart representing the production budget of each content rating category.', 'reasoning_steps': ['Q1: What are the production budgets for each content rating category?', 'Q2: Which content rating category has the highest production budget?', 'Q3: Is PG-13 the content rating category with the highest production budget?'], 'justification': 'To determine if PG-13 is the content rating category with the highest production budget, we would need to examine the production budgets for each content rating category. However, without access to this data, we cannot definitively say whether PG-13 has the highest production budget or not. Further research and data are needed to make this determination.'}], 'sub_table':     content rating  production budget
+0                r           20000000
+1                r           65000000
+2                r           40000000
+3            pg-13           10000000
+4                r            7000000
+..             ...                ...
+704          pg-13            8300000
+705          pg-13          210000000
+706          pg-13          160000000
+707          pg-13           85000000
+708              r           37000000
+
+[709 rows x 2 columns], 'attributes': ['content rating', 'production budget']}
+INFO:root:Execution Time: 2023-08-14 23:39:25
+INFO:root:Token used: 6664
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 715.17014503479ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000252627A0FA0>,), {'claim': 'pg13 is the category with highest budget.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': False}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is PG-13 the content rating category with the highest production budget?', 'visualization': 'Show a bar chart representing the production budget of each content rating category.', 'reasoning_steps': ['Q1: What are the production budgets for each content rating category?', 'Q2: Which content rating category has the highest production budget?', 'Q3: Is PG-13 the content rating category with the highest production budget?'], 'justification': 'To determine if PG-13 is the content rating category with the highest production budget, we need to examine the production budgets for each content rating category. While I currently do not have access to this data, it is possible to obtain it from reliable sources such as film industry reports or databases. Once this data is obtained, a thorough analysis can be conducted to provide a definitive answer.'}], 'sub_table':     content rating  production budget
+0                r           20000000
+1                r           65000000
+2                r           40000000
+3            pg-13           10000000
+4                r            7000000
+..             ...                ...
+704          pg-13            8300000
+705          pg-13          210000000
+706          pg-13          160000000
+707          pg-13           85000000
+708              r           37000000
+
+[709 rows x 2 columns], 'attributes': ['content rating', 'production budget']}
+INFO:root:Execution Time: 2023-08-14 23:46:08
+INFO:root:Token used: 6669
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 949.8851299285889ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000016050900FA0>,), {'claim': 'pg13 is the category with highest budget.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is PG-13 the content rating category with the highest production budget?', 'visualization': 'Show a bar chart representing the production budget of each content rating category.', 'reasoning_steps': ['Q1: What are the production budgets for each content rating category?', 'Q2: Which content rating category has the highest production budget?', 'Q3: Is PG-13 the content rating category with the highest production budget?'], 'justification': "The production budgets for each content rating category are as follows: 'r' - 12,803,927,938.0, 'pg-13' - 20,098,128,700.0, 'pg' - 5,959,400,000.0, 'g' - 1,760,500,000.0. Given these figures, it is clear that the 'pg-13' category has the highest production budget. Therefore, it is accurate to say that 'pg-13' is the content rating category with the highest production budget."}], 'sub_table':      production budget content rating
+0             20000000              r
+1             65000000              r
+2             40000000              r
+3             10000000          pg-13
+4              7000000              r
+..                 ...            ...
+704            8300000          pg-13
+705          210000000          pg-13
+706          160000000          pg-13
+707           85000000          pg-13
+708           37000000              r
+
+[709 rows x 2 columns], 'attributes': ['production budget', 'content rating']}
+INFO:root:Execution Time: 2023-08-15 00:05:01
+INFO:root:Token used: 6958
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1022.2699642181396ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000239C7D10FA0>,), {'claim': 'Albania has higher coal production than Argentina in 2010.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did Albania have higher coal production than Argentina in 2010?', 'visualization': 'Show the coal production of Albania and Argentina in 2010.', 'reasoning_steps': ["Q1: What was Albania's coal production in 2010?", "Q2: What was Argentina's coal production in 2010?", "Q3: Was Albania's coal production higher than Argentina's in 2010?", 'Q4: Did Albania have higher coal production than Argentina in 2010?'], 'justification': "Due to the lack of available data for Albania's and Argentina's coal production in 2010, we cannot make a definitive comparison or determination about which country had higher coal production in that year."}], 'sub_table':      production budget row_id  release year
+0             20000000      0          1996
+1             65000000      1          1996
+2             40000000      2          1996
+3             10000000      3          1996
+4              7000000      4          1996
+..                 ...    ...           ...
+704            8300000    704          2010
+705          210000000    705          2010
+706          160000000    706          2010
+707           85000000    707          2010
+708           37000000    708          2010
+
+[709 rows x 3 columns], 'attributes': ['production budget', 'row_id', 'release year']}
+INFO:root:Execution Time: 2023-08-15 00:11:17
+INFO:root:Token used: 6828
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 708.1069946289062ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000203681B2A00>,), {'claim': 'Albania has higher coal production than Argentina in 2010.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did Albania have higher coal production than Argentina in 2010?', 'visualization': 'Show the coal production of Albania and Argentina in 2010.', 'reasoning_steps': ["Q1: What was Albania's coal production in 2010?", "Q2: What was Argentina's coal production in 2010?", "Q3: Was Albania's coal production higher than Argentina's in 2010?", 'Q4: Did Albania have higher coal production than Argentina in 2010?'], 'justification': "To determine whether Albania's coal production in 2010 was higher than Argentina's, we need to compare the coal production figures for both countries in that year. As I currently do not have access to the coal production data for Albania and Argentina in 2010, I am unable to provide an answer to this question."}], 'sub_table':      release year row_id  production budget
+0            1996      0           20000000
+1            1996      1           65000000
+2            1996      2           40000000
+3            1996      3           10000000
+4            1996      4            7000000
+..            ...    ...                ...
+704          2010    704            8300000
+705          2010    705          210000000
+706          2010    706          160000000
+707          2010    707           85000000
+708          2010    708           37000000
+
+[709 rows x 3 columns], 'attributes': ['release year', 'row_id', 'production budget']}
+INFO:root:Execution Time: 2023-08-15 00:45:47
+INFO:root:Token used: 7042
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1544.0750122070312ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000024D99850FA0>,), {'claim': 'Average housing income exceeds 200000.', 'table':        longitude  latitude  housing_median_age  total_rooms  ...  households  median_income  median_house_value  ocean_proximity
+0        -122.23     37.88                41.0        880.0  ...       126.0         8.3252            452600.0         NEAR BAY
+1        -122.22     37.86                21.0       7099.0  ...      1138.0         8.3014            358500.0         NEAR BAY
+2        -122.24     37.85                52.0       1467.0  ...       177.0         7.2574            352100.0         NEAR BAY
+3        -122.25     37.85                52.0       1274.0  ...       219.0         5.6431            341300.0         NEAR BAY
+4        -122.25     37.85                52.0       1627.0  ...       259.0         3.8462            342200.0         NEAR BAY
+...          ...       ...                 ...          ...  ...         ...            ...                 ...              ...
+20635    -121.09     39.48                25.0       1665.0  ...       330.0         1.5603             78100.0           INLAND
+20636    -121.21     39.49                18.0        697.0  ...       114.0         2.5568             77100.0           INLAND
+20637    -121.22     39.43                17.0       2254.0  ...       433.0         1.7000             92300.0           INLAND
+20638    -121.32     39.43                18.0       1860.0  ...       349.0         1.8672             84700.0           INLAND
+20639    -121.24     39.37                16.0       2785.0  ...       530.0         2.3886             89400.0           INLAND
+
+[20640 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the average median income of housing in the table greater than 200000?', 'visualization': 'Show a bar chart representing the median income of each housing.', 'reasoning_steps': ['Q1: What is the median income of housing in the table?', 'Q2: What is the average median income of housing in the table?', 'Q3: Is the average median income of housing in the table greater than 200000?'], 'justification': 'To determine the median income of housing in the table, we find that it is [0.4999]. Moving on, we calculate the average median income of housing in the table, which is [3.8706710029070246]. Now, we can address the question of whether the average median income of housing in the table is greater than 200000. However, we cannot directly compare the average median income of 3.8706710029070246 to 200000 without knowing the unit or scale of these numbers. If the average median income is in the same unit or scale as the 200000, then we can conclude that (3.8706710029070246 < 200000), indicating that the answer is no. If not, we need to convert one of the numbers to the same unit or scale before making the comparison.'}], 'sub_table':        median_income
+0             8.3252
+1             8.3014
+2             7.2574
+3             5.6431
+4             3.8462
+...              ...
+20635         1.5603
+20636         2.5568
+20637         1.7000
+20638         1.8672
+20639         2.3886
+
+[20640 rows x 1 columns], 'attributes': ['median_income']}
+INFO:root:Execution Time: 2023-08-15 11:31:35
+INFO:root:Token used: 7018

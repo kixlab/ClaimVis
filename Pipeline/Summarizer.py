@@ -21,9 +21,9 @@ class Summarizer:
         
         # prepare metadata of the file
         meta_data = self.get_meta_data(df, file_name)
-        message = f"Given the meta data of a dataset, describe what the dataset is about, including its data attributes' datat type and description:\n\n{str(meta_data)}"
+        message = f"Given the meta data of a dataset, describe what the dataset is about, including its data attributes' data type and description:\n\n{str(meta_data)}"
         # Maximum length of the generated summary
-        max_summary_length = 1000
+        max_summary_length = 3000
 
         # Call GPT-3.5 to generate the summary
         response = openai.ChatCompletion.create(
@@ -36,7 +36,7 @@ class Summarizer:
 
         return response['choices'][0]['message']['content']
 
-    def get_meta_data(self, df, file_name, max_number_of_attributes=100):
+    def get_meta_data(self, df, file_name, max_number_of_attributes=200):
         # this function is to be changed
         return {
             'name': file_name,
@@ -54,12 +54,28 @@ class Summarizer:
             "name": file_name,
             "description": self.prompt_description(file_name)
         }
+
+    def update_description(self, file_name: str):
+        # update the description of a file
+        description = self.prompt_description(file_name)
+        with open(os.path.join(self.datasrc, "description/desc.json"), "r+") as outfile:
+            data_dict = json.load(outfile)
+            data_dict[file_name] = {
+                "name": file_name,
+                "description": description
+            }
+            outfile.seek(0)
+            outfile.truncate()
+            json.dump(data_dict, outfile, indent=4)
+    
+    # def download_dataset(url: str, download_path: str):
+    #     # download dataset from url
+        
     
 if __name__ == "__main__":
     # Write data_dict to ../Datasets/description/desc.json
-    with open("../Datasets/description/desc.json", "r+") as outfile:
-        data_list = json.load(outfile)
-        data_dict = {item['name']: item for item in data_list}
-        outfile.seek(0)
-        json.dump(data_dict, outfile, indent=4)
-    
+    summarizer = Summarizer(datasrc="../Datasets")
+    summarizer.update_description("housing.csv")
+    # for file_name in os.listdir("../Datasets"):
+    #     if file_name.endswith('.csv'):
+    #         summarizer.update_description(file_name)
