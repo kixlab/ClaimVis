@@ -6,15 +6,12 @@ import random
 import time
 from typing import TypeVar
 
-from absl import flags
 import openai
 import tensorflow as tf
 from Credentials.info import *
 
 from common.functionlog import *
 
-# _OPENAI_CREDENTIALS = flags.DEFINE_list(
-#     'openai_credentials', None, 'Credentials to call OpenAI.', required=True)
 openai.api_key = openai_api
 
 class Model(str, enum.Enum):

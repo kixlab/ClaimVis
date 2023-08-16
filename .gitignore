@@ -2,3 +2,8 @@
 Credentials/*
 cache/*
 .vscode/*
+Scripts/*
+pyvenv.cfg
+Lib/*
+Other/*
+```

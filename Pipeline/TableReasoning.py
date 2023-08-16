@@ -245,7 +245,7 @@ class TableReasoner(object):
 
         return answers
     
-    def _evaluate_soundness(self, reasoning:str):
+    def _evaluate_soundness(self, reasoning:str): 
         evaluation = self._call_api_2(
             prompt = [
                 {"role": "system", "content": """You are an amazing logician. You are given a sequence of logical deduction based on real-world data. 
@@ -256,7 +256,7 @@ class TableReasoner(object):
                 \}"""},
                 {"role": "user", "content": reasoning},
             ],
-            model=Model.GPT4
+            model=Model.GPT4 # 4
         )
 
         return self.parser.parse_evaluation(evaluation[0])

@@ -3214,3 +3214,114 @@ INFO:root:Return Value: {'suggestions': [{'query': 'Is the average median income
 [20640 rows x 1 columns], 'attributes': ['median_income']}
 INFO:root:Execution Time: 2023-08-15 11:31:35
 INFO:root:Token used: 7018
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 656.1219692230225ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 650.9189605712891ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000219D9C70FA0>,), {'claim': 'Average housing income exceeds 200000.', 'table':        longitude  latitude  housing_median_age  total_rooms  ...  households  median_income  median_house_value  ocean_proximity
+0        -122.23     37.88                41.0        880.0  ...       126.0         8.3252            452600.0         NEAR BAY
+1        -122.22     37.86                21.0       7099.0  ...      1138.0         8.3014            358500.0         NEAR BAY
+2        -122.24     37.85                52.0       1467.0  ...       177.0         7.2574            352100.0         NEAR BAY
+3        -122.25     37.85                52.0       1274.0  ...       219.0         5.6431            341300.0         NEAR BAY
+4        -122.25     37.85                52.0       1627.0  ...       259.0         3.8462            342200.0         NEAR BAY
+...          ...       ...                 ...          ...  ...         ...            ...                 ...              ...
+20635    -121.09     39.48                25.0       1665.0  ...       330.0         1.5603             78100.0           INLAND
+20636    -121.21     39.49                18.0        697.0  ...       114.0         2.5568             77100.0           INLAND
+20637    -121.22     39.43                17.0       2254.0  ...       433.0         1.7000             92300.0           INLAND
+20638    -121.32     39.43                18.0       1860.0  ...       349.0         1.8672             84700.0           INLAND
+20639    -121.24     39.37                16.0       2785.0  ...       530.0         2.3886             89400.0           INLAND
+
+[20640 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the average median income of housing in the table greater than 200000?', 'visualization': 'Show a bar chart representing the median income of each housing.', 'reasoning_steps': ['Q1: What is the median income of housing in the table?', 'Q2: What is the average median income of housing in the table?', 'Q3: Is the average median income of housing in the table greater than 200000?'], 'justification': "To determine the median income of housing in the table, we find that it is [0.4999]. Moving on, we calculate the average median income of housing in the table, which is [3.8706710029070246]. Now, we can address the question of whether the average median income of housing in the table is greater than 200000. However, we need to ensure that we are comparing the same units of measurement. If the average median income is in hundreds of thousands, then it would be 387,067.10, which is greater than 200,000. If it's in millions, then it would be 3,870,671, which is also greater than 200,000. Therefore, without knowing the units of measurement, we cannot definitively answer this question."}], 'sub_table':        median_income
+0             8.3252
+1             8.3014
+2             7.2574
+3             5.6431
+4             3.8462
+...              ...
+20635         1.5603
+20636         2.5568
+20637         1.7000
+20638         1.8672
+20639         2.3886
+
+[20640 rows x 1 columns], 'attributes': ['median_income']}
+INFO:root:Execution Time: 2023-08-15 18:00:54
+INFO:root:Token used: 6985
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 718.5671329498291ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002652F870FA0>,), {'claim': 'Average housing income exceeds 200000.', 'table':        longitude  latitude  housing_median_age  total_rooms  ...  households  median_income  median_house_value  ocean_proximity
+0        -122.23     37.88                41.0        880.0  ...       126.0         8.3252            452600.0         NEAR BAY
+1        -122.22     37.86                21.0       7099.0  ...      1138.0         8.3014            358500.0         NEAR BAY
+2        -122.24     37.85                52.0       1467.0  ...       177.0         7.2574            352100.0         NEAR BAY
+3        -122.25     37.85                52.0       1274.0  ...       219.0         5.6431            341300.0         NEAR BAY
+4        -122.25     37.85                52.0       1627.0  ...       259.0         3.8462            342200.0         NEAR BAY
+...          ...       ...                 ...          ...  ...         ...            ...                 ...              ...
+20635    -121.09     39.48                25.0       1665.0  ...       330.0         1.5603             78100.0           INLAND
+20636    -121.21     39.49                18.0        697.0  ...       114.0         2.5568             77100.0           INLAND
+20637    -121.22     39.43                17.0       2254.0  ...       433.0         1.7000             92300.0           INLAND
+20638    -121.32     39.43                18.0       1860.0  ...       349.0         1.8672             84700.0           INLAND
+20639    -121.24     39.37                16.0       2785.0  ...       530.0         2.3886             89400.0           INLAND
+
+[20640 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the average median income of housing in the table greater than 200000?', 'visualization': 'Show a bar chart representing the median income of each housing.', 'reasoning_steps': ['Q1: What is the median income of housing in the table?', 'Q2: What is the average median income of housing in the table?', 'Q3: Is the average median income of housing in the table greater than 200000?'], 'justification': None}], 'sub_table':        median_income
+0             8.3252
+1             8.3014
+2             7.2574
+3             5.6431
+4             3.8462
+...              ...
+20635         1.5603
+20636         2.5568
+20637         1.7000
+20638         1.8672
+20639         2.3886
+
+[20640 rows x 1 columns], 'attributes': ['median_income']}
+INFO:root:Execution Time: 2023-08-15 21:35:41
+INFO:root:Token used: 6883
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1192.5759315490723ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000148C8A30FA0>,), {'claim': 'Average housing income exceeds 200000.', 'table':        longitude  latitude  housing_median_age  total_rooms  ...  households  median_income  median_house_value  ocean_proximity
+0        -122.23     37.88                41.0        880.0  ...       126.0         8.3252            452600.0         NEAR BAY
+1        -122.22     37.86                21.0       7099.0  ...      1138.0         8.3014            358500.0         NEAR BAY
+2        -122.24     37.85                52.0       1467.0  ...       177.0         7.2574            352100.0         NEAR BAY
+3        -122.25     37.85                52.0       1274.0  ...       219.0         5.6431            341300.0         NEAR BAY
+4        -122.25     37.85                52.0       1627.0  ...       259.0         3.8462            342200.0         NEAR BAY
+...          ...       ...                 ...          ...  ...         ...            ...                 ...              ...
+20635    -121.09     39.48                25.0       1665.0  ...       330.0         1.5603             78100.0           INLAND
+20636    -121.21     39.49                18.0        697.0  ...       114.0         2.5568             77100.0           INLAND
+20637    -121.22     39.43                17.0       2254.0  ...       433.0         1.7000             92300.0           INLAND
+20638    -121.32     39.43                18.0       1860.0  ...       349.0         1.8672             84700.0           INLAND
+20639    -121.24     39.37                16.0       2785.0  ...       530.0         2.3886             89400.0           INLAND
+
+[20640 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the average median income of housing in the table greater than 200000?', 'visualization': 'Show a bar chart representing the median income of each housing.', 'reasoning_steps': ['Q1: What is the median income of housing in the table?', 'Q2: What is the average median income of housing in the table?', 'Q3: Is the average median income of housing in the table greater than 200000?'], 'justification': 'To determine the median income of housing in the table, we find that it is [0.4999]. Moving on, we calculate the average median income of housing in the table, which is [3.8706710029070246]. Now, we can address the question of whether the average median income of housing in the table is greater than 200000. However, we need to clarify the units of these numbers before making a comparison. If the average median income is in the same unit as the 200000, then it is indeed less. If not, we need to convert them to the same unit before making a comparison.'}], 'sub_table':        median_income
+0             8.3252
+1             8.3014
+2             7.2574
+3             5.6431
+4             3.8462
+...              ...
+20635         1.5603
+20636         2.5568
+20637         1.7000
+20638         1.8672
+20639         2.3886
+
+[20640 rows x 1 columns], 'attributes': ['median_income']}
+INFO:root:Execution Time: 2023-08-15 21:50:27
+INFO:root:Token used: 6971
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1081.151008605957ms.

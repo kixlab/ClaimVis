@@ -8,7 +8,6 @@ from ClaimDetection import ClaimDetector
 from DataMatching import DataMatcher
 import pandas as pd
 from nltk.tokenize import sent_tokenize
-from nl4dv import NL4DV
 from collections import defaultdict
 import json
 
@@ -53,7 +52,24 @@ class Pipeline(object):
 if __name__ == "__main__":
     pipeline = Pipeline(datasrc="../Datasets")
     text = "Average housing income exceeds 200000."
+    
+    import time
+    start = time.perf_counter()
+
+    # YOUR_CODE
     claim_map, claims = pipeline.run(text)
+    
+    end = time.perf_counter()
+    
+    execution_time = end - start
+    print(f"Execution time: {execution_time} seconds")
+
+
+
+
+
+
+    
     # for claim in claims:
     #     # save subtable to csv
     #     data_url="temp/trial5/sub_table.csv"
