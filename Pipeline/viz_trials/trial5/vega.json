@@ -11,7 +11,7 @@
         }
     },
     "query_raw": "Show the population of Albania and Algeria in 2020.",
-    "query": "show the population of albania and algeria in 2020 .",
+    "query": "show the population of all countries in 2020 .",
     "dataset": "temp/trial5/sub_table.csv",
     "alias": null,
     "visList": [

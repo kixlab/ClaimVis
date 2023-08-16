@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "You are an amazing data analyst and logician! You are given a table and a statement. Please suggest me a list of suggestions, each containing:\n        1. A query that can be verified using the data attributes within the table. The query must be an improved version of the orginal statement.\n        2. A visualization task that is consistent with the query and the statement.\n        3. An explanation of why the query is a good fit to the statement.\n        4. A list of data attributes that are used in the query."
+        "content": "You are an amazing data analyst and logician! You are given a table and a statement. Please suggest me a list of suggestions, each containing:\n        1. A query that MUST BE VERIFIABLE using the data attributes within the table. The query must be an improved version of the orginal statement.\n        2. A visualization task that is consistent with the query and the statement.\n        3. An explanation of why the query is a good fit to the statement.\n        4. A list of data attributes that are used in the query. Each attribute MUST BE RETRIEVABLE from the table."
     },
     {
         "role": "user",

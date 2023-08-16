@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "You are a superb logician. You are given a task to decompose the following question into the most coherent sequence of sub-questions that you can query a database to obtain answers step-by-step. Please note that the original question becomes the final sub-question in the sequence."
+        "content": "You are a superb logician. You are given a task to decompose the following question into a coherent sequence of sub-questions that you can query a database to obtain answers one-after-another. Please note that the original question becomes the final sub-question in the sequence."
     },
     {
         "role": "user",
@@ -51,5 +51,50 @@
     {
         "role": "assistant",
         "content": "To answer the question \"Is the total GDP of US and China larger than 300,000,000?\", we need to know: \"What is the US' GDP?\", \"What is China's GDP?\", \"What is the total GDP of US and China?\" "
+    },
+
+    {
+        "role": "user",
+        "content": "Do all movies with IMDB rating higher than 70 have budget at least 50,000,000?"
+    },
+    {
+        "role": "assistant",
+        "content": "To answer the question \"Do all movies with IMDB rating higher than 70 have budget at least 50,000,000?\", we need to know: \"What is the least budget of all movies with IMDB rating higher than 70?\" "
+    },
+
+    {
+        "role": "user",
+        "content": "No students in the final exam have higher grades than Sam?"
+    },
+    {
+        "role": "assistant",
+        "content": "To answer the question \"No students in the final exam have higher grades than Sam?\", we need to know: \"What is the grade of Sam?\", \"What is the highest grade in the final exam?\" "
+    },
+
+    {
+        "role": "user",
+        "content": "Is the total number of students with better grades than Sam in the final exam larger than 100?"
+    },
+    {
+        "role": "assistant",
+        "content": "To answer the question \"Is the total number of students with better grades than Sam in the final exam larger than 100?\", we need to know: \"What is the grade of Sam?\", \"What is the total number of students with better grades than Sam in the final exam?\" "
+    }, 
+
+    {
+        "role": "user",
+        "content": "No people have a lower salary than 40,000$ a year?"
+    },
+    {
+        "role": "assistant",
+        "content": "To answer the question \"No people have a lower salary than 40,000$ a year?\", we need to know: \"What is the lowest salary among all people?\" "
+    },
+
+    {
+        "role": "user",
+        "content": "No countries have lower coal production than Germany plus Japan?"
+    },
+    {
+        "role": "assistant",
+        "content": "To answer the question \"No countries have higher coal production than Germany plus Japan?\", we need to know: \"What is the coal production of Germany?\", \"What is the coal production of Japan?\", \"What is the total coal production of Germany plus Japan?\", \"What is the lowest coal production among all countries?\" "
     }
 ]

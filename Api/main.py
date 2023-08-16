@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from models import *
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
+from Pipeline.main import Pipeline
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -14,10 +16,42 @@ app.add_middleware(
 df = pd.read_csv("./Datasets/owid-energy-data.csv")
 
 @app.post("/potential_data_point_sets")
-def potential_data_point_sets_test(body: UserClaimBody) -> list[DataPointSet]:
+def potential_data_point_sets_test(body: UserClaimBody, verbose:bool=False) -> list[DataPointSet]:
+    """
+        Claim map has the following structure:
+
+        claim_map = {
+            "sentence_i": [
+                { # each of the justification corresponds to a dataset
+                    suggestions: [
+                        {
+                            "query": ...,
+                            "visualization": ...,
+                            "reasoning_steps": [...],
+                            "justification": ...
+                        },
+                        {...}
+                    ],
+                    "sub_table": pd.DataFrame(...),
+                    "attributes": [...]
+                },
+                {...}
+            ],
+            "sentence_j": [...],
+            ...
+        }
+    """
     user_claim = body.userClaim
+    pipeline = Pipeline(datasrc="../Datasets")
     
-    
+    claim_map, claims = pipeline.run(user_claim)
+    if verbose: print(claim_map)
+
+    reason = claim_map[claims[0]][0]
+    table, attributes, justification, vis_task = reason["sub_table"], reason["attributes"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
+    if verbose: print(table, attributes, justification)
+
+    tablename = None
     
 
 @app.post("/potential_data_point_sets")
@@ -50,7 +84,7 @@ def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
                         type="nominal"
                     )],
                     ranges = Ranges(
-                        date = {
+                        date = { # will take the lowest and highest date from the data points
                             'date_start': {
                                 'label': '2015', 
                                 'value': '2015'
@@ -60,7 +94,7 @@ def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
                                 'value': '2022'
                             }
                         },
-                        values = [{
+                        values = [{ # will take numerical data attribute from the attribute sets
                             'label': 'Nuclear energy consumption', # human readable column name
                             'value': 'nuclear_consumption', # name in the table
                             'unit': 'TWh', # unit of measurement
@@ -77,7 +111,7 @@ def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
                             'unit': 'TWh',
                             'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).'
                         }],
-                        country = ['United States', 'United Kingdom', 'Greece', 'Germany', 'South Korea', 'Japan', 'Vietnam']
+                        country = ['United States', 'United Kingdom', 'Greece', 'Germany', 'South Korea', 'Japan', 'Vietnam'] # will assume that only one of these nominal attribute is present in the claim
                     )
                 )
     ]

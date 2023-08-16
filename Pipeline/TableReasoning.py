@@ -295,7 +295,8 @@ class TableReasoner(object):
         )
         # take first query from suggested queries
         suggestions, vis_tasks, _, attributes = self._suggest_queries(claim, table=db.get_table_df())
-        if attributes: db.update_table(attributes) # update table with relevant attributes
+        
+        if attributes: db.update_table(map(lambda x: x.lower(), attributes)) # update table with relevant attributes
         if verbose: print(f"generated queries: {suggestions}")
 
         reason_map = []
@@ -314,10 +315,13 @@ class TableReasoner(object):
                         )
             
             def process_ans(ans):
-                if isinstance(ans, list) and len(ans) > 10:
-                    # sometimes the answer is too long to fit into the prompt
-                    return f"Ranging from {str(min(ans))} to {str(max(ans))}"
-                return str(ans)
+                try:
+                    if isinstance(ans, list) and len(ans) > 10:
+                        # sometimes the answer is too long to fit into the prompt
+                        return f"Ranging from {str(min(ans))} to {str(max(ans))}"
+                    return str(ans)
+                except:
+                    return []
             
             sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
             answers = [f"A{i+1}: {process_ans(ans)}" for i, ans in enumerate(answers)]
