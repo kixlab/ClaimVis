@@ -1,19 +1,22 @@
-from lida.modules import Manager
-import lida
-import pandas   as pd
+import spacy
+from spacy import displacy
+from datetime import datetime
 
-import os
-os.environ["LIDA_ALLOW_CODE_EVAL"] = "1"
+def tag_date_time(text: str):
+    # Parse date time from the claim
+    # Use NLP libraries to extract date from user_claim
+    nlp = spacy.load("en_core_web_sm")
+    
+    doc = nlp(text)
 
-datapath = "../Datasets/housing.csv"
-lida = Manager()
-summary = lida.summarize(datapath) # generate data summary
+    replaced_text = ""
+    for token in doc:
+        if token.ent_type_ == "DATE":
+            replaced_text += "{date} "
+        else:
+            replaced_text += token.text + " "
 
-goals = lida.generate_goals(summary, n=5) # generate goals
+    print(replaced_text.strip())
 
-# generate code specifications for charts
-vis_specs = lida.generate_viz(summary=summary, goal=goals[0], library="matplotlib") # altair, matplotlib etc
-
-# execute code to return charts (raster images or other formats)
-charts = lida.execute_viz(code_specs=vis_specs, data=pd.read_csv(datapath), summary=summary)
-charts[0].code.show(    )   # show code
+if __name__ == "__main__":
+    tag_date_time("Some people are crazy enough to get out in the winter, especially november and december where it's freezing code outside.")

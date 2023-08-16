@@ -10,7 +10,7 @@
 			"total": 1.3133811950683594
 		}
 	}, 
-	"query_raw": "Show a bar chart representing the production budget of each movie.", 
+	"query_raw": "Show a line chart representing the production budget of each movie.", 
 	"query": "show a bar chart representing the production budget of each movie .", 
 	"dataset": "temp/sub_table.csv", 
 	"alias": null, 

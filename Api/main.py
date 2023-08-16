@@ -14,6 +14,13 @@ app.add_middleware(
 df = pd.read_csv("./Datasets/owid-energy-data.csv")
 
 @app.post("/potential_data_point_sets")
+def potential_data_point_sets_test(body: UserClaimBody) -> list[DataPointSet]:
+    user_claim = body.userClaim
+    
+    
+    
+
+@app.post("/potential_data_point_sets")
 def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
     user_claim = body.userClaim
 
