@@ -17,7 +17,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT venue FROM w WHERE `home team`=\"footscray\" AND `home team score`=\"10.11 (71)\") = \"western oval\" "
+        "content": "NeuralSQL: SELECT (SELECT venue FROM w WHERE \"home team\"=\"footscray\" AND \"home team score\"=\"10.11 (71)\") = \"western oval\" "
     },
     {
         "role": "user",
@@ -25,7 +25,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT `country of origin` FROM w WHERE player=\"leo najorda\") = \"philippines\" "
+        "content": "NeuralSQL: SELECT (SELECT \"country of origin\" FROM w WHERE player=\"leo najorda\") = \"philippines\" "
     },
     {
         "role": "user",
@@ -33,7 +33,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT  time FROM w WHERE `year set` = 2009) = \"7:51:80\" "
+        "content": "NeuralSQL: SELECT (SELECT  time FROM w WHERE \"year set\" = 2009) = \"7:51:80\" "
     },
     {
         "role": "user",
@@ -41,7 +41,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT `new entries this round` FROM w WHERE round = 'third round') IS NULL"
+        "content": "NeuralSQL: SELECT (SELECT \"new entries this round\" FROM w WHERE round = 'third round') IS NULL"
     },
     {
         "role": "user",
@@ -49,7 +49,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT QA(\"ans@what is the most common league?\"; `leagues entering at this round`) = 's\u00fcper ligs' "
+        "content": "NeuralSQL: SELECT QA(\"ans@what is the most common league?\"; \"leagues entering at this round\") = 's\u00fcper ligs' "
     },
     {
         "role": "user",
@@ -57,7 +57,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT MIN(`new entries this round`) FROM w) = 5"
+        "content": "NeuralSQL: SELECT (SELECT MIN(\"new entries this round\") FROM w) = 5"
     },
     {
         "role": "user",
@@ -73,7 +73,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT `cuts made` FROM w WHERE tournament = 'pga championship') < (SELECT events FROM w WHERE tournament = 'pga championship')"
+        "content": "NeuralSQL: SELECT (SELECT \"cuts made\" FROM w WHERE tournament = 'pga championship') < (SELECT events FROM w WHERE tournament = 'pga championship')"
     },
     {
         "role": "user",
@@ -89,7 +89,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT (SELECT `host team` FROM w WHERE QA(\"map@is it new year even?\"; date) = 'yes') = 'new york giant') AND (SELECT (SELECT `host team` FROM w WHERE QA(\"map@is it new year's day?\"; date) = 'yes') = 'st louis ram')"
+        "content": "NeuralSQL: SELECT (SELECT (SELECT \"host team\" FROM w WHERE QA(\"map@is it new year even?\"; date) = 'yes') = 'new york giant') AND (SELECT (SELECT \"host team\" FROM w WHERE QA(\"map@is it new year's day?\"; date) = 'yes') = 'st louis ram')"
     },
     {
         "role": "user",
@@ -105,7 +105,7 @@
     },
     {
         "role": "assistant",
-        "content": "NeuralSQL: SELECT (SELECT COUNT(*) FROM w WHERE QA(\"map@is it in 90s?\"; frequency) = 'yes' GROUP BY `call sign`) = 3"
+        "content": "NeuralSQL: SELECT (SELECT COUNT(*) FROM w WHERE QA(\"map@is it in 90s?\"; frequency) = 'yes' GROUP BY \"call sign\") = 3"
     },
     {
         "role": "user",

@@ -1,0 +1,60 @@
+top k datasets: [('housing.csv', 'The dataset is called "housing.csv". It contains information about California housing and related factors. The dataset has the following attributes:\n\n1. longitude: A measure of how far west a house is; a higher value is farther west\n2. latitude: A measure of how far north a house is; a higher value is farther north\n3. housingMedianAge: Median age of a house within a block; a lower number is a newer building\n4. totalRooms: Total number of rooms within a block\n5. totalBedrooms: Total number of bedrooms within a block\n6. population: Total number of people residing within a block\n7. households: Total number of households, a group of people residing within a home unit, for a block\n8. medianIncome: Median income for households within a block of houses (measured in tens of thousands of US Dollars)\n9. medianHouseValue: Median house value for households within a block (measured in US Dollars)\n10. oceanProximity: Location of the house w.r.t ocean/sea', 0.32406497)]  
+
+generated queries: ['Is the average median income of housing in the table greater than 200000?']
+
+steps of reasoning: ['What is the median income of housing in the table?', 'What is the average median income of housing in the table?', 'Is the average median income of housing in the table greater than 200000?']
+
+Q1: What is the median income of housing in the table?
+Generated SQLs: ['SELECT "median_income" FROM w ORDER by "median_income" LIMIT 1 offset ( SELECT COUNT ( * ) FROM w ) / 2', 'SELECT "median_income" FROM w ORDER by "median_income" LIMIT 1 offset ( SELECT COUNT ( * ) FROM w ) / 2', 'SELECT "median_income" FROM w ORDER by "median_income" LIMIT 1 offset ( SELECT COUNT ( * ) FROM w ) / 2', 'SELECT "median_income" FROM w ORDER by "median_income" LIMIT 1 offset ( SELECT COUNT ( * ) FROM w ) / 2', 'SELECT "median_income" FROM w ORDER by "median_income" LIMIT 1 offset ( SELECT COUNT ( * ) FROM w ) / 2']
+refined: [0.4999]
+refined: [0.4999]
+refined: [0.4999]
+refined: [0.4999]
+refined: [0.4999]
+A1: [0.4999]
+********************************************************************************
+Q2: What is the average median income of housing in the table?
+Generated SQLs: ['SELECT AVG ( "median_income" ) FROM w', 'SELECT AVG ( "median_income" ) FROM w', 'SELECT AVG ( "median_income" ) FROM w', 'SELECT AVG ( "median_income" ) FROM w', 'SELECT AVG ( "median_income" ) FROM w']
+refined: [3.848989933333329]
+refined: [3.848989933333329]
+refined: [3.848989933333329]
+refined: [3.848989933333329]
+refined: [3.848989933333329]
+A2: [3.848989933333329]
+********************************************************************************
+final justifications: [
+    {
+        'query': 'Is the average median income of housing in the table greater than 200000?', 
+        'visualization': 'Show a bar chart representing the median income of each housing.', 
+        'reasoning_steps': [
+            'Q1: What is the median income of housing in the table?', 
+            'Q2: What is the average median income of housing in the table?', 
+            'Q3: Is the average median income of housing in the table greater than 200000?'
+        ], 
+        'justification': "To determine the median income of housing in the table, we find that it is [0.4999] (units unspecified). Moving on, we calculate the average median income of housing in the table, which is [3.848989933333329] (units unspecified). Now, we can address the question of whether the average median income of housing in the table is greater than 200000 (units unspecified). Considering that the average median income is 3.848989933333329, we can conclude that it is not greater than 200000, as 3.848989933333329 is less than 200000. However, it's important to note that the units of measurement are not specified, which could affect the interpretation of these figures."
+    }
+]
+Execution time: 46.025943700002244 seconds
+********************************************************************************
+full data template:
+
+claim_map = {
+    "sentence_i": [
+        { # each of the justification corresponds to a dataset
+            suggestions: [
+                {
+                    "query": ...,
+                    "visualization": ...,
+                    "reasoning_steps": [...],
+                    "justification": ...
+                },
+                {...}
+            ],
+            "sub_table": pd.DataFrame(...),
+            "attributes": [...]
+        },
+        {...}
+    ],
+    "sentence_j": [...],
+    ...
+}

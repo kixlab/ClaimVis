@@ -1,0 +1,223 @@
+{
+    "status": "SUCCESS",
+    "debug": {
+        "execution_durations": {
+            "clean_query": 0.001994609832763672,
+            "extract_attributes": 1.1850254535675049,
+            "extract_vis_type": 0.0,
+            "extract_tasks": 0.03284597396850586,
+            "get_vis_list": 0.0,
+            "total": 1.2198660373687744
+        }
+    },
+    "query_raw": "Show the IMDB rating of The Phantom and Dragonheart.",
+    "query": "show the imdb rating of the phantom and dragonheart .",
+    "dataset": "temp/trial2/sub_table.csv",
+    "alias": null,
+    "visList": [
+        {
+            "score": 2.5,
+            "scoreObj": {
+                "by_attributes": 1,
+                "by_task": 0.5,
+                "by_vis": 0
+            },
+            "confidenceObj": {
+                "imdb rating": 1.0
+            },
+            "attributes": [
+                "imdb rating"
+            ],
+            "queryPhrase": null,
+            "visType": null,
+            "tasks": [
+                "distribution"
+            ],
+            "inferenceType": "implicit",
+            "vlSpec": {
+                "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+                "mark": {
+                    "type": "bar",
+                    "tooltip": true
+                },
+                "encoding": {
+                    "x": {
+                        "field": "imdb rating",
+                        "type": "quantitative",
+                        "bin": true,
+                        "axis": {
+                            "format": "s"
+                        }
+                    },
+                    "y": {
+                        "field": "imdb rating",
+                        "type": "quantitative",
+                        "aggregate": "count",
+                        "axis": {
+                            "format": "s"
+                        }
+                    }
+                },
+                "transform": [],
+                "data": {
+                    "url": "temp/trial2/sub_table.csv",
+                    "format": {
+                        "type": "csv"
+                    }
+                }
+            }
+        },
+        {
+            "score": 2.5,
+            "scoreObj": {
+                "by_attributes": 1,
+                "by_task": 0.5,
+                "by_vis": 0
+            },
+            "confidenceObj": {
+                "imdb rating": 1.0
+            },
+            "attributes": [
+                "imdb rating"
+            ],
+            "queryPhrase": null,
+            "visType": null,
+            "tasks": [
+                "distribution"
+            ],
+            "inferenceType": "implicit",
+            "vlSpec": {
+                "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+                "mark": {
+                    "type": "tick",
+                    "tooltip": true
+                },
+                "encoding": {
+                    "x": {
+                        "field": "imdb rating",
+                        "type": "quantitative",
+                        "axis": {
+                            "format": "s"
+                        }
+                    },
+                    "tooltip": {
+                        "field": "title"
+                    }
+                },
+                "transform": [],
+                "data": {
+                    "url": "temp/trial2/sub_table.csv",
+                    "format": {
+                        "type": "csv"
+                    }
+                }
+            }
+        },
+        {
+            "score": 2.5,
+            "scoreObj": {
+                "by_attributes": 1,
+                "by_task": 0.5,
+                "by_vis": 0
+            },
+            "confidenceObj": {
+                "imdb rating": 1.0
+            },
+            "attributes": [
+                "imdb rating"
+            ],
+            "queryPhrase": null,
+            "visType": null,
+            "tasks": [
+                "distribution"
+            ],
+            "inferenceType": "implicit",
+            "vlSpec": {
+                "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+                "mark": {
+                    "type": "boxplot",
+                    "tooltip": true
+                },
+                "encoding": {
+                    "x": {
+                        "field": "imdb rating",
+                        "type": "quantitative",
+                        "axis": {
+                            "format": "s"
+                        }
+                    },
+                    "tooltip": {
+                        "field": "title"
+                    }
+                },
+                "transform": [],
+                "data": {
+                    "url": "temp/trial2/sub_table.csv",
+                    "format": {
+                        "type": "csv"
+                    }
+                }
+            }
+        }
+    ],
+    "attributeMap": {
+        "imdb rating": {
+            "name": "imdb rating",
+            "queryPhrase": [
+                "imdb rating"
+            ],
+            "inferenceType": "explicit",
+            "matchScore": 1,
+            "metric": [
+                "attribute_exact_match"
+            ],
+            "isLabel": false,
+            "encode": true,
+            "isAmbiguous": false,
+            "ambiguity": [],
+            "meta": {
+                "score": 100,
+                "threshold": 85,
+                "alias": null,
+                "ambiguity": {},
+                "dataType": "Q",
+                "confidence": 100
+            }
+        }
+    },
+    "taskMap": {
+        "distribution": [
+            {
+                "task": "distribution",
+                "queryPhrase": [],
+                "operator": null,
+                "values": null,
+                "matchScore": 0.5,
+                "attributes": [
+                    "imdb rating"
+                ],
+                "inferenceType": "implicit",
+                "isAttrAmbiguous": false,
+                "isValueAmbiguous": false,
+                "meta": {
+                    "value_ambiguity_type": null
+                },
+                "followup_type": null
+            }
+        ]
+    },
+    "followUpQuery": false,
+    "contextObj": null,
+    "attributeMapping": {
+        "imdb rating": {
+            "imdb rating": 1
+        }
+    },
+    "followUpConfidence": null,
+    "ambiguity": {
+        "attribute": {},
+        "value": {}
+    },
+    "dialogId": "0",
+    "queryId": "0"
+}

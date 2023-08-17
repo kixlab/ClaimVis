@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "Generate SQL given the statement and table to verify the statement correctly"
+        "content": "Generate SQL given the statement and table to verify the statement correctly. Remember to wrap column name with double quotes if it contains space."
     },
     {
         "role": "user",
@@ -9,7 +9,7 @@
     },
     {
         "role": "assistant",
-        "content": "SQL: SELECT (SELECT opponent, round FROM w WHERE event = \"mac - midwest absolute challenge\")=(\"dan spychalski\", 1)"
+        "content": "SQL: SELECT (SELECT opponent, round FROM w WHERE event = 'mac - midwest absolute challenge')=('dan spychalski', 1)"
     },
     {
         "role": "user",
@@ -17,7 +17,7 @@
     },
     {
         "role": "assistant",
-        "content": "SQL: SELECT (SELECT venue FROM w WHERE `home team`=\"footscray\" AND `home team score`=\"10.11 (71)\") = \"western oval\" "
+        "content": "SQL: SELECT (SELECT venue FROM w WHERE \"home team\"='footscray' AND \"home team score\"='10.11 (71)') = 'western oval' "
     },
     {
         "role": "user",
@@ -25,7 +25,7 @@
     },
     {
         "role": "assistant",
-        "content": "SQL: SELECT (SELECT `country of origin` FROM w WHERE player=\"leo najorda\") = \"philippines\" "
+        "content": "SQL: SELECT (SELECT \"country of origin\" FROM w WHERE player='leo najorda') = 'philippines' "
     },
     {
         "role": "user",
@@ -33,7 +33,7 @@
     },
     {
         "role": "assistant",
-        "content": "SQL: SELECT (SELECT  time FROM w WHERE `year set` = 2009) = \"7:51:80\" "
+        "content": "SQL: SELECT (SELECT  time FROM w WHERE \"year set\" = 2009) = '7:51:80' "
     },
     {
         "role": "user",
@@ -41,7 +41,7 @@
     },
     {
         "role": "assistant",
-        "content": "SQL: SELECT (SELECT `new entries this round` FROM w WHERE round = 'third round') IS NULL"
+        "content": "SQL: SELECT (SELECT \"new entries this round\" FROM w WHERE round = 'third round') IS NULL"
     },
     {
         "role": "user",
@@ -49,7 +49,7 @@
     },
     {
         "role": "assistant",
-        "content": "SQL: SELECT (SELECT MIN(`new entries this round`) FROM w) = 5"
+        "content": "SQL: SELECT (SELECT MIN(\"new entries this round\") FROM w) = 5"
     },
     {
         "role": "user",
@@ -57,7 +57,7 @@
     },
     {
         "role": "assistant",
-        "content": "SQL: SELECT (SELECT `cuts made` FROM w WHERE tournament = 'pga championship') < (SELECT events FROM w WHERE tournament = 'pga championship')"
+        "content": "SQL: SELECT (SELECT \"cuts made\" FROM w WHERE tournament = 'pga championship') < (SELECT events FROM w WHERE tournament = 'pga championship')"
     },
     {
         "role": "user",

@@ -27,6 +27,8 @@
 import json
 import sqlite3
 from nltk import word_tokenize
+from nltk.parse.corenlp import CoreNLPParser
+from subprocess import Popen
 
 CLAUSE_KEYWORDS = ('select', 'from', 'where', 'group', 'order', 'limit', 'intersect', 'union', 'except')
 JOIN_KEYWORDS = ('join', 'on', 'as')
@@ -112,28 +114,33 @@ def get_schema_from_json(fpath):
 
     return schema
 
+def tokenize(string, use_corenlp=False, use_duckdb=False):
+    # init tokenizer (corenlp or nltk)
+    tokenizer = CoreNLPParser().tokenize if use_corenlp else word_tokenize
 
-def tokenize(string):
     string = str(string)
-    string = string.replace("\'", "\"")  # ensures all string values wrapped by "" problem??
-    quote_idxs = [idx for idx, char in enumerate(string) if char == '"']
+    STRQs = ["'", '"'] if not use_duckdb else ["'"]
+
+    quote_idxs = [idx for idx, char in enumerate(string) if char in STRQs]
     assert len(quote_idxs) % 2 == 0, "Unexpected quote"
 
     # keep string value as token
     vals = {}
     for i in range(len(quote_idxs)-1, -1, -2):
+        # two consecutive single quotes
         qidx1 = quote_idxs[i-1]
         qidx2 = quote_idxs[i]
         val = string[qidx1: qidx2+1]
-        key = "__val_{}_{}__".format(qidx1, qidx2)
+        key = "val_{}_{}".format(qidx1, qidx2)
         string = string[:qidx1] + key + string[qidx2+1:]
         vals[key] = val
 
     # tokenize sql
-    toks_tmp = [word.lower() for word in word_tokenize(string)]
+    toks_tmp = [word.lower() for word in tokenizer(string)]
+    # print(toks_tmp)
     toks = []
     for tok in toks_tmp:
-        if tok.startswith('=__val_'):
+        if tok.startswith('=val_'):
             tok = tok[1:]
             toks.append('=')
         toks.append(tok)
@@ -153,7 +160,6 @@ def tokenize(string):
             toks = toks[:eq_idx-1] + [pre_tok + "="] + toks[eq_idx+1: ]
 
     return toks
-
 
 def scan_alias(toks):
     """Scan the index of 'as' and build the map for all alias"""
@@ -522,7 +528,7 @@ def parse_sql(toks, start_idx, tables_with_alias, schema):
     sql['select'] = select_col_units
     # where clause
     idx, where_conds = parse_where(toks, idx, tables_with_alias, schema, default_tables)
-    sql['where'] = where_conds
+    sql['where'] = where_condss
     # group by clause
     idx, group_col_units = parse_group_by(toks, idx, tables_with_alias, schema, default_tables)
     sql['groupBy'] = group_col_units

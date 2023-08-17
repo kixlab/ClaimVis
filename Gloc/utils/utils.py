@@ -83,7 +83,7 @@ def majority_vote(
 
     # Vote answers
     candi_answer_dict = dict()
-    for (nsql, logprob), pred_answer in zip(nsqls, pred_answer_list):
+    for nsql, pred_answer in zip(nsqls, pred_answer_list):
         if allow_none_and_empty_answer:
             if pred_answer == [None] or pred_answer == []:
                 pred_answer = [answer_placeholder]
@@ -101,7 +101,7 @@ def majority_vote(
             }
         answer_info = candi_answer_dict.get(tuple(pred_answer), None)
         answer_info['count'] += 1
-        answer_info['nsqls'].append([nsql, logprob])
+        answer_info['nsqls'].append([nsql, 100])
 
     # All candidates execution errors
     if len(candi_answer_dict) == 0:

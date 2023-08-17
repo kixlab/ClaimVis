@@ -16,12 +16,17 @@ import csv
 from common.functionlog import log_decorator
 from processor.table_truncate import RowDeleteTruncate
 from processor.table_linearize import IndexedRowTableLinearize
+from Gloc.nsql.database import NeuralDB
+from Gloc.utils.normalizer import post_process_sql
+from Gloc.utils.utils import majority_vote
+from Gloc.nsql.parser import extract_answers
 
-# file_name = "owid-energy-data.csv"
-file_name = "movies-w-year.csv"
+file_name = "owid-energy-data.csv"
+# file_name = "movies-w-year.csv"
+# file_name = "colleges.csv"
 dataset_path = "../Datasets/" + file_name
-df = pd.read_csv(dataset_path)
-table = df.iloc[:10, :10]
+table = pd.read_csv(dataset_path)
+table = table.iloc[:100, :20]
 
 # save df[:3, :] to Datasets/owid-energy-data-2.csv
 # df.iloc[:3, :].to_csv("../Datasets/owid-energy-data-2.csv", index=False)
@@ -106,7 +111,10 @@ def test_prompt_builder_2(
 def test_call_api_1(
         table: pd.DataFrame = None,
         question = "The second movie has an IMDB rating higher than the third movie.",
-        template_key = TemplateKey.COL_DECOMPOSE
+        template_key = TemplateKey.COL_DECOMPOSE,
+        temperature = 0,
+        max_decode_steps = 500,
+        samples = 1
     ):
     prompt = test_prompt_builder_2(
                 table=table,
@@ -118,23 +126,23 @@ def test_call_api_1(
     response = call_model(
         model=Model.GPT3,
         use_code=False,
-        temperature=0,
-        max_decode_steps=500,
+        temperature=temperature,
+        max_decode_steps=max_decode_steps,
         prompt=prompt,
-        samples=1
+        samples=samples
     )
     print(question, response)
     # print(prompt)
     return response
 
-test_call_api_1(template_key=TemplateKey.NSQL_GENERATION, table=table)
+# test_call_api_1(template_key=TemplateKey.NSQL_GENERATION, table=table)
 
 @log_decorator
 def test_call_api_2(prompt):
     response = call_model(
         model=Model.GPT3,
         use_code=False,
-        temperature=0,
+        temperature=0.4,
         max_decode_steps=500,
         prompt=prompt,
         samples=1
@@ -222,13 +230,79 @@ def test_break_big_columns_1(
 # test_break_big_columns_1()
 
 @log_decorator
-def test_pipeline_1(
-    question = "The US's economy is larger than China's."
-):
-    # without the generation module
-    # Create a sample DataFrame
-    df = pd.read_csv(dataset_path)
-    
+def test_generate_sql(question):
+    parser = AnsParser()
 
+    results = test_call_api_1(
+        question=question,
+        template_key=TemplateKey.SQL_GENERATION,
+        table=table,
+        temperature=0.4,
+        max_decode_steps=500,
+        samples=4
+    )
+    return [parser.parse_sql(result) for result in results]
 
-    
+@log_decorator
+def test_sql_retrieval(question = "What are the top 3 movies with the highest budget?"):
+    db = NeuralDB(
+        tables=[table]
+    )
+
+    # retrieve sql
+    sqls = test_generate_sql(question)
+    psqls = []
+    # process fuzzy sql
+    for psql in sqls:
+        # psql = post_process_sql(
+        #     sql_str=sql,
+        #     df=db.get_table(),
+        #     process_program_with_fuzzy_match_on_db=True,
+        #     use_corenlp=True,
+        #     use_duckdb=True, 
+        #     verbose=True
+        # )
+        psqls.append(psql.lower())
+    print(psqls)
+
+    # execute sql
+    predictions = []
+    for psql in psqls:
+        try:
+            result = db.execute_query(psql)
+            print(result)
+            result = extract_answers(result)
+            predictions.append(result)
+            print(result)
+        except Exception as e:
+            pass
+    pred, pred_sqls = majority_vote(
+        nsqls=psqls,
+        pred_answer_list=predictions
+    )
+    print(pred, pred_sqls)
+    # print(result)
+
+if __name__ == "__main__":
+    test_sql_retrieval(question="in which year is the total coal production among countries the largest?")
+    # db = NeuralDB(
+    #     tables=[table]
+    # )
+    # # # # print(db.get_table())
+    # sql = """sELECT "Production Budget" FROM w WHERE title =\'from dusk till dawn\'"""
+    # # sql = """SELECT "Title", "Release Year", "Production Budget" FROM w WHERE "Title" IN (\'The Rock\', \'The Cable Guy\')"""
+    # # result = db.execute_query(sql)
+    # # # print(result)
+    # # psql = post_process_sql(
+    # #     sql_str=sql,
+    # #     df=db.get_table(),
+    # #     process_program_with_fuzzy_match_on_db=True,
+    # #     verbose=True,
+    # #     use_corenlp=True,
+    # #     use_duckdb=True
+    # # )
+    # # print(psql)
+
+    # res = db.execute_query(sql)
+    # print(res)
+    pass

@@ -1,54 +1,38 @@
 [
     {
         "role": "system",
-        "content": "From a claim and a summarizer of a dataset, suggest me a list of at max 3 suggestions, each containing:\n        1. a query that can verified using a database.\n        2. a visualization task that is consistent with the query."
+        "content": "You are an amazing data analyst and logician! You are given a table and a statement. Please suggest me a list of suggestions, each containing:\n        1. A query that MUST BE VERIFIABLE using the data attributes within the table. The query must be an improved version of the orginal statement.\n        2. A visualization task that is consistent with the query and the statement.\n        3. An explanation of why the query is a good fit to the statement.\n        4. A list of data attributes that are used in the query. Each attribute MUST BE RETRIEVABLE from the table."
     },
     {
         "role": "user",
-        "content": "statement: The number of COVID in US has dwindled to below 2000 cases per day in June 26, 2023."
+        "content": "CREATE TABLE jason chambers(\n\trow_id int,\n\tres text,\n\trecord text,\n\topponent text,\n\tmethod text,\n\tevent text,\n\tround text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tres\trecord\topponent\tmethod\tevent\tround\n0\twin\t18 - 5 - 2\tdan new\tsubmission (rear naked choke)\ttfc - power fights\t1\n1\twin\t17 - 5 - 2\trene gonzalez\tdecision (split)\tmainstream mma - cold war\tn / a\n2\tloss\t16 - 5 - 2\ttristan yunker\tsubmission ( armbar )\ttfc 7 - total fight challenge 7\t1\n*/\nStatement: Jason Chambers has the most win against Dan New among all of his wins."
     },
     {
         "role": "assistant",
-        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the number of COVID cases in US below 2000 per day in 26th June 2023?\",\n                vis: \"Show the number of COVID cases in US per day in 26th June 2023.\"\n                explain: \"Showing the number of COVID cases in US per day in 26th June 2023 helps to verify the claim.\"\n            }\n        ]"
+        "content": "Suggestions:\n    [\n        {\n            query: \"Does Jason Chambers have more win in his record against Dan New than against everyone else?\",\n            vis: \"Show a bar chart representing the number of wins of Jason Chambers against each opponent.\",\n            explain: \"The query is good because the number of win is tracked as the first number in the record column. It can easily be verified using the table.\"\n            attributes: [\"record\", \"opponent\"]\n        }\n    ]"
     },
     {
         "role": "user",
-        "content": "statement: US'economy has outgrown China's in 2023."
+        "content": "CREATE TABLE movies(\n    row_id int,\n    title text,\n    year int,\n    length int,\n    budget int,\n    IMDB rating real,\n    Rotten Tomatoes rating real,\n    votes int)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\ttitle\tyear\tlength\tbudget\tIMDB rating Rotten Tomatoes rating votes\n0\tavatar\t2009\t162\t237000000\t7.9   44.5   890617\n1\ttitanic\t1997\t194\t200000000\t7.7\t  66.2   843881\n2\tthe avengers\t2012\t143\t220000000    8.1\t820847\n*/\nStatement: The movie with the highest rating is The Avengers."
     },
     {
         "role": "assistant",
-        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the GDP of US greater than China in 2023?\",\n                vis: \"Show the GDP of US and China in 2023.\",\n                explain: \"Since GDP is a quantitative metric that measures economy,                     showing the GDP of US and China in 2023 helps to verify the claim.\"\n            },\n            {\n                query: \"Is the Trade Volume of US greater than China in 2023?\",\n                vis: \"Show the Trade Volume of US and China in 2023.\",\n                explain: \"Trade Volume is also a good economic metric, showing it could give                 more information to verify the claim.\"\n            }\n        ]"
+        "content": "Suggestions:\n        [\n            {\n                query: \"Is The Avengers the movie with the highest IMDB rating?\",\n                vis: \"Show a bar chart representing the IMDB rating of each movie.\",\n                explain: \"Since IMDB rating is a good metric for evaluating movie quality in the table. Compare the IMDB rating between The Avengers and other movies would  help clarify the original statement.\"\n                attributes: [\"title\", \"IMDB rating\"]\n            },\n            {\n                query: \"Is The Avengers the movie with the highest Rotten Tomatoes rating?\",\n                vis: \"Show a bar chart representing the Rotten Tomatoes rating of each movie.\",\n                explain: \"Since Rotten Tomatoes rating is a good metric for evaluating movie quality in the table. Compare the Rotten Tomatoes rating between The Avengers and other movies would help clarify the original statement.\"\n                attributes: [\"title\", \"Rotten Tomatoes rating\"]\n            }\n        ]"
     },
     {
         "role": "user",
-        "content": "statement: US'economy outweighs the whole South Asia's."
+        "content": "CREATE TABLE economy(\n    row_id int,\n    country text,\n    year int,\n    GDP real,\n    Trade Volume real,\n    Inflation real,\n    Unemployment real,\n    Population real)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tcountry\tyear\tGDP\tTrade Volume\tInflation\tUnemployment\tPopulation\n0\tUnited States\t2010\t14992000.0\t3.9\t1.6\t9.6\t309.3\n1\tChina\t2010\t5937000.0\t2.4\t3.3\t4.1\t1339.7\n2\tUnited States\t2011\t15542000.0\t4.6\t3.2\t8.9\t311.6\n*/\nStatement: US'economy has outgrown China's in 2023."
     },
     {
         "role": "assistant",
-        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the GDP of US greater than the sum of GDP of all South Asian countries in 2023?\",\n                vis: \"Show the GDP of US and all South Asian countries in 2023.\",\n                explain: \"Since GDP is a quantitative metric that measures economy,                     showing the GDP of US and all South Asian countries in 2023 helps to verify the claim.\"\n            }\n        ]"
+        "content": "Suggestions:\n        [\n            {\n                query: \"Is the GDP of US higher than that of China in 2023?\",\n                vis: \"Show the GDP of US and China in 2023.\",\n                explain: \"Since GDP is a good metric for evaluating economy in the table. Compare the GDP between US and China would help clarify the original statement.\"\n                attributes: [\"country\", \"GDP\"]\n            },\n            {\n                query: \"Is the Trade Volume of US higher than that of China in 2023?\",\n                vis: \"Show the Trade Volume of US and China in 2023.\",\n                explain: \"Since Trade Volume is a good metric for evaluating economy in the table. Compare the Trade Volume between US and China would help clarify the original statement.\"\n                attributes: [\"country\", \"Trade Volume\"]\n            }\n        ]"
     },
     {
         "role": "user",
-        "content": "statement: All countries in East Asia produce less than 200 kWh of electricity per capita per day in 2019."
+        "content": "CREATE TABLE American housing(\n    row_id int,\n    year int,\n    month int,\n    house_price real,\n    house_price_change real,\n    mortgage_rate real,\n    mortgage_rate_change real,\n    unemployment_rate real,\n    unemployment_rate_change real)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tyear\tmonth\thouse_price\thouse_price_change\tmortgage_rate\tmortgage_rate_change\tunemployment_rate\tunemployment_rate_change\n0\t2010\t1\t221.3\t0.0\t5.03\t0.0\t9.8\t0.0\n1\t2010\t2\t221.3\t0.0\t4.99\t-0.8\t9.8\t0.0\n2\t2010\t3\t221.3\t0.0\t4.97\t-0.4\t9.9\t1.0\n*/\nStatement: American's housing in 2023 is more active than that in 2010."
     },
     {
         "role": "assistant",
-        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the electricity production per capita of all East Asian countries less than 200 kWh per day in 2019?\",\n                vis: \"Show the electricity production per capita per day of all East Asian countries in 2019.\",\n                explain: \"Showing the electricity production per capita per day of all East Asian countries in 2019 helps to verify the claim.\"\n            }\n        ]"
-    },
-    {
-        "role": "user",
-        "content": "statement: As the temperature in China rises, the number of COVID cases in China decreases."
-    },
-    {
-        "role": "assistant",
-        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the temperature in China and the number of COVID cases in China negatively correlated?\",\n                vis: \"Show the relationship between the temperature in China and the number of COVID cases in China.\",\n                explain: \"Showing the relationship between the temperature in China and the number of COVID cases in China helps to verify the claim.\"\n            }\n        ]"
-    },
-    {
-        "role": "user",
-        "content": "statement: The movie production of US is better than that of China in 2023."
-    },
-    {
-        "role": "assistant",
-        "content": "Here are some suggestions:\n        [\n            {\n                query: \"Is the total box office of US greater than China in 2023?\",\n                vis: \"Show the total box office of US and China in 2023.\",\n                explain: \"Showing the total box office of US and China in 2023 helps to give more information to verify the claim.\"\n            },\n            {\n                query: \"Is the number of movies produced in US greater than China in 2023?\",\n                vis: \"Show the number of movies produced in US and China in 2023.\",\n                explain: \"Showing the number of movies produced in US and China in 2023 helps to give more information to verify the claim.\"\n            }\n        ]"
+        "content": "Suggestions:\n        [\n            {\n                query: \"Is the average American house price in 2023 higher than that in 2010?\",\n                vis: \"Show the average American house price in 2023 and 2010.\",\n                explain: \"Since house price is a good metric for evaluating housing market in the table. Compare the house price between 2023 and 2010 would help clarify the original statement.\"\n                attributes: [\"year\", \"house_price\"]\n            },\n            {\n                query: \"Is the average mortgage rate in 2023 higher than that in 2010?\",\n                vis: \"Show the average mortgage rate in 2023 and 2010.\",\n                explain: \"Since mortgage rate is a good metric for evaluating housing market in the table. Compare the mortgage rate between 2023 and 2010 would help clarify the original statement.\"\n                attributes: [\"year\", \"mortgage_rate\"]\n            }\n        ]"
     }
 ]

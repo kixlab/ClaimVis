@@ -1,0 +1,62 @@
+[
+    {
+        "role": "system",
+        "content": "Generate SQL given the question and table. Remember to wrap column name with double quotes if it contains spaces."
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE jason chambers(\n\trow_id int,\n\tres text,\n\trecord text,\n\topponent text,\n\tmethod text,\n\tevent text,\n\tround text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tres\trecord\topponent\tmethod\tevent\tround\n0\twin\t18 - 5 - 2\tdan new\tsubmission (rear naked choke)\ttfc - power fights\t1\n1\twin\t17 - 5 - 2\trene gonzalez\tdecision (split)\tmainstream mma - cold war\tn / a\n2\tloss\t16 - 5 - 2\ttristan yunker\tsubmission ( armbar )\ttfc 7 - total fight challenge 7\t1\n*/\nQ1: How many win are there when the opponent is dan spychalski?\nQ2: What is the number of records with a nan round ended in 2 or began with 2?"
+    },
+    {
+        "role": "assistant",
+        "content": "A1: SELECT COUNT(*) FROM w WHERE opponent = 'dan spychalski'\n    A2: SELECT COUNT(*) FROM w WHERE round = 'n / a' AND (record LIKE '% - % - 2' OR record LIKE '2 - % - %')"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE 2005 pba draft(\n    row_id int,\n    pick int,\n    player text,\n    country of origin text,\n    pba team text,\n    college text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tpick\tplayer\tcountry of origin\tpba team\tcollege\n0\t1\tjay washington\tunited states\tair21 express\teckerd\n1\t2\talex cabagnot\tunited states\tsta lucia realtors\thawaii - hilo\n2\t3\tdennis miranda\tphilippines\tcoca - cola tigers\tfeu\n*/\nQ1: How many feu players are from from us?\nQ2: Is dennis miranda a player from us?"
+    },
+    {
+        "role": "assistant",
+        "content": "A1: SELECT COUNT(*) FROM w WHERE college = 'feu' AND country of origin = 'united states'\n    A2: SELECT COUNT(*) FROM w WHERE player = 'dennis miranda' AND country of origin = 'united states'"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE turkish cup(\n\trow_id int,\n\tround text,\n\tclubs remaining int,\n\tclubs involved int,\n\twinners from previous round real,\n\tnew entries this round real,\n\tleagues entering at this round text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tround\tclubs remaining\tclubs involved\twinners from previous round\tnew entries this round\tleagues entering at this round\n0\tfirst round\t156\t86\tnan\t86.0\ttff third league & turkish regional amateur league\n1\tsecond round\t113\t108\t43.0\t65.0\ts\u00fcper lig & tff first league & tff second league\n2\tthird round\t59\t54\t54.0\tnan\tnone\n*/\nQ1: What is the lowest number of clubs remaining?"
+    },
+    {
+        "role": "assistant",
+        "content": "A1: SELECT MIN(\"clubs remaining\") FROM w"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE cultural interest fraternities and sororities(\n\trow_id int,\n\tletters text,\n\torganization text,\n\tnickname text,\n\tfounding time text,\n\tfounding university text,\n\ttype text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tletters\torganization\tnickname\tfounding time\tfounding university\ttype\n0\t\u03b1\u03b5\u03c0\talpha epsilon pi 1\taepi\t1913-11-07 00:00:00\tnew york university\tfraternity\n1\t\u03b1\u03b5\u03c6\talpha epsilon phi 2\taephi\t1909-10-24 00:00:00\tbarnard college\tsorority\n2\t\u03c3\u03b1\u03b5\u03c0\tsigma alpha epsilon pi 3\tsigma\t1998-10-01 00:00:00\tuniversity of california , davis\tsorority\n*/\nQ1 : What is the number of of the cultural interest fraternity?\nQ2 : How many records are both sorority and founded in 1990s?\nQ3 : How many organizations are founded in 2003 with a type of fraternity?"
+    },
+    {
+        "role": "assistant",
+        "content": "A1: SELECT COUNT(*) FROM w WHERE type = 'fraternity'\nA2: SELECT COUNT(*) FROM w WHERE type = 'sorority' AND \"founding time\" LIKE '199%-%-%'\nA3: SELECT COUNT(DISTINCT(organization)) FROM w WHERE type = 'sorority'"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE jeev milkha singh(\n\trow_id int,\n\ttournament text,\n\twins int,\n\ttop - 10 int,\n\ttop - 25 int,\n\tevents int,\n\tcuts made int,\n\twin rate text)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\ttournament\twins\ttop - 10\ttop - 25\tevents\tcuts made\twin rate\n0\tmasters tournament\t0\t0\t1\t3\t2\t12%\n1\tus open\t0\t0\t0\t4\t3\t24%\n2\tthe open championship\t0\t0\t0\t2\t1\t26%\n*/\nQ1: What is the number of cut made in the pga championship?\nQ2: What is the number of event in the pga championship?\nQ3: What is the average win rate of all games?"
+    },
+    {
+        "role": "assistant",
+        "content": "A1: SELECT \"cuts made\" FROM w WHERE tournament = 'pga championship'\nA2: SELECT events FROM w WHERE tournament = 'pga championship'\nA3: SELECT AVERAGE(CAST(REPLACE(\"win rate\",'%','')) AS INT) FROM w"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE 2008 women 's british open(\n\trow_id int,\n\tplace text,\n\tplayer text,\n\tcountry text,\n\tscore int,\n\tto par int)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\tplace\tplayer\tcountry\tscore\tto par\trecords\n0\t1\tjuli inkster\tunited states\t65\t7\t3 - 2\n1\tt2\tmomoko ueda\tjapan\t66\t6\t4 - 11\n2\tt2\tlaura diaz\tunited states\t66\t6\t12 - 3\n*/\nQ1: How many players from japan have the same score?\nQ2: How many records have a records where the first number larger than the second number?"
+    },
+    {
+        "role": "assistant",
+        "content": "A1: SELECT COUNT(DISTINCT score) FROM w WHERE country = 'japan'\nA2: SELECT COUNT(*) FROM w WHERE records LIKE '% - %' AND (CAST(SUBSTR(score, 1, INSTR(score, '-') - 1) AS INT) - CAST(SUBSTR(score, INSTR(score, '-') + 1, LENGTH(score) - (INSTR(score, ' - ') + 1)) AS INT)) > 0"
+    },
+    {
+        "role": "user",
+        "content": "CREATE TABLE 1976 world junior figure skating championships(\n    row_id int,\n    rank int,\n    name text,\n    nation text,\n    points real,\n    places int)\n/*\n3 example rows:\nSELECT * FROM w LIMIT 3;\nrow_id\trank\tname\tnation\tpoints\tplaces\n0\t1\tsherri baier / robin cowan\tcanada\t128.39\t9\n1\t2\tlorene mitchell / donald mitchell\tunited states\t124.94\t16\n2\t3\telizabeth cain / peter cain\taustralia\t116.67\t33\n*/\nQ1: How many of the 7 top - ranked figure skate teams are from france?"
+    },
+    {
+        "role": "assistant",
+        "content": "A1: SELECT COUNT(*) FROM w WHERE nation = 'france' AND rank <= 7"
+    }
+]

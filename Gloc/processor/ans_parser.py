@@ -1,4 +1,8 @@
 import re
+import pandas as pd
+from Gloc.nsql.parser import extract_answers
+from functools import reduce
+
 class AnsParser(object):
     def __init__(self) -> None:
         pass
@@ -25,10 +29,56 @@ class AnsParser(object):
             return []        
     
     def parse_gen_query(self, message: str):
-        return re.findall(r'query: "(.*?)"', message)
+        queries = re.findall(r'query: "(.*?)"', message)
+        vis_tasks = re.findall(r'vis: "(.*?)"', message)
+        reasons = re.findall(r'explain: "(.*?)"', message)
+
+        if "attributes" in message:
+            # prompt with context
+            attr_strs = re.findall(r'attributes: \[(.*?)\]', message)
+            attributes = set(reduce(lambda x, y: x + y, [attr_str.split(', ') for attr_str in attr_strs], []))
+            attributes = [attr.strip("\"") for attr in attributes]
+        else:
+            # prompt without context
+            attributes = None
+
+        return queries, vis_tasks, reasons, attributes
     
     def parse_sql(self, message: str):
-        return re.search(r'SQL: "(.*?)"', message).group(1)
+        match = re.search(r'SQL: (.*)', message)
+        
+        return match.group(1) if match else None
+    
+    def parse_sql_2(self, message: str):
+        ans = []
+        for s in message.split('\n'):
+            match = re.search(r'A\d+: (.*)', s)
+            if match: ans.append(match.group(1))
+        return ans
     
     def parse_nsql(self, message: str):
-        return re.search(r'NeuralSQL: "(.*?)"', message).group(1)
+        match = re.search(r'NeuralSQL: (.*)', message)
+        
+        return match.group(1) if match else None
+    
+    def parse_sql_result(self, sub_table: pd.DataFrame or dict):
+        if isinstance(sub_table, dict):
+            return extract_answers(sub_table)
+        else: # is dataframe
+            if sub_table.empty or sub_table.columns.empty:
+                return []
+            answer = []
+            if 'row_id' in sub_table.columns:
+                for _, row in sub_table.iterrows():
+                    answer.extend(row.values[1:])
+                return answer
+            else:
+                for _, row in sub_table.iterrows():
+                    answer.extend(row.values)
+                return answer
+    
+    def parse_evaluation(self, message: str):
+        match = re.search(r'revised: "(.*?)"', message)
+        
+        return match.group(1) if match else None
+    

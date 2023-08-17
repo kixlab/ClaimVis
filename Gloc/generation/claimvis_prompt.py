@@ -30,6 +30,7 @@ class TemplateKey(str, enum.Enum):
 
     NSQL_GENERATION = 'nsql'
     SQL_GENERATION = 'sql'
+    SQL_GENERATION_2 = 'sql2'
 
 class Prompter(object):
     def __init__(self) -> None:
@@ -55,7 +56,7 @@ class Prompter(object):
             self, 
             template_key,
             table: pd.DataFrame,
-            question: str = None,
+            question: str or list[str] = None,
             title: str = None,
             num_rows: int = 3,
             **kwargs
@@ -100,11 +101,22 @@ class Prompter(object):
                 "role": "user",
                 "content": f"statement: {question}"
             })
-        elif template_key in [TemplateKey.NSQL_GENERATION, TemplateKey.SQL_GENERATION]:
+        elif template_key in [TemplateKey.NSQL_GENERATION, TemplateKey.SQL_GENERATION, TemplateKey.SQL_GENERATION_2]:
             template.append({
                 "role": "user",
                 "content": bd.build_one_shot_prompt(
-                    prompt_type=("question", "nsql"),
+                    prompt_type=("question" if isinstance(question, str) else "questions", ),
+                    table=table,
+                    question=question,
+                    answer_text=None,
+                    nsql=""
+                )
+            })
+        elif template_key == TemplateKey.QUERY_GENERATION_3:
+            template.append({
+                "role": "user",
+                "content": bd.build_one_shot_prompt(
+                    prompt_type=("statement",),
                     table=table,
                     question=question,
                     answer_text=None,
@@ -114,3 +126,4 @@ class Prompter(object):
 
         return template
                
+        
