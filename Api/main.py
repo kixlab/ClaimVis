@@ -15,7 +15,7 @@ app.add_middleware(
 
 df = pd.read_csv("./Datasets/owid-energy-data.csv")
 
-@app.post("/potential_data_point_sets")
+@app.post("/potential_data_point_sets_test")
 def potential_data_point_sets_test(body: UserClaimBody, verbose:bool=False) -> list[DataPointSet]:
     """
         Claim map has the following structure:
@@ -51,7 +51,7 @@ def potential_data_point_sets_test(body: UserClaimBody, verbose:bool=False) -> l
     table, attributes, justification, vis_task = reason["sub_table"], reason["attributes"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
     if verbose: print(table, attributes, justification)
 
-    tablename = None
+    # parse attributes from
     
 
 @app.post("/potential_data_point_sets")

@@ -14,6 +14,7 @@ from Gloc.utils.normalizer import post_process_sql
 from Gloc.nsql.database import NeuralDB
 from Gloc.utils.utils import majority_vote
 from fuzzywuzzy import fuzz
+import math
 
 class TableReasoner(object):
     def __init__(
@@ -314,13 +315,15 @@ class TableReasoner(object):
                             fuzzy_match=fuzzy_match
                         )
             
-            def process_ans(ans):
+            def process_ans(ans: list):
                 try:
-                    if isinstance(ans, list) and len(ans) > 10:
+                    if len(ans) > 30:
                         # sometimes the answer is too long to fit into the prompt
+                        ans = [x for x in ans if not math.isnan(x)] 
                         return f"Ranging from {str(min(ans))} to {str(max(ans))}"
                     return str(ans)
-                except:
+                except Exception as e:
+                    if verbose: print(e)
                     return []
             
             sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
