@@ -108,9 +108,11 @@ df = pd.read_csv("../Datasets/owid-energy-data.csv")
 def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=True) -> list[DataPointSet]:
     user_claim = body.userClaim.lower()
 
-    if test:
-        table = pd.read_csv("../Datasets/owid-energy-data.csv").iloc[:5]
-        attributes = ["year", "country", "primary_energy_consumption", "coal_production"]
+    if test: # for testing purposes
+        attributes = ["country_name", "trained teachers in upper secondary education (% of total teachers)", "educational attainment, at least completed post-secondary, population 25+, male (%) (cumulative)"]
+        table = pd.read_csv("../Datasets/Education.csv").iloc[:5]
+        table.columns = table.columns.str.lower()
+        table = table[attributes]
     else:
         pipeline = Pipeline(datasrc="../Datasets")
         
@@ -123,7 +125,7 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=True
 
     # given a table and its attributes, return the data points
     AutoViz = AutomatedViz(table=table, attributes=attributes)
-    return AutoViz.retrieve_data_points(text=user_claim)
+    return AutoViz.retrieve_data_points(text=user_claim, verbose=verbose)
 
 @app.post("/get_viz_spec")
 def get_viz_spec(body: GetVizSpecBody): # needs update
@@ -193,5 +195,5 @@ def get_data_new(body: GetVizDataBodyNew) -> str:
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    l = potential_data_point_sets(UserClaimBody(userClaim="The United States consumes more coal than the United Kingdom in 2011."), verbose=True, test=False)
+    l = potential_data_point_sets(UserClaimBody(userClaim="The United States has the highest number of trained teacher in 2011."), verbose=True, test=True)
     print(l)

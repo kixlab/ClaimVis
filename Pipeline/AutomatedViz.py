@@ -112,7 +112,7 @@ class AutomatedViz(object):
 
     def tag_attribute_gpt(self, text: str):
         message = [
-            {"role": "system", "content": """Given a list of attributes and a claim, please wrap the relevant references in the claim to the attributes with curly braces and return a map of references to corresponding attributes. For example, if the claim is 'The United State has the highest energy consumption in 2022.', and the attributes are ['country', 'energy consumption per capita', 'year'], then the output should be 
+            {"role": "system", "content": """Given a list of attributes and a claim, please wrap the relevant references in the claim to the attributes with curly braces and return a map of references to the MOST SIMILAR attributes. For example, if the claim is 'The United State has the highest energy consumption in 2022.', and the attributes are ['country', 'energy consumption per capita', 'year'], then the output should be 
              {
                 "wrap": 'The {United State} has the highest {energy consumption} in {2022}.',
                 "map": {
@@ -149,6 +149,7 @@ class AutomatedViz(object):
     
     def retrieve_data_points(self, text: str, verbose: bool = False):
         tag_map = self.tag_attribute_gpt(text)
+        if verbose: print(f"tagmap: {tag_map}")
 
         def isAny(attr, func: callable):
             if verbose:
@@ -159,6 +160,7 @@ class AutomatedViz(object):
         dates, fields, categories, datapoints = None, [], [], []
         for ref, attr in tag_map['map'].items():
             if helpers.isdate(ref)[0]:
+                if verbose: print(f"date: {helpers.isdate(ref)[1]}")
                 dates = {
                     "value": attr,
                     "range": self.table[attr].to_list()
@@ -182,6 +184,11 @@ class AutomatedViz(object):
                                 type="nominal"
                             ))      
             
+        if verbose:
+            print(f"dates: {dates}")
+            print(f"fields: {fields}")
+            print(f"categories: {categories}")
+
         # final pass to retrieve all datapoints
         data_fields = list(map(lambda x: x.name, fields))
         for category in categories:
@@ -197,7 +204,7 @@ class AutomatedViz(object):
                     )
                 )
         
-        return DataPointSet(
+        return [DataPointSet(
                     statement=tag_map['wrap'],
                     dataPoints=datapoints,
                     fields=fields,
@@ -215,7 +222,7 @@ class AutomatedViz(object):
                         values = categories,
                         otherFields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
                     )
-                )
+                )]
 
 if __name__ == "__main__":
     # tag_date_time("Some people are crazy enough to get out in the winter, especially november and december where it's freezing code outside.")

@@ -8,7 +8,7 @@ class DataMatcher:
     def __init__(self, datasrc: str):
         self.summarizer = Summarizer(datasrc=datasrc)
         self.datasrc = datasrc
-        self.embedder = SentenceTransformer('paraphrase-MiniLM-L6-v2') # prepare sentence embedder
+        self.embedder = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') # prepare sentence embedder
         self.datasets = [filename for filename in os.listdir(self.datasrc) if filename.endswith('.csv')]
 
         with open(f'{self.datasrc}/description/desc.json', 'r+') as openfile:
@@ -48,7 +48,16 @@ class DataMatcher:
 
         return top_k_datasets
 
+    def similarity_score(self, phrase1: str, phrase2: str):
+        phrase1_embedding = self.embedder.encode([phrase1])[0]
+        phrase2_embedding = self.embedder.encode([phrase2])[0]
+        similarity = cosine_similarity([phrase1_embedding], [phrase2_embedding])[0][0]
+        return similarity
+
 if __name__ == "__main__":
     matcher = DataMatcher(datasrc="../Datasets")
-    claim = "The energy consumption level of the US was super bad last year."
-    matcher.find_top_k_datasets(claim, k=2)
+    # claim = "The energy consumption level of the US was super bad last year."
+    # matcher.find_top_k_datasets(claim, k=2)
+    phrase1 = "2011"
+    phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
+    print(matcher.similarity_score(phrase1, phrase2))
