@@ -2,6 +2,7 @@
 from enum import Enum
 from typing import Dict
 from pydantic import BaseModel as PydanticBaseModel
+from typing import Optional
 
 class BaseModel(PydanticBaseModel):
     class Config:
@@ -27,7 +28,7 @@ class DateRange(BaseModel):
     date_end: OptionProps
 
 class Ranges(BaseModel):
-    date: DateRange
+    date: Optional[DateRange]
     values: list[OptionProps]
     otherFields: Dict[str, list]
 
