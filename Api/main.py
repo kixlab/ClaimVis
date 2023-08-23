@@ -54,7 +54,7 @@ def potential_data_point_sets_test(body: UserClaimBody, verbose:bool=False) -> l
 
     # given a table and its attributes, return 
     AutoViz = AutomatedViz(table, attributes)
-    
+    return AutoViz.retrieve_data_points(text=user_claim)
 
 
 @app.post("/potential_data_point_sets")

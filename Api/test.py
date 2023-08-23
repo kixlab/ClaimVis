@@ -148,15 +148,7 @@ class AutomatedViz(object):
         return response_dict
     
     def retrieve_data_points(self, text: str, verbose: bool = False):
-        # tag_map = self.tag_attribute_gpt(text)
-        tag_map = {
-                    "wrap": 'The {United State} has the highest {energy consumption} in {2022}.',
-                    "map": {
-                        "United State": "country",
-                        "energy consumption": "primary_energy_consumption",
-                        "2022": "year"
-                    }
-                }
+        tag_map = self.tag_attribute_gpt(text)
 
         def isAny(attr, func: callable):
             if verbose:
@@ -168,7 +160,7 @@ class AutomatedViz(object):
         for ref, attr in tag_map['map'].items():
             if helpers.isdate(ref)[0]:
                 dates = {
-                    "name": attr,
+                    "value": attr,
                     "range": self.table[attr].to_list()
                 }
                 fields.append(Field(
@@ -179,10 +171,10 @@ class AutomatedViz(object):
             elif helpers.isint(ref) or helpers.isfloat(ref) or isAny(attr, helpers.isint) or isAny(attr, helpers.isfloat):
                 categories.append({
                     'label': ref,
-                    'value': ref,
+                    'value': attr,
                     'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,
-                    'provenance': None,
-                    'table_name': None
+                    'provenance': "",
+                    'table_name': ""
                 })
             else: # nominal
                 fields.append(Field(
@@ -190,27 +182,50 @@ class AutomatedViz(object):
                                 type="nominal"
                             ))      
             
-        return dates, fields, categories
         # final pass to retrieve all datapoints
+        data_fields = list(map(lambda x: x.name, fields))
+        for category in categories:
+            for row in self.table[data_fields + [category['value']]].itertuples(index=False):
+                datapoints.append(
+                    DataPointValue(
+                        tableName="",
+                        date=str(getattr(row, dates['value'])),
+                        category=category['value'],
+                        otherFields={attr: getattr(row, attr) for attr in data_fields},
+                        unit=category['unit'],
+                        value=getattr(row, category['value'])
+                    )
+                )
         
-        # for idx, value in enumerate(self.table[attr].to_list()):
-        #     datapoints.append(DataPointValue(
-        #         tableName=None,
-        #         date=dates['range'][idx] if dates else None,
-        #         category=ref,
-        #         otherFields={attr: value},
-        #         unit=self.parser.parse_unit(attr) or self.table[attr].dtype.name,
-        #         value=value
-        #     ))
+        return DataPointSet(
+                    statement=tag_map['wrap'],
+                    dataPoints=datapoints,
+                    fields=fields,
+                    ranges=Ranges(
+                        date = { # will take the lowest and highest date from the data points
+                            'date_start': {
+                                'label': str(min(dates['range'])), 
+                                'value': str(min(dates['range']))
+                            },
+                            'date_end': {
+                                'label': str(max(dates['range'])),
+                                'value': str(max(dates['range']))
+                            }
+                        },
+                        values = categories,
+                        otherFields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
+                    )
+                )
 
 if __name__ == "__main__":
     # tag_date_time("Some people are crazy enough to get out in the winter, especially november and december where it's freezing code outside.")
+    data = pd.read_csv("../Datasets/owid-energy-data.csv").iloc[:5]
     vizPipeline = AutomatedViz(
-                    datasrc="../Datasets/owid-energy-data.csv",
-                    attributes=['primary_energy_consumption', 'year', 'country']
+                    # datasrc="../Datasets/owid-energy-data.csv",
+                    table=data,
+                    attributes=['primary_energy_consumption', 'year', 'country', 'coal_share_energy']
                 )
 
-    # vizPipeline.retrieve_data_points("The United State has the highest energy consumption in the world in 2020.")
-    x, y, z = vizPipeline.retrieve_data_points("any thing")
-    print(y, z)
+    t = vizPipeline.retrieve_data_points("The United State has the highest coal energy in the world in 2020.")
+    print(t)
     
