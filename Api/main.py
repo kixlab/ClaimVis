@@ -4,6 +4,7 @@ from models import *
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 from Pipeline.main import Pipeline
+from Api.test import AutomatedViz
 
 app = FastAPI()
 app.add_middleware(
@@ -15,7 +16,7 @@ app.add_middleware(
 
 df = pd.read_csv("./Datasets/owid-energy-data.csv")
 
-@app.post("/potential_data_point_sets")
+@app.post("/potential_data_point_sets_test")
 def potential_data_point_sets_test(body: UserClaimBody, verbose:bool=False) -> list[DataPointSet]:
     """
         Claim map has the following structure:
@@ -41,18 +42,20 @@ def potential_data_point_sets_test(body: UserClaimBody, verbose:bool=False) -> l
             ...
         }
     """
-    user_claim = body.userClaim
+    user_claim = body.userClaim.lower()
     pipeline = Pipeline(datasrc="../Datasets")
     
     claim_map, claims = pipeline.run(user_claim)
     if verbose: print(claim_map)
 
     reason = claim_map[claims[0]][0]
-    table, attributes, justification, vis_task = reason["sub_table"], reason["attributes"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
-    if verbose: print(table, attributes, justification)
+    table, attributes = reason["sub_table"], reason["attributes"]
+    if verbose: print(table, attributes)
 
-    tablename = None
-    
+    # given a table and its attributes, return 
+    AutoViz = AutomatedViz(table, attributes)
+    return AutoViz.retrieve_data_points(text=user_claim)
+
 
 @app.post("/potential_data_point_sets")
 def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
