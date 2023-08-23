@@ -5254,3 +5254,66 @@ INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have 
 [16758 rows x 2 columns], 'attributes': ['energy use (kg of oil equivalent per capita)', 'country_name']}
 INFO:root:Execution Time: 2023-08-22 23:17:59
 INFO:root:Token used: 10346
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1715.205192565918ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4502 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001C52D924C10>,), {'claim': 'the united states has a higher solar energy consumption than the united kingdom.', 'table':                       country_name  ...  Urban population living in areas where elevation is below 5 meters (% of total population)
+0      Africa Eastern and Southern  ...                                                NaN                                         
+1      Africa Eastern and Southern  ...                                                NaN                                         
+2      Africa Eastern and Southern  ...                                                NaN                                         
+3      Africa Eastern and Southern  ...                                                NaN                                         
+4      Africa Eastern and Southern  ...                                                NaN                                         
+...                            ...  ...                                                ...                                         
+16753                     Zimbabwe  ...                                                NaN                                         
+16754                     Zimbabwe  ...                                                NaN                                         
+16755                     Zimbabwe  ...                                                NaN                                         
+16756                     Zimbabwe  ...                                                NaN                                         
+16757                     Zimbabwe  ...                                                NaN                                         
+
+[16758 rows x 78 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have a higher solar energy consumption than the United Kingdom?', 'visualization': 'Show the solar energy consumption of the United States and the United Kingdom.', 'reasoning_steps': ['Q1: What is the solar energy consumption of the United States?', 'Q2: What is the solar energy consumption of the United Kingdom?', 'Q3: Is the solar energy consumption of the United States higher than the solar energy consumption of the United Kingdom?', 'Q4: Does the United States have a higher solar energy consumption than the United Kingdom?'], 'justification': 'The solar energy consumption of a country is an important factor to consider when comparing different nations. In the case of the United States, its solar energy consumption ranges from 4.09 to 11.16. On the other hand, the United Kingdom has a solar energy consumption ranging from 0.61 to 13.5. By comparing these figures, we can observe that there is an overlap in the range of solar energy consumption for both countries. However, this overlap does not definitively determine whether the solar energy consumption of the United States is higher or lower than that of the United Kingdom. To make a more accurate comparison, we would need to consider additional factors such as the average or most common consumption rates in each country.'}], 'sub_table':                       country_name  renewable energy consumption (% of total final energy consumption)
+0      africa eastern and southern                                                NaN                 
+1      africa eastern and southern                                                NaN                 
+2      africa eastern and southern                                          66.123449                 
+3      africa eastern and southern                                          63.387090                 
+4      africa eastern and southern                                          62.242631                 
+...                            ...                                                ...                 
+16753                     zimbabwe                                                NaN                 
+16754                     zimbabwe                                                NaN                 
+16755                     zimbabwe                                                NaN                 
+16756                     zimbabwe                                                NaN                 
+16757                     zimbabwe                                                NaN                 
+
+[16758 rows x 2 columns], 'attributes': ['country_name', 'renewable energy consumption (% of total final energy consumption)']}
+INFO:root:Execution Time: 2023-08-23 14:25:44
+INFO:root:Token used: 12699
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 798.1009483337402ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1144.577980041504ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4503 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1147.6929187774658ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4503 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False

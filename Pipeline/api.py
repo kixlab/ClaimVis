@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from models import *
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
-from Pipeline.main import Pipeline
-from Api.test import AutomatedViz
+from main import Pipeline
+from AutomatedViz import AutomatedViz
 
 app = FastAPI()
 app.add_middleware(
@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-df = pd.read_csv("./Datasets/owid-energy-data.csv")
+df = pd.read_csv("../Datasets/owid-energy-data.csv")
 
 """
     Claim map has the following structure:
@@ -105,20 +105,24 @@ df = pd.read_csv("./Datasets/owid-energy-data.csv")
 """
 
 @app.post("/potential_data_point_sets")
-def potential_data_point_sets(body: UserClaimBody, verbose:bool=False) -> list[DataPointSet]:
-    
+def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=True) -> list[DataPointSet]:
     user_claim = body.userClaim.lower()
-    pipeline = Pipeline(datasrc="../Datasets")
-    
-    claim_map, claims = pipeline.run(user_claim)
-    if verbose: print(claim_map)
 
-    reason = claim_map[claims[0]][0]
-    table, attributes = reason["sub_table"], reason["attributes"]
-    if verbose: print(table, attributes)
+    if test:
+        table = pd.read_csv("../Datasets/owid-energy-data.csv").iloc[:5]
+        attributes = ["year", "country", "primary_energy_consumption", "coal_production"]
+    else:
+        pipeline = Pipeline(datasrc="../Datasets")
+        
+        claim_map, claims = pipeline.run(user_claim)
+        if verbose: print(claim_map)
+
+        reason = claim_map[claims[0]][0]
+        table, attributes = reason["sub_table"], reason["attributes"]
+        if verbose: print(table, attributes)
 
     # given a table and its attributes, return the data points
-    AutoViz = AutomatedViz(table, attributes)
+    AutoViz = AutomatedViz(table=table, attributes=attributes)
     return AutoViz.retrieve_data_points(text=user_claim)
 
 @app.post("/get_viz_spec")
@@ -188,5 +192,6 @@ def get_data_new(body: GetVizDataBodyNew) -> str:
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=9889)
-    
+    # uvicorn.run(app, host="0.0.0.0", port=9889)
+    l = potential_data_point_sets(UserClaimBody(userClaim="The United States consumes more coal than the United Kingdom in 2011."), verbose=True, test=False)
+    print(l)
