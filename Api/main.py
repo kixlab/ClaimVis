@@ -16,32 +16,97 @@ app.add_middleware(
 
 df = pd.read_csv("./Datasets/owid-energy-data.csv")
 
+"""
+    Claim map has the following structure:
+
+    claim_map = {
+        "sentence_i": [
+            { # each of the justification corresponds to a dataset
+                suggestions: [
+                    {
+                        "query": ...,
+                        "visualization": ...,
+                        "reasoning_steps": [...],
+                        "justification": ...
+                    },
+                    {...}
+                ],
+                "sub_table": pd.DataFrame(...),
+                "attributes": [...]
+            },
+            {...}
+        ],
+        "sentence_j": [...],
+        ...
+    }
+"""
+
+
+"""
+    Data point set has the following structure:
+    [
+        DataPointSet(
+            statement="{value} in {date} between {country}", 
+            dataPoints=[  # Two main data point of comparison
+                DataPointValue(tableName="Primary energy consumption", 
+                    country="United States", 
+                    date="2020", 
+                    category="Nuclear energy consumption", 
+                    value=1.0,
+                    unit="TWh"),
+                DataPointValue(tableName="Primary energy consumption", 
+                    country="United Kingdom", 
+                    date="2020", 
+                    category="Nuclear energy consumption", 
+                    value=1.0,
+                    unit="TWh"),
+            ],
+            fields = [Field(
+                name="date",
+                type="temporal",
+                timeUnit= "year"
+            ),
+            Field(
+                name="country",
+                type="nominal"
+            )],
+            ranges = Ranges(
+                date = { # will take the lowest and highest date from the data points
+                    'date_start': {
+                        'label': '2015', 
+                        'value': '2015'
+                    },
+                    'date_end': {
+                        'label': '2022',
+                        'value': '2022'
+                    }
+                },
+                values = [{ # will take numerical data attribute from the attribute sets
+                    'label': 'Nuclear energy consumption', # human readable column name
+                    'value': 'nuclear_consumption', # name in the table
+                    'unit': 'TWh', # unit of measurement
+                    'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).' # where the data came from
+                }, {
+                    'label': 'Coal energy consumption',
+                    'value': 'coal_consumption',
+                    'unit': 'TWh',
+                    'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).'
+                },
+                {
+                    'label': 'Solar energy consumption',
+                    'value': 'solar_consumption',
+                    'unit': 'TWh',
+                    'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).'
+                }],
+                country = ['United States', 'United Kingdom', 'Greece', 'Germany', 'South Korea', 'Japan', 'Vietnam'] # will assume that only one of these nominal attribute is present in the claim
+            )
+        )
+    ]
+"""
+
 @app.post("/potential_data_point_sets")
 def potential_data_point_sets(body: UserClaimBody, verbose:bool=False) -> list[DataPointSet]:
-    """
-        Claim map has the following structure:
-
-        claim_map = {
-            "sentence_i": [
-                { # each of the justification corresponds to a dataset
-                    suggestions: [
-                        {
-                            "query": ...,
-                            "visualization": ...,
-                            "reasoning_steps": [...],
-                            "justification": ...
-                        },
-                        {...}
-                    ],
-                    "sub_table": pd.DataFrame(...),
-                    "attributes": [...]
-                },
-                {...}
-            ],
-            "sentence_j": [...],
-            ...
-        }
-    """
+    
     user_claim = body.userClaim.lower()
     pipeline = Pipeline(datasrc="../Datasets")
     
@@ -55,71 +120,6 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False) -> list[D
     # given a table and its attributes, return the data points
     AutoViz = AutomatedViz(table, attributes)
     return AutoViz.retrieve_data_points(text=user_claim)
-
-
-# @app.post("/potential_data_point_sets")
-# def potential_data_point_sets(body: UserClaimBody) -> list[DataPointSet]:
-#     user_claim = body.userClaim
-
-#     test_data = [
-#         DataPointSet(statement="{value} in {date} between {country}", 
-#                     dataPoints=[  # Two main data point of comparison
-#                         DataPointValue(tableName="Primary energy consumption", 
-#                             country="United States", 
-#                             date="2020", 
-#                             category="Nuclear energy consumption", 
-#                             value=1.0,
-#                             unit="TWh"),
-#                         DataPointValue(tableName="Primary energy consumption", 
-#                            country="United Kingdom", 
-#                            date="2020", 
-#                            category="Nuclear energy consumption", 
-#                            value=1.0,
-#                            unit="TWh"),
-#                     ],
-#                     fields = [Field(
-#                         name="date",
-#                         type="temporal",
-#                         timeUnit= "year"
-#                     ),
-#                     Field(
-#                         name="country",
-#                         type="nominal"
-#                     )],
-#                     ranges = Ranges(
-#                         date = { # will take the lowest and highest date from the data points
-#                             'date_start': {
-#                                 'label': '2015', 
-#                                 'value': '2015'
-#                             },
-#                             'date_end': {
-#                                 'label': '2022',
-#                                 'value': '2022'
-#                             }
-#                         },
-#                         values = [{ # will take numerical data attribute from the attribute sets
-#                             'label': 'Nuclear energy consumption', # human readable column name
-#                             'value': 'nuclear_consumption', # name in the table
-#                             'unit': 'TWh', # unit of measurement
-#                             'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).' # where the data came from
-#                         }, {
-#                             'label': 'Coal energy consumption',
-#                             'value': 'coal_consumption',
-#                             'unit': 'TWh',
-#                             'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).'
-#                         },
-#                         {
-#                             'label': 'Solar energy consumption',
-#                             'value': 'solar_consumption',
-#                             'unit': 'TWh',
-#                             'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).'
-#                         }],
-#                         country = ['United States', 'United Kingdom', 'Greece', 'Germany', 'South Korea', 'Japan', 'Vietnam'] # will assume that only one of these nominal attribute is present in the claim
-#                     )
-#                 )
-#     ]
-
-#     return test_data
 
 @app.post("/get_viz_spec")
 def get_viz_spec(body: GetVizSpecBody): # needs update

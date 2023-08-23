@@ -22,7 +22,7 @@ class AutomatedViz(object):
         self.datasrc = datasrc
 
         # lower case the whole dataset
-        self.table = table if table is not None else pd.read_csv(datasrc)
+        self.table = table or pd.read_csv(datasrc)
         # self.table.columns = self.table.columns.str.lower()
         # self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
