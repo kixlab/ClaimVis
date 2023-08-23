@@ -5428,3 +5428,353 @@ INFO:root:Return Value: {'suggestions': [{'query': 'Is the GDP of China larger t
 [16758 rows x 3 columns], 'attributes': ['broad money to total reserves ratio', 'row_id', 'country_name']}
 INFO:root:Execution Time: 2023-08-23 19:23:56
 INFO:root:Token used: 20930
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1154.6330451965332ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4498 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4869 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000213F39BC710>,), {'claim': 'The economy of China is larger than that of France..', 'table':                       country_name  date  ...  Total reserves minus gold (current US$)  Wholesale price index (2010 = 100)
+0      Africa Eastern and Southern  2022  ...                                      NaN                                 NaN
+1      Africa Eastern and Southern  2021  ...                                      NaN                                 NaN
+2      Africa Eastern and Southern  2020  ...                                      NaN                                 NaN
+3      Africa Eastern and Southern  2019  ...                                      NaN                                 NaN
+4      Africa Eastern and Southern  2018  ...                                      NaN                                 NaN
+...                            ...   ...  ...                                      ...                                 ...
+16753                     Zimbabwe  1964  ...                                      NaN                                 NaN
+16754                     Zimbabwe  1963  ...                                      NaN                                 NaN
+16755                     Zimbabwe  1962  ...                                      NaN                                 NaN
+16756                     Zimbabwe  1961  ...                                      NaN                                 NaN
+16757                     Zimbabwe  1960  ...                                      NaN                                 NaN
+
+[16758 rows x 78 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the GDP of China larger than that of France?', 'visualization': 'Show the GDP of China and France.', 'reasoning_steps': ['Q1: What is the GDP of China?', 'Q2: What is the GDP of France?', 'Q3: Is the GDP of China larger than that of France?'], 'justification': "To determine if the GDP of China is larger than that of France, we need to compare their respective GDPs. However, the data for both China's and France's GDPs are currently unavailable. Therefore, without this necessary information, we cannot make a valid comparison or reach a definitive conclusion. Thus, the question of whether China's GDP is larger than France's remains unanswered until the relevant data becomes available."}, {'query': 'Is the total reserves of China larger than that of France?', 'visualization': 'Show the total reserves of China and France.', 'reasoning_steps': ['Q1: What are the total reserves of China?', 'Q2: What are the total reserves of France?', 'Q3: Is the total reserves of China larger than that of France?'], 'justification': 'In order to determine if the total reserves of China are larger than that of France, we need to have information about the total reserves of both countries. The total reserves of China range from 3.42945889387677 to 16.2653195192833. However, the total reserves of France are not provided in the given data. Therefore, we cannot make a comparison until we have the necessary data for France.'}], 'sub_table':        broad money to total reserves ratio row_id                 country_name
+0                                      NaN      0  africa eastern and southern
+1                                      NaN      1  africa eastern and southern
+2                                      NaN      2  africa eastern and southern
+3                                      NaN      3  africa eastern and southern
+4                                      NaN      4  africa eastern and southern
+...                                    ...    ...                          ...
+16753                                  NaN  16753                     zimbabwe
+16754                                  NaN  16754                     zimbabwe
+16755                                  NaN  16755                     zimbabwe
+16756                                  NaN  16756                     zimbabwe
+16757                                  NaN  16757                     zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['broad money to total reserves ratio', 'row_id', 'country_name']}
+INFO:root:Execution Time: 2023-08-23 19:40:11
+INFO:root:Token used: 20159
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1205.3649425506592ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4498 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 5051 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000227904FC750>,), {'claim': 'The economy of China is larger than that of France.', 'table':                       country_name  date  ...  Total reserves minus gold (current US$)  Wholesale price index (2010 = 100)
+0      Africa Eastern and Southern  2022  ...                                      NaN                                 NaN
+1      Africa Eastern and Southern  2021  ...                                      NaN                                 NaN
+2      Africa Eastern and Southern  2020  ...                                      NaN                                 NaN
+3      Africa Eastern and Southern  2019  ...                                      NaN                                 NaN
+4      Africa Eastern and Southern  2018  ...                                      NaN                                 NaN
+...                            ...   ...  ...                                      ...                                 ...
+16753                     Zimbabwe  1964  ...                                      NaN                                 NaN
+16754                     Zimbabwe  1963  ...                                      NaN                                 NaN
+16755                     Zimbabwe  1962  ...                                      NaN                                 NaN
+16756                     Zimbabwe  1961  ...                                      NaN                                 NaN
+16757                     Zimbabwe  1960  ...                                      NaN                                 NaN
+
+[16758 rows x 78 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the GDP of China larger than that of France?', 'visualization': 'Show the GDP of China and France.', 'reasoning_steps': ['Q1: What is the GDP of China?', 'Q2: What is the GDP of France?', 'Q3: Is the GDP of China larger than that of France?'], 'justification': 'To determine which country, China or France, has a greater GDP, we need to compare their GDP values. The GDP of China is 6655936817.83662, while the GDP of France is 2731021241.79207. By comparing these values, we can conclude that the GDP of China is indeed greater than the GDP of France.'}, {'query': 'Is the population of China larger than that of France?', 'visualization': 'Show the population of China and France.', 'reasoning_steps': ['Q1: What is the population of China?', 'Q2: What is the population of France?', 'Q3: Is the population of China larger than that of France?'], 'justification': 'To ascertain the population of China, we must refer to a credible source or database that provides the most current data. Given that the provided table does not contain the required population data for China, it is essential to seek this information from a reliable external source.'}], 'sub_table':       row_id  net migration                 country_name
+0          0            NaN  africa eastern and southern
+1          1      -179444.0  africa eastern and southern
+2          2       -48955.0  africa eastern and southern
+3          3      -187410.0  africa eastern and southern
+4          4      -366105.0  africa eastern and southern
+...      ...            ...                          ...
+16753  16753       -10064.0                     zimbabwe
+16754  16754        -9369.0                     zimbabwe
+16755  16755        -8931.0                     zimbabwe
+16756  16756        -8582.0                     zimbabwe
+16757  16757        -8256.0                     zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['row_id', 'net migration', 'country_name']}
+INFO:root:Execution Time: 2023-08-23 19:43:45
+INFO:root:Token used: 20493
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 898.7360000610352ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4498 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 5259 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000215DA1AE990>,), {'claim': 'the economy of china is larger than that of france.', 'table':                       country_name  date  ...  Total reserves minus gold (current US$)  Wholesale price index (2010 = 100)
+0      Africa Eastern and Southern  2022  ...                                      NaN                                 NaN
+1      Africa Eastern and Southern  2021  ...                                      NaN                                 NaN
+2      Africa Eastern and Southern  2020  ...                                      NaN                                 NaN
+3      Africa Eastern and Southern  2019  ...                                      NaN                                 NaN
+4      Africa Eastern and Southern  2018  ...                                      NaN                                 NaN
+...                            ...   ...  ...                                      ...                                 ...
+16753                     Zimbabwe  1964  ...                                      NaN                                 NaN
+16754                     Zimbabwe  1963  ...                                      NaN                                 NaN
+16755                     Zimbabwe  1962  ...                                      NaN                                 NaN
+16756                     Zimbabwe  1961  ...                                      NaN                                 NaN
+16757                     Zimbabwe  1960  ...                                      NaN                                 NaN
+
+[16758 rows x 78 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the GDP of China larger than that of France?', 'visualization': 'Show the GDP of China and France.', 'reasoning_steps': ['Q1: What is the GDP of China?', 'Q2: What is the GDP of France?', 'Q3: Is the GDP of China larger than that of France?'], 'justification': 'To determine if the GDP of China is greater than the GDP of France, we compare their respective values. The GDP of China is approximately 24.96 trillion, while the GDP of France is approximately 2.97 trillion. Given that 24.96 trillion is indeed greater than 2.97 trillion, we can conclude that the GDP of China is greater than the GDP of France.'}, {'query': 'Is the total reserves of China larger than that of France?', 'visualization': 'Show the total reserves of China and France.', 'reasoning_steps': ['Q1: What are the total reserves of China?', 'Q2: What are the total reserves of France?', 'Q3: Is the total reserves of China larger than that of France?'], 'justification': "In order to determine if the total reserves of China are larger than that of France, we need to compare their respective values. However, the given data does not provide the total reserves of France. The total reserves of China range from 3.42945889387677 to 16.2653195192833, while the total reserves of France are not provided ([]). Therefore, without the total reserves of France, we cannot determine if China's reserves are larger."}], 'sub_table':        broad money to total reserves ratio                 country_name row_id
+0                                      NaN  africa eastern and southern      0
+1                                      NaN  africa eastern and southern      1
+2                                      NaN  africa eastern and southern      2
+3                                      NaN  africa eastern and southern      3
+4                                      NaN  africa eastern and southern      4
+...                                    ...                          ...    ...
+16753                                  NaN                     zimbabwe  16753
+16754                                  NaN                     zimbabwe  16754
+16755                                  NaN                     zimbabwe  16755
+16756                                  NaN                     zimbabwe  16756
+16757                                  NaN                     zimbabwe  16757
+
+[16758 rows x 3 columns], 'attributes': ['broad money to total reserves ratio', 'country_name', 'row_id']}
+INFO:root:Execution Time: 2023-08-23 19:58:44
+INFO:root:Token used: 21033
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1980.6749820709229ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002076689E990>,), {'claim': 'United States produced more coal than Asia from 2010.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States produce more coal than Asia in 2010?', 'visualization': 'Show the coal production of the United States and Asia in 2010.', 'reasoning_steps': ['Q1: What is the coal production of the United States in 2010?', 'Q2: What is the coal production of Asia in 2010?', 'Q3: Did the United States produce more coal than Asia in 2010?', 'Q4: Did the United States produce more coal than Asia in 2010?'], 'justification': "Since we lack the data for coal production in the United States and Asia in 2010, we cannot make a definitive comparison between the two regions' coal production for that year."}], 'sub_table':                       country_name  electricity production from coal sources (% of total)                 country_name
+0      africa eastern and southern                                                NaN      africa eastern and southern
+1      africa eastern and southern                                                NaN      africa eastern and southern
+2      africa eastern and southern                                                NaN      africa eastern and southern
+3      africa eastern and southern                                                NaN      africa eastern and southern
+4      africa eastern and southern                                                NaN      africa eastern and southern
+...                            ...                                                ...                              ...
+16753                     zimbabwe                                                NaN                         zimbabwe
+16754                     zimbabwe                                                NaN                         zimbabwe
+16755                     zimbabwe                                                NaN                         zimbabwe
+16756                     zimbabwe                                                NaN                         zimbabwe
+16757                     zimbabwe                                                NaN                         zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['country_name', 'electricity production from coal sources (% of total)', 'country_name']}
+INFO:root:Execution Time: 2023-08-23 20:06:03
+INFO:root:Token used: 10509
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 2030.2000045776367ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1919.8908805847168ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000235515CC710>,), {'claim': 'United States produced more coal than Asia from 2010.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States produce more coal than Asia in 2010?', 'visualization': 'Show the coal production of the United States and Asia in 2010.', 'reasoning_steps': ['Q1: What is the coal production of the United States in 2010?', 'Q2: What is the coal production of Asia in 2010?', 'Q3: Did the United States produce more coal than Asia in 2010?', 'Q4: Did the United States produce more coal than Asia in 2010?'], 'justification': 'To determine the coal production of the United States in 2010, we need specific data on the coal production of the United States in that year. However, the table provided does not include this specific data. Therefore, we cannot determine the coal production of the United States in 2010 based on the given table.'}], 'sub_table':        electricity production from coal sources (% of total)                 country_name                 country_name
+0                                                    NaN      africa eastern and southern  africa eastern and southern
+1                                                    NaN      africa eastern and southern  africa eastern and southern
+2                                                    NaN      africa eastern and southern  africa eastern and southern
+3                                                    NaN      africa eastern and southern  africa eastern and southern
+4                                                    NaN      africa eastern and southern  africa eastern and southern
+...                                                  ...                              ...                          ...
+16753                                                NaN                         zimbabwe                     zimbabwe
+16754                                                NaN                         zimbabwe                     zimbabwe
+16755                                                NaN                         zimbabwe                     zimbabwe
+16756                                                NaN                         zimbabwe                     zimbabwe
+16757                                                NaN                         zimbabwe                     zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['electricity production from coal sources (% of total)', 'country_name', 'country_name']}
+INFO:root:Execution Time: 2023-08-23 20:37:58
+INFO:root:Token used: 10645
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1036.4480018615723ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1312.2739791870117ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000206F1A3C710>,), {'claim': 'United States produced more coal than Asia from 2010.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States produce more coal than Asia in 2010?', 'visualization': 'Show the coal production of the United States and Asia in 2010.', 'reasoning_steps': ['Q1: What is the coal production of the United States in 2010?', 'Q2: What is the coal production of Asia in 2010?', 'Q3: Did the United States produce more coal than Asia in 2010?', 'Q4: Did the United States produce more coal than Asia in 2010?'], 'justification': 'In order to determine whether the United States produced more coal than Asia in 2010, we need to compare their respective coal production figures. However, the data provided only gives ranges, not specific amounts. To make a sound conclusion, we need the exact coal production figures for both the United States and Asia in 2010. Once we have these figures, we can accurately compare and determine which region produced more coal.'}], 'sub_table':                       country_name  electricity production from coal sources (% of total)                 country_name
+0      africa eastern and southern                                                NaN      africa eastern and southern
+1      africa eastern and southern                                                NaN      africa eastern and southern
+2      africa eastern and southern                                                NaN      africa eastern and southern
+3      africa eastern and southern                                                NaN      africa eastern and southern
+4      africa eastern and southern                                                NaN      africa eastern and southern
+...                            ...                                                ...                              ...
+16753                     zimbabwe                                                NaN                         zimbabwe
+16754                     zimbabwe                                                NaN                         zimbabwe
+16755                     zimbabwe                                                NaN                         zimbabwe
+16756                     zimbabwe                                                NaN                         zimbabwe
+16757                     zimbabwe                                                NaN                         zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['country_name', 'electricity production from coal sources (% of total)', 'country_name']}
+INFO:root:Execution Time: 2023-08-23 20:41:51
+INFO:root:Token used: 10900
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1007.3099136352539ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001E57017C750>,), {'claim': 'United States produced more coal than Asia from 2010.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States produce more coal than Asia in 2010?', 'visualization': 'Show the coal production of the United States and Asia in 2010.', 'reasoning_steps': ['Q1: What is the coal production of the United States in 2010?', 'Q2: What is the coal production of Asia in 2010?', 'Q3: Did the United States produce more coal than Asia in 2010?', 'Q4: Did the United States produce more coal than Asia in 2010?'], 'justification': "To determine the coal production of the United States in 2010, we need specific data on the United States' coal production for that year. However, the table provided does not include this specific data. Therefore, we cannot determine the coal production of the United States in 2010 based on the given table."}], 'sub_table':        electricity production from coal sources (% of total)                 country_name                 country_name
+0                                                    NaN      africa eastern and southern  africa eastern and southern
+1                                                    NaN      africa eastern and southern  africa eastern and southern
+2                                                    NaN      africa eastern and southern  africa eastern and southern
+3                                                    NaN      africa eastern and southern  africa eastern and southern
+4                                                    NaN      africa eastern and southern  africa eastern and southern
+...                                                  ...                              ...                          ...
+16753                                                NaN                         zimbabwe                     zimbabwe
+16754                                                NaN                         zimbabwe                     zimbabwe
+16755                                                NaN                         zimbabwe                     zimbabwe
+16756                                                NaN                         zimbabwe                     zimbabwe
+16757                                                NaN                         zimbabwe                     zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['electricity production from coal sources (% of total)', 'country_name', 'country_name']}
+INFO:root:Execution Time: 2023-08-23 20:48:02
+INFO:root:Token used: 10486
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1948.0140209197998ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1136.795997619629ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000128D819C750>,), {'claim': 'United States produced more coal than Asia from 2010.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States produce more coal than Asia in 2010?', 'visualization': 'Show the coal production of the United States and Asia in 2010.', 'reasoning_steps': ['Q1: What is the coal production of the United States in 2010?', 'Q2: What is the coal production of Asia in 2010?', 'Q3: Did the United States produce more coal than Asia in 2010?', 'Q4: Did the United States produce more coal than Asia in 2010?'], 'justification': 'Since the data for coal production of the United States and Asia in 2010 is not currently available, we cannot definitively determine if the United States produced more coal than Asia in that year. However, we might be able to make an educated guess based on data from surrounding years or by using statistical methods to estimate the missing data.'}], 'sub_table':                       country_name  electricity production from coal sources (% of total)
+0      africa eastern and southern                                                NaN    
+1      africa eastern and southern                                                NaN    
+2      africa eastern and southern                                                NaN    
+3      africa eastern and southern                                                NaN    
+4      africa eastern and southern                                                NaN    
+...                            ...                                                ...    
+16753                     zimbabwe                                                NaN    
+16754                     zimbabwe                                                NaN    
+16755                     zimbabwe                                                NaN    
+16756                     zimbabwe                                                NaN    
+16757                     zimbabwe                                                NaN    
+
+[16758 rows x 2 columns], 'attributes': ['country_name', 'electricity production from coal sources (% of total)']}
+INFO:root:Execution Time: 2023-08-23 20:54:53
+INFO:root:Token used: 10459
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1069.3750381469727ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1295.1359748840332ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 952.5928497314453ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 935.4991912841797ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 920.3100204467773ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1183.9780807495117ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 2242.851972579956ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001E204E4CC10>,), {'claim': 'United States produced more coal than Asia from 2010.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States produce more coal than Asia in 2010?', 'visualization': 'Show the coal production of the United States and Asia in 2010.', 'reasoning_steps': ['Q1: What is the coal production of the United States in 2010?', 'Q2: What is the coal production of Asia in 2010?', 'Q3: Did the United States produce more coal than Asia in 2010?', 'Q4: Did the United States produce more coal than Asia in 2010?'], 'justification': 'To ascertain whether the United States produced more coal than Asia in 2010, we require data on the coal production of both regions for that year. However, this data is currently unavailable for both the United States and Asia. Therefore, without this information, we cannot definitively determine which region produced more coal in 2010.'}], 'sub_table':        electricity production from oil, gas and coal sources (% of total)  ...  electricity production from hydroelectric sources (% of total)
+0                                                    NaN                   ...                                                NaN             
+1                                                    NaN                   ...                                                NaN             
+2                                                    NaN                   ...                                                NaN             
+3                                                    NaN                   ...                                                NaN             
+4                                                    NaN                   ...                                                NaN             
+...                                                  ...                   ...                                                ...             
+16753                                                NaN                   ...                                                NaN             
+16754                                                NaN                   ...                                                NaN             
+16755                                                NaN                   ...                                                NaN             
+16756                                                NaN                   ...                                                NaN             
+16757                                                NaN                   ...                                                NaN             
+
+[16758 rows x 12 columns], 'attributes': ['electricity production from oil, gas and coal sources (% of total)', 'electricity production from nuclear sources (% of total)', 'co2 emissions from gaseous fuel consumption (% of total)', 'electricity production from coal sources (% of total)', 'country_name', 'electricity production from natural gas sources (% of total)', 'co2 emissions from liquid fuel consumption (kt)', 'electricity production from oil sources (% of total)', 'electricity production from renewable sources, excluding hydroelectric (% of total)', 'electricity production from renewable sources, excluding hydroelectric (kwh)', 'electricity production from coal sources (% of total)', 'electricity production from hydroelectric sources (% of total)']}
+INFO:root:Execution Time: 2023-08-23 22:17:17
+INFO:root:Token used: 11116
