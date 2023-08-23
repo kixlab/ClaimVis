@@ -23,29 +23,29 @@ class AutomatedViz(object):
 
         # lower case the whole dataset
         self.table = table if table is not None else pd.read_csv(datasrc)
-        self.table.columns = self.table.columns.str.lower()
-        self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
+        # self.table.columns = self.table.columns.str.lower()
+        # self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
         self.attributes = attributes or list(self.table.columns)
         
-        # initialize NL4DV
-        label_attribute = None
-        dependency_parser_config = {
-                "name": "corenlp-server", 
-                "url": "http://localhost:9000",
-            }
+        # # initialize NL4DV
+        # label_attribute = None
+        # dependency_parser_config = {
+        #         "name": "corenlp-server", 
+        #         "url": "http://localhost:9000",
+        #     }
 
-        self.nl4dv = NL4DV(
-                        verbose=False, 
-                        debug=True, 
-                        data_url=self.datasrc, 
-                        data_value=table,
-                        label_attribute=label_attribute, 
-                        dependency_parser_config=dependency_parser_config
-                    )
-        self.query_processor = self.nl4dv.query_genie_instance
-        self.attribute_processor = self.nl4dv.attribute_genie_instance
-        self.data_processor = self.nl4dv.data_genie_instance
+        # self.nl4dv = NL4DV(
+        #                 verbose=False, 
+        #                 debug=True, 
+        #                 data_url=self.datasrc, 
+        #                 data_value=table,
+        #                 label_attribute=label_attribute, 
+        #                 dependency_parser_config=dependency_parser_config
+        #             )
+        # self.query_processor = self.nl4dv.query_genie_instance
+        # self.attribute_processor = self.nl4dv.attribute_genie_instance
+        # self.data_processor = self.nl4dv.data_genie_instance
 
         # initialize AnsParser
         self.parser = AnsParser()

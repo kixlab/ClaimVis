@@ -52,7 +52,7 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False) -> list[D
     table, attributes = reason["sub_table"], reason["attributes"]
     if verbose: print(table, attributes)
 
-    # given a table and its attributes, return 
+    # given a table and its attributes, return the data points
     AutoViz = AutomatedViz(table, attributes)
     return AutoViz.retrieve_data_points(text=user_claim)
 
