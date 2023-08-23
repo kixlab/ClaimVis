@@ -103,7 +103,20 @@ class TableReasoner(object):
             table=table
         )
 
-        return self.parser.parse_gen_query(suggestions[0])
+        queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
+    
+        # further process the attributes
+        for idx, attr in enumerate(attributes):
+            # fuzzy match when GPT hallucinating attributes
+            if attr not in table.columns: 
+                similar_attr = max(table.columns, key=lambda col: fuzz.ratio(col, attr))
+                attributes[idx] = similar_attr
+            
+            # # find the span of each attribute within the claim
+            # attr_positions = [(claim.index(attr), claim.index(attr) + len(attr)) for attr in attributes]
+            # print(f"Attribute positions: {attr_positions}")
+        
+        return queries, vis_tasks, reasons, attributes
     
     def _decompose_query(self, query: str):
         """
@@ -224,6 +237,17 @@ class TableReasoner(object):
             # transpose sqlss
             sqlss = list(map(list, zip(*sqlss)))
         
+        def process_ans(ans: list):
+            try:
+                if len(ans) > 30:
+                    # sometimes the answer is too long to fit into the prompt
+                    ans = [x for x in ans if not math.isnan(x) and isinstance(x, (int, float))] 
+                    return f"Ranging from {str(min(ans))} to {str(max(ans))}"
+                return str(ans)
+            except Exception as e:
+                if verbose: print(e)
+                return []
+                
         for idx, (sqls, query) in enumerate(zip(sqlss, queries)):
             if verbose: print(f"Q{idx+1}: {query}\nGenerated SQLs: {sqls}")
 
@@ -232,7 +256,7 @@ class TableReasoner(object):
                 try:
                     res = db.execute_query(sql.lower())
                     refined_res = self.parser.parse_sql_result(res)
-                    if verbose: print(f"refined: {refined_res}")
+                    # if verbose: print(f"refined: {refined_res}")
                     preds.append(refined_res)
                 except Exception as e:
                     continue
@@ -241,7 +265,9 @@ class TableReasoner(object):
                 nsqls=sqls,
                 pred_answer_list=preds
             )
+            top_ans = process_ans(top_ans)
             if verbose: print(f"A{idx+1}: {top_ans}\n{'*'*50}")
+
             answers.append(top_ans)
 
         return answers
@@ -296,9 +322,12 @@ class TableReasoner(object):
         )
         # take first query from suggested queries
         suggestions, vis_tasks, _, attributes = self._suggest_queries(claim, table=db.get_table_df())
-        
-        if attributes: db.update_table(map(lambda x: x.lower(), attributes)) # update table with relevant attributes
-        if verbose: print(f"generated queries: {suggestions}")
+                    
+        # update table with relevant attributes
+        db.update_table(map(lambda x: x.lower(), attributes)) 
+        if verbose: 
+            print(f"generated queries: {suggestions}")
+            if attributes: print(f"mapped attributes: {attributes}")
 
         reason_map = []
         for idx, query in enumerate(suggestions):
@@ -315,19 +344,8 @@ class TableReasoner(object):
                             fuzzy_match=fuzzy_match
                         )
             
-            def process_ans(ans: list):
-                try:
-                    if len(ans) > 30:
-                        # sometimes the answer is too long to fit into the prompt
-                        ans = [x for x in ans if not math.isnan(x)] 
-                        return f"Ranging from {str(min(ans))} to {str(max(ans))}"
-                    return str(ans)
-                except Exception as e:
-                    if verbose: print(e)
-                    return []
-            
             sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
-            answers = [f"A{i+1}: {process_ans(ans)}" for i, ans in enumerate(answers)]
+            answers = [f"A{i+1}: {ans}" for i, ans in enumerate(answers)]
             # generate prompt for decomposed reasoning
             dec_prompt = build_dec_prompt(sub_queries, answers)
             # if verbose: print(f"full prompt:\n{dec_prompt}")

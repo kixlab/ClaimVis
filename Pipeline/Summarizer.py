@@ -21,17 +21,18 @@ class Summarizer:
         
         # prepare metadata of the file
         meta_data = self.get_meta_data(df, file_name)
+        print(meta_data)
         message = f"Given the meta data of a dataset, describe what the dataset is about, including its data attributes' data type and description:\n\n{str(meta_data)}"
         # Maximum length of the generated summary
         max_summary_length = 3000
 
         # Call GPT-3.5 to generate the summary
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # Use the appropriate engine name
+            model="gpt-3.5-turbo-16k",  # Use the appropriate engine name
             messages=[
                 {"role":"user", "content": message}
             ],
-            max_tokens=max_summary_length
+            # max_tokens=max_summary_length
         )
 
         return response['choices'][0]['message']['content']

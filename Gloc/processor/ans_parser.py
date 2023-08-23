@@ -82,3 +82,8 @@ class AnsParser(object):
         
         return match.group(1) if match else None
     
+    def parse_unit(self, message: str):
+        match = re.search(r'\((.*?)\)', message)
+        
+        return match.group(1) if match else None
+    

@@ -1,6 +1,11 @@
-from pydantic import BaseModel, create_model
+# from pydantic import BaseModel, create_model
 from enum import Enum
 from typing import Dict
+from pydantic import BaseModel as PydanticBaseModel
+
+class BaseModel(PydanticBaseModel):
+    class Config:
+        arbitrary_types_allowed = True
 
 class DataTableEnum(str, Enum):
     fixed: str = "fixed"
@@ -15,6 +20,7 @@ class OptionProps(BaseModel):
 class Field(BaseModel):
     name: str
     type: str
+    timeUnit: str = None
 
 class DateRange(BaseModel):
     date_start: OptionProps
@@ -23,12 +29,13 @@ class DateRange(BaseModel):
 class Ranges(BaseModel):
     date: DateRange
     values: list[OptionProps]
+    otherFields: Dict[str, list]
 
 class DataPoint(BaseModel):
     tableName: str
-    country: str
     date: str
     category: str
+    otherFields: Dict[str, any]
 
 class DataPointValue(DataPoint):
     value: float
@@ -42,6 +49,7 @@ class DataPointSet(BaseModel):
 
 class UserClaimBody(BaseModel):
     userClaim: str
+    paragraph: str = None
 
 class GetVizSpecBody(BaseModel):
     userClaim: str

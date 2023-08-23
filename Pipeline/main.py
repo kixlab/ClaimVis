@@ -67,7 +67,7 @@ class Pipeline(object):
     
     def create_trial(self, claim:str):
         pipeline = Pipeline(datasrc="../Datasets")
-        claim_map, claims = pipeline.run(claim, False)
+        claim_map, claims = pipeline.run(claim)
         reason = claim_map[claims[0]][0] # only take the first dataset
         vis_task, sub_table = reason["suggestions"][0]["visualization"], reason["sub_table"]
 
@@ -121,10 +121,10 @@ class Pipeline(object):
 
 if __name__ == "__main__":
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "The United States has the highest coal production in the world."
+    text = "United State has the highest energy consumption in 2011."
     
     # try:
-    pipeline.create_trial(text)
+    pipeline.run(text)
     # except Exception as e:
     #     print(e)
         

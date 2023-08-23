@@ -4582,3 +4582,675 @@ INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have 
 INFO:root:Execution Time: 2023-08-22 11:45:23
 INFO:root:Token used: 11760
 INFO:lida.utils:Dataframe has more than 4500 rows. We will sample 4500 rows.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1141.0799026489258ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4282 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001C2831EC1D0>,), {'claim': '70% of the world energy consumption comes from United State.', 'table':        row_id        country  year iso_code  ...  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN  ...               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN  ...               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN  ...               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN  ...               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN  ...               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...  ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  ...               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  ...               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  ...               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  ...               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  ...               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'What is the percentage of world energy consumption that comes from the United States?', 'visualization': 'Show a pie chart representing the energy consumption share of different countries.', 'reasoning_steps': ['Q1: What is the energy consumption of the United States?', 'Q2: What is the total world energy consumption?', "Q3: What is the percentage of the United States' energy consumption out of the total world energy consumption?", 'Q4: What is the percentage of world energy consumption that comes from the United States?'], 'justification': "The energy consumption of the United States is a positive value, let's assume it ranges from X to Y. The total world energy consumption is 1054893.5590000052. To determine the percentage of the United States' energy consumption out of the total world energy consumption, we can calculate the ratio of the energy consumption of the United States to the total world energy consumption and multiply by 100. This percentage ranges from (X/1054893.5590000052)*100 to (Y/1054893.5590000052)*100. However, since the exact energy consumption of the United States is not provided, we cannot provide the precise percentage of world energy consumption that comes from the United States."}], 'sub_table':              country  energy_cons_change_twh
+0      asean (ember)                     NaN
+1      asean (ember)                     NaN
+2      asean (ember)                     NaN
+3      asean (ember)                     NaN
+4      asean (ember)                     NaN
+...              ...                     ...
+22007       zimbabwe                   6.553
+22008       zimbabwe                  -5.689
+22009       zimbabwe                  -4.123
+22010       zimbabwe                   0.149
+22011       zimbabwe                     NaN
+
+[22012 rows x 2 columns], 'attributes': ['country', 'energy_cons_change_twh']}
+INFO:root:Execution Time: 2023-08-22 15:49:00
+INFO:root:Token used: 11822
+INFO:lida.utils:Dataframe has more than 4500 rows. We will sample 4500 rows.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 858.4551811218262ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4282 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002ACD7BFC710>,), {'claim': '70% of the world energy consumption comes from United State.', 'table':        row_id        country  year iso_code  ...  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN  ...               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN  ...               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN  ...               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN  ...               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN  ...               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...  ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  ...               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  ...               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  ...               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  ...               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  ...               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'What is the percentage of world energy consumption that comes from the United States?', 'visualization': 'Show a pie chart representing the energy consumption share of different countries.', 'reasoning_steps': ['Q1: What is the energy consumption of the United States?', 'Q2: What is the total world energy consumption?', "Q3: What is the percentage of the United States' energy consumption out of the total world energy consumption?", 'Q4: What is the percentage of world energy consumption that comes from the United States?'], 'justification': "The energy consumption of the United States is within a certain range. The total world energy consumption is 1054893.5590000052. To determine the percentage of the United States' energy consumption out of the total world energy consumption, we can calculate the ratio of the energy consumption of the United States to the total world energy consumption and multiply by 100. However, since the specific value for the United States' energy consumption is not provided, only a range, an exact answer cannot be given."}], 'sub_table':              country  energy_cons_change_twh
+0      asean (ember)                     NaN
+1      asean (ember)                     NaN
+2      asean (ember)                     NaN
+3      asean (ember)                     NaN
+4      asean (ember)                     NaN
+...              ...                     ...
+22007       zimbabwe                   6.553
+22008       zimbabwe                  -5.689
+22009       zimbabwe                  -4.123
+22010       zimbabwe                   0.149
+22011       zimbabwe                     NaN
+
+[22012 rows x 2 columns], 'attributes': ['country', 'energy_cons_change_twh']}
+INFO:root:Execution Time: 2023-08-22 15:56:52
+INFO:root:Token used: 11902
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1000.1449584960938ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4282 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001DBB904C710>,), {'claim': '70% of the world energy consumption comes from United State.', 'table':        row_id        country  year iso_code  ...  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN  ...               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN  ...               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN  ...               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN  ...               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN  ...               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...  ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  ...               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  ...               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  ...               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  ...               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  ...               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'What is the percentage of world energy consumption that comes from the United States?', 'visualization': 'Show a pie chart representing the energy consumption share of different countries.', 'reasoning_steps': ['Q1: What is the energy consumption of the United States?', 'Q2: What is the total world energy consumption?', "Q3: What is the percentage of the United States' energy consumption out of the total world energy consumption?", 'Q4: What is the percentage of world energy consumption that comes from the United States?'], 'justification': "The energy consumption of the United States is a certain value within a given range. The total world energy consumption is known. To determine the percentage of the United States' energy consumption out of the total world energy consumption, we can calculate the ratio of the energy consumption of the United States to the total world energy consumption and multiply by 100. However, without the specific value for the United States' energy consumption, an exact answer cannot be given."}], 'sub_table':              country  energy_cons_change_pct
+0      asean (ember)                     NaN
+1      asean (ember)                     NaN
+2      asean (ember)                     NaN
+3      asean (ember)                     NaN
+4      asean (ember)                     NaN
+...              ...                     ...
+22007       zimbabwe                  14.479
+22008       zimbabwe                 -10.982
+22009       zimbabwe                  -8.940
+22010       zimbabwe                   0.354
+22011       zimbabwe                     NaN
+
+[22012 rows x 2 columns], 'attributes': ['country', 'energy_cons_change_pct']}
+INFO:root:Execution Time: 2023-08-22 16:06:55
+INFO:root:Token used: 11514
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1185.7330799102783ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4283 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000180C17CC710>,), {'claim': '70% of the world primary energy consumption comes from United State.', 'table':        row_id        country  year iso_code  ...  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN  ...               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN  ...               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN  ...               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN  ...               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN  ...               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...  ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  ...               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  ...               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  ...               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  ...               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  ...               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'What is the percentage of world primary energy consumption that comes from the United States?', 'visualization': 'Show a pie chart representing the distribution of primary energy consumption among different countries.', 'reasoning_steps': ['Q1: What is the primary energy consumption of the United States?', 'Q2: What is the total world primary energy consumption?', "Q3: What is the percentage of the United States' primary energy consumption out of the total world primary energy consumption?", 'Q4: What is the percentage of world primary energy consumption that comes from the United States?'], 'justification': "The primary energy consumption of the United States ranges from approximately 14440 to 27064. Globally, the total world primary energy consumption is around 56782273. To determine the percentage of the United States' primary energy consumption out of the total world primary energy consumption, we divide the primary energy consumption of the United States by the total world primary energy consumption. This results in a range of approximately 0.025 to 0.048. To express this as a percentage, we multiply by 100, indicating that the United States accounts for approximately 2.5% to 4.8% of the world's primary energy consumption."}], 'sub_table':        primary_energy_consumption        country
+0                             NaN  asean (ember)
+1                             NaN  asean (ember)
+2                             NaN  asean (ember)
+3                             NaN  asean (ember)
+4                             NaN  asean (ember)
+...                           ...            ...
+22007                      51.809       zimbabwe
+22008                      46.120       zimbabwe
+22009                      41.997       zimbabwe
+22010                      42.145       zimbabwe
+22011                         NaN       zimbabwe
+
+[22012 rows x 2 columns], 'attributes': ['primary_energy_consumption', 'country']}
+INFO:root:Execution Time: 2023-08-22 16:08:45
+INFO:root:Token used: 12153
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 2364.2799854278564ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001ED2B33C710>,), {'claim': '70% of energy consumption of France was from nuclear energy in 2020.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'What percentage of energy consumption in France was from nuclear energy in 2020?', 'visualization': 'Show a pie chart representing the energy consumption in France in 2020, with the percentage of nuclear energy highlighted.', 'reasoning_steps': ['Q1: What was the total energy consumption in France in 2020?', 'Q2: What was the energy consumption from nuclear energy in France in 2020?', 'Q3: What percentage of the total energy consumption in France in 2020 was from nuclear energy?', 'Q4: What percentage of energy consumption in France was from nuclear energy in 2020?'], 'justification': 'To determine the percentage of energy consumption in France that was from nuclear energy in 2020, we need two pieces of data: the total energy consumption in France for that year and the amount of energy consumed that came from nuclear sources. Once we have these figures, we can calculate the percentage by dividing the nuclear energy consumption by the total energy consumption and multiplying by 100. However, without the specific data, we cannot perform this calculation at the moment.'}], 'sub_table':     row_id
+0        0
+1        1
+2        2
+3        3
+4        4
+..     ...
+704    704
+705    705
+706    706
+707    707
+708    708
+
+[709 rows x 1 columns], 'attributes': ['row_id']}
+INFO:root:Execution Time: 2023-08-22 16:51:49
+INFO:root:Token used: 7435
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 2043.7180995941162ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4282 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1142.7829265594482ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4280 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 2007.5359344482422ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000020D100EC750>,), {'claim': 'China has the highest combustion rate in the entire world.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does China have the highest worldwide gross in the table?', 'visualization': 'Show a bar chart representing the worldwide gross of each country.', 'reasoning_steps': ['Q1: What is the worldwide gross of China?', 'Q2: What is the worldwide gross of each country in the table?', 'Q3: Which country has the highest worldwide gross in the table?', 'Q4: Does China have the highest worldwide gross in the table?'], 'justification': 'To determine if China has the highest worldwide gross, we need to compare the worldwide gross of China with that of every other country. However, without this data, we cannot definitively conclude whether China has the highest worldwide gross or not. Therefore, the question of whether China has the highest worldwide gross in the table remains unanswered until we have the necessary data.'}], 'sub_table':      worldwide gross                               title
+0           25728961                 from dusk till dawn
+1          148345997                        broken arrow
+2           20278055                           city hall
+3           38623460                       happy gilmore
+4           51204567                               fargo
+..               ...                                 ...
+704           493296  the city of your final destination
+705        310885538                          robin hood
+706        753830280                           inception
+707         43149143         scott pilgrim vs. the world
+708         33180607                            the town
+
+[709 rows x 2 columns], 'attributes': ['worldwide gross', 'title']}
+INFO:root:Execution Time: 2023-08-22 18:20:15
+INFO:root:Token used: 7033
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 2206.317901611328ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000258F173C750>,), {'claim': 'No movie has higher budget than The Phantom.', 'table':                                   Title  Worldwide Gross  ...  Rotten Tomatoes Rating  IMDB Rating
+0                   From Dusk Till Dawn         25728961  ...                      63          7.1
+1                          Broken Arrow        148345997  ...                      55          5.8
+2                             City Hall         20278055  ...                      55          6.1
+3                         Happy Gilmore         38623460  ...                      58          6.9
+4                                 Fargo         51204567  ...                      94          8.3
+..                                  ...              ...  ...                     ...          ...
+704  The City of Your Final Destination           493296  ...                      40          6.6
+705                          Robin Hood        310885538  ...                      43          6.9
+706                           Inception        753830280  ...                      87          9.1
+707         Scott Pilgrim vs. The World         43149143  ...                      81          8.1
+708                            The Town         33180607  ...                      84          8.7
+
+[709 rows x 10 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does any movie have a higher production budget than The Phantom?', 'visualization': 'Show a bar chart representing the production budget of each movie.', 'reasoning_steps': ['Q1: What is the production budget of The Phantom?', 'Q2: What is the highest production budget among all movies?', 'Q3: Does any movie have a higher production budget than The Phantom?'], 'justification': 'The production budget of The Phantom is 45000000. Among all movies, the highest production budget is 300000000. Therefore, since the production budget of The Phantom is lower than the highest production budget among all movies, there are movies with a higher production budget than The Phantom.'}, {'query': 'Does any movie have a higher worldwide gross than The Phantom?', 'visualization': 'Show a bar chart representing the worldwide gross of each movie.', 'reasoning_steps': ['Q1: What is the worldwide gross of The Phantom?', 'Q2: What is the highest worldwide gross among all movies?', 'Q3: Does any movie have a higher worldwide gross than The Phantom?'], 'justification': 'The worldwide gross of a movie is a significant factor in determining its success. The Phantom, for instance, has a worldwide gross of 17220599. However, the highest worldwide gross among all movies is 1842879955. Therefore, it is evident that there is at least one movie that has achieved a higher worldwide gross than The Phantom.'}], 'sub_table':      production budget  worldwide gross                               title
+0             20000000         25728961                 from dusk till dawn
+1             65000000        148345997                        broken arrow
+2             40000000         20278055                           city hall
+3             10000000         38623460                       happy gilmore
+4              7000000         51204567                               fargo
+..                 ...              ...                                 ...
+704            8300000           493296  the city of your final destination
+705          210000000        310885538                          robin hood
+706          160000000        753830280                           inception
+707           85000000         43149143         scott pilgrim vs. the world
+708           37000000         33180607                            the town
+
+[709 rows x 3 columns], 'attributes': ['production budget', 'worldwide gross', 'title']}
+INFO:root:Execution Time: 2023-08-22 18:22:04
+INFO:root:Token used: 12679
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 953.0558586120605ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1198.124885559082ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1167.9039001464844ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1466.0959243774414ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1485.1930141448975ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4282 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, you requested 4302 tokens (3802 in the messages, 500 in the completion). Please reduce the length of the messages or completion." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001C71E242310>,), {'claim': 'United State has the highest primary energy consumption in 2020.', 'table':        row_id        country  year iso_code  ...  wind_electricity  wind_energy_per_capita  wind_share_elec  wind_share_energy
+0           0  ASEAN (Ember)  2000      NaN  ...               0.0                     NaN              0.0                NaN
+1           1  ASEAN (Ember)  2001      NaN  ...               0.0                     NaN              0.0                NaN
+2           2  ASEAN (Ember)  2002      NaN  ...               0.0                     NaN              0.0                NaN
+3           3  ASEAN (Ember)  2003      NaN  ...               0.0                     NaN              0.0                NaN
+4           4  ASEAN (Ember)  2004      NaN  ...               0.0                     NaN              0.0                NaN
+...       ...            ...   ...      ...  ...               ...                     ...              ...                ...
+22007   22007       Zimbabwe  2018      ZWE  ...               0.0                     NaN              0.0                NaN
+22008   22008       Zimbabwe  2019      ZWE  ...               0.0                     NaN              0.0                NaN
+22009   22009       Zimbabwe  2020      ZWE  ...               0.0                     NaN              0.0                NaN
+22010   22010       Zimbabwe  2021      ZWE  ...               0.0                     NaN              0.0                NaN
+22011   22011       Zimbabwe  2022      ZWE  ...               NaN                     NaN              NaN                NaN
+
+[22012 rows x 130 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have the highest primary energy consumption in 2020?', 'visualization': 'Show a bar chart representing the primary energy consumption of each country in 2020.', 'reasoning_steps': ['Q1: What is the primary energy consumption of the United States in 2020?', 'Q2: What is the primary energy consumption of other countries in 2020?', 'Q3: Does any other country have a higher primary energy consumption than the United States in 2020?', 'Q4: Does the United States have the highest primary energy consumption in 2020?'], 'justification': 'In 2020, the United States had a primary energy consumption of 24603.098. When compared to other countries, which had a range of primary energy consumption from 0.0 to 158359.453, it is clear that there is at least one country with a higher primary energy consumption than the United States. Therefore, the United States did not have the highest primary energy consumption in 2020.'}], 'sub_table':        year  primary_energy_consumption        country
+0      2000                         NaN  asean (ember)
+1      2001                         NaN  asean (ember)
+2      2002                         NaN  asean (ember)
+3      2003                         NaN  asean (ember)
+4      2004                         NaN  asean (ember)
+...     ...                         ...            ...
+22007  2018                      51.809       zimbabwe
+22008  2019                      46.120       zimbabwe
+22009  2020                      41.997       zimbabwe
+22010  2021                      42.145       zimbabwe
+22011  2022                         NaN       zimbabwe
+
+[22012 rows x 3 columns], 'attributes': ['year', 'primary_energy_consumption', 'country']}
+INFO:root:Execution Time: 2023-08-22 18:26:30
+INFO:root:Token used: 12451
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1273.244857788086ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002744BBC7B10>,), {'claim': 'United State has the highest income per capita in 2020.', 'table':                       country_name  ...  Survey mean consumption or income per capita, total population (2017 PPP $ per day)
+0      Africa Eastern and Southern  ...                                                NaN                                  
+1      Africa Eastern and Southern  ...                                                NaN                                  
+2      Africa Eastern and Southern  ...                                                NaN                                  
+3      Africa Eastern and Southern  ...                                                NaN                                  
+4      Africa Eastern and Southern  ...                                                NaN                                  
+...                            ...  ...                                                ...                                  
+16753                     Zimbabwe  ...                                                NaN                                  
+16754                     Zimbabwe  ...                                                NaN                                  
+16755                     Zimbabwe  ...                                                NaN                                  
+16756                     Zimbabwe  ...                                                NaN                                  
+16757                     Zimbabwe  ...                                                NaN                                  
+
+[16758 rows x 31 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have the highest income per capita in 2020?', 'visualization': 'Show a bar chart representing the income per capita of each country in 2020.', 'reasoning_steps': ['Q1: What is the income per capita of the United States in 2020?', 'Q2: What is the income per capita of other countries in 2020?', 'Q3: Which country has the highest income per capita in 2020?', 'Q4: Does the United States have the highest income per capita in 2020?'], 'justification': 'To determine if the United States had the highest income per capita in 2020, we must compare it to the income per capita of other countries. The income per capita of the United States in 2020 was 88.01. However, the income per capita of other countries in 2020 ranged from 5.08 to 93.12. Therefore, the United States did not have the highest income per capita in 2020, as Luxembourg had a higher income per capita of 93.12.'}], 'sub_table':        survey mean consumption or income per capita, total population (2017 ppp $ per day)  ...                 country_name
+0                                                    NaN                                    ...  africa eastern and southern
+1                                                    NaN                                    ...  africa eastern and southern
+2                                                    NaN                                    ...  africa eastern and southern
+3                                                    NaN                                    ...  africa eastern and southern
+4                                                    NaN                                    ...  africa eastern and southern
+...                                                  ...                                    ...                          ...
+16753                                                NaN                                    ...                     zimbabwe
+16754                                                NaN                                    ...                     zimbabwe
+16755                                                NaN                                    ...                     zimbabwe
+16756                                                NaN                                    ...                     zimbabwe
+16757                                                NaN                                    ...                     zimbabwe
+
+[16758 rows x 4 columns], 'attributes': ['survey mean consumption or income per capita, total population (2017 ppp $ per day)', 'date', 'survey mean consumption or income per capita, total population (2017 ppp $ per day)', 'country_name']}
+INFO:root:Execution Time: 2023-08-22 20:26:42
+INFO:root:Token used: 9397
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1287.4979972839355ms.
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1154.9131870269775ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000012C9729C710>,), {'claim': 'Newzealand has higher electricity consumption than India from 2017 to 2020.', 'table':                       country_name  date  ...  Net ODA provided, total (constant 2020 US$)  Net ODA provided, total (current US$)
+0      Africa Eastern and Southern  2022  ...                                          NaN                                    NaN
+1      Africa Eastern and Southern  2021  ...                                          NaN                                    NaN
+2      Africa Eastern and Southern  2020  ...                                          NaN                                    NaN
+3      Africa Eastern and Southern  2019  ...                                          NaN                                    NaN
+4      Africa Eastern and Southern  2018  ...                                          NaN                                    NaN
+...                            ...   ...  ...                                          ...                                    ...
+16753                     Zimbabwe  1964  ...                                          NaN                                    NaN
+16754                     Zimbabwe  1963  ...                                          NaN                                    NaN
+16755                     Zimbabwe  1962  ...                                          NaN                                    NaN
+16756                     Zimbabwe  1961  ...                                          NaN                                    NaN
+16757                     Zimbabwe  1960  ...                                          NaN                                    NaN
+
+[16758 rows x 7 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does New Zealand have higher electricity consumption than India from 2017 to 2020?', 'visualization': 'Show the electricity consumption of New Zealand and India from 2017 to 2020.', 'reasoning_steps': ['Q1: What is the electricity consumption of New Zealand from 2017 to 2020?', 'Q2: What is the electricity consumption of India from 2017 to 2020?', 'Q3: Is the electricity consumption of New Zealand higher than India from 2017 to 2020?', 'Q4: Does New Zealand have higher electricity consumption than India from 2017 to 2020?'], 'justification': 'Without the data for the electricity consumption of New Zealand from 2017 to 2020 (A1), and the data for the electricity consumption of India during the same period (A2), it is not possible to compare the electricity consumption of the two countries (A3). Therefore, a conclusion about whether New Zealand has a higher electricity consumption than India cannot be drawn (A4).'}], 'sub_table':        date                 country_name                 country_name
+0      2022  africa eastern and southern  africa eastern and southern
+1      2021  africa eastern and southern  africa eastern and southern
+2      2020  africa eastern and southern  africa eastern and southern
+3      2019  africa eastern and southern  africa eastern and southern
+4      2018  africa eastern and southern  africa eastern and southern
+...     ...                          ...                          ...
+16753  1964                     zimbabwe                     zimbabwe
+16754  1963                     zimbabwe                     zimbabwe
+16755  1962                     zimbabwe                     zimbabwe
+16756  1961                     zimbabwe                     zimbabwe
+16757  1960                     zimbabwe                     zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['date', 'country_name', 'country_name']}
+INFO:root:Execution Time: 2023-08-22 20:31:23
+INFO:root:Token used: 7429
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1286.388874053955ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4503 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001982F26C710>,), {'claim': 'Newzealand has higher nuclear energy consumption than Australia in 2019.', 'table':                       country_name  ...  Urban population living in areas where elevation is below 5 meters (% of total population)
+0      Africa Eastern and Southern  ...                                                NaN                                         
+1      Africa Eastern and Southern  ...                                                NaN                                         
+2      Africa Eastern and Southern  ...                                                NaN                                         
+3      Africa Eastern and Southern  ...                                                NaN                                         
+4      Africa Eastern and Southern  ...                                                NaN                                         
+...                            ...  ...                                                ...                                         
+16753                     Zimbabwe  ...                                                NaN                                         
+16754                     Zimbabwe  ...                                                NaN                                         
+16755                     Zimbabwe  ...                                                NaN                                         
+16756                     Zimbabwe  ...                                                NaN                                         
+16757                     Zimbabwe  ...                                                NaN                                         
+
+[16758 rows x 78 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does New Zealand have higher nuclear energy consumption than Australia in 2019?', 'visualization': 'Show the nuclear energy consumption of New Zealand and Australia in 2019.', 'reasoning_steps': ['Q1: What is the nuclear energy consumption of New Zealand in 2019?', 'Q2: What is the nuclear energy consumption of Australia in 2019?', 'Q3: Is the nuclear energy consumption of New Zealand higher than Australia in 2019?', 'Q4: Does New Zealand have higher nuclear energy consumption than Australia in 2019?'], 'justification': "Since the nuclear energy consumption of both New Zealand and Australia in 2019 is not available, we cannot directly compare their nuclear energy consumption. However, it's worth noting that New Zealand has a nuclear-free policy, and Australia, while it has no nuclear power stations, does have a nuclear research reactor and uranium mines."}], 'sub_table':        date  energy use (kg of oil equivalent) per $1,000 gdp (constant 2017 ppp)                 country_name
+0      2022                                                NaN                     africa eastern and southern
+1      2021                                                NaN                     africa eastern and southern
+2      2020                                                NaN                     africa eastern and southern
+3      2019                                                NaN                     africa eastern and southern
+4      2018                                                NaN                     africa eastern and southern
+...     ...                                                ...                                             ...
+16753  1964                                                NaN                                        zimbabwe
+16754  1963                                                NaN                                        zimbabwe
+16755  1962                                                NaN                                        zimbabwe
+16756  1961                                                NaN                                        zimbabwe
+16757  1960                                                NaN                                        zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['date', 'energy use (kg of oil equivalent) per $1,000 gdp (constant 2017 ppp)', 'country_name']}
+INFO:root:Execution Time: 2023-08-22 20:34:26
+INFO:root:Token used: 12222
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 2163.5148525238037ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4503 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000017CB8CC0890>,), {'claim': 'United State has an increasing trend of nuclear energy consumption from 2010.', 'table':                       country_name  ...  Urban population living in areas where elevation is below 5 meters (% of total population)
+0      Africa Eastern and Southern  ...                                                NaN                                         
+1      Africa Eastern and Southern  ...                                                NaN                                         
+2      Africa Eastern and Southern  ...                                                NaN                                         
+3      Africa Eastern and Southern  ...                                                NaN                                         
+4      Africa Eastern and Southern  ...                                                NaN                                         
+...                            ...  ...                                                ...                                         
+16753                     Zimbabwe  ...                                                NaN                                         
+16754                     Zimbabwe  ...                                                NaN                                         
+16755                     Zimbabwe  ...                                                NaN                                         
+16756                     Zimbabwe  ...                                                NaN                                         
+16757                     Zimbabwe  ...                                                NaN                                         
+
+[16758 rows x 78 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have an increasing trend of nuclear energy consumption from 2010?', 'visualization': 'Show a line chart representing the nuclear energy consumption of the United States from 2010.', 'reasoning_steps': ['Q1: What was the nuclear energy consumption in the United States in 2010?', 'Q2: What is the current nuclear energy consumption in the United States?', 'Q3: Is the current nuclear energy consumption higher than the consumption in 2010?', 'Q4: Does the United States have an increasing trend of nuclear energy consumption from 2010?'], 'justification': 'The nuclear energy consumption in the United States in 2010 was 19.2664460909667. However, the current nuclear energy consumption in the United States is not available. Therefore, it is impossible to determine if the current consumption is higher than the consumption in 2010. Additionally, without data on the current consumption, we cannot ascertain if there is an increasing trend from 2010. Thus, the question of whether the United States has an increasing trend of nuclear energy consumption from 2010 remains unanswered.'}], 'sub_table':                       country_name  date  electricity production from nuclear sources (% of total)
+0      africa eastern and southern  2022                                                NaN       
+1      africa eastern and southern  2021                                                NaN       
+2      africa eastern and southern  2020                                                NaN       
+3      africa eastern and southern  2019                                                NaN       
+4      africa eastern and southern  2018                                                NaN       
+...                            ...   ...                                                ...       
+16753                     zimbabwe  1964                                                NaN       
+16754                     zimbabwe  1963                                                NaN       
+16755                     zimbabwe  1962                                                NaN       
+16756                     zimbabwe  1961                                                NaN       
+16757                     zimbabwe  1960                                                NaN       
+
+[16758 rows x 3 columns], 'attributes': ['country_name', 'date', 'electricity production from nuclear sources (% of total)']}
+INFO:root:Execution Time: 2023-08-22 20:36:20
+INFO:root:Token used: 12622
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1308.9299201965332ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002CC1FAEC750>,), {'claim': 'United State has a bigger production of coal in 2012 than in 2005.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States have a higher production of coal in 2012 compared to 2005?', 'visualization': 'Show the production of coal in the United States in 2012 and 2005.', 'reasoning_steps': ['Q1: What was the coal production of the United States in 2012?', 'Q2: What was the coal production of the United States in 2005?', 'Q3: Did the United States have a higher production of coal in 2012 compared to 2005?'], 'justification': 'To determine if the United States had a higher production of coal in 2012 compared to 2005, we need to examine the available data. Unfortunately, the coal production data for both 2012 and 2005 is not available. Therefore, we cannot make a direct comparison between the two years based on the current data. However, we could potentially obtain this information from other reliable sources or use related data, such as the trend of coal production in surrounding years, to make an educated guess.'}], 'sub_table':                       country_name  electricity production from coal sources (% of total)                 country_name
+0      africa eastern and southern                                                NaN      africa eastern and southern
+1      africa eastern and southern                                                NaN      africa eastern and southern
+2      africa eastern and southern                                                NaN      africa eastern and southern
+3      africa eastern and southern                                                NaN      africa eastern and southern
+4      africa eastern and southern                                                NaN      africa eastern and southern
+...                            ...                                                ...                              ...
+16753                     zimbabwe                                                NaN                         zimbabwe
+16754                     zimbabwe                                                NaN                         zimbabwe
+16755                     zimbabwe                                                NaN                         zimbabwe
+16756                     zimbabwe                                                NaN                         zimbabwe
+16757                     zimbabwe                                                NaN                         zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['country_name', 'electricity production from coal sources (% of total)', 'country_name']}
+INFO:root:Execution Time: 2023-08-22 20:39:04
+INFO:root:Token used: 10151
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1020.4761028289795ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000023DC702C750>,), {'claim': 'United State has a bigger production of coal in 2012 than in 2005.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States have a higher production of coal in 2012 compared to 2005?', 'visualization': 'Show the production of coal in the United States in 2012 and 2005.', 'reasoning_steps': ['Q1: What was the coal production of the United States in 2012?', 'Q2: What was the coal production of the United States in 2005?', 'Q3: Did the United States have a higher production of coal in 2012 compared to 2005?'], 'justification': 'The table does not provide information about the coal production of the United States for the years 2005 and 2012. Therefore, it is not possible to determine from the given table whether the United States had a higher production of coal in 2012 compared to 2005.'}], 'sub_table':        electricity production from coal sources (% of total)                 country_name                 country_name
+0                                                    NaN      africa eastern and southern  africa eastern and southern
+1                                                    NaN      africa eastern and southern  africa eastern and southern
+2                                                    NaN      africa eastern and southern  africa eastern and southern
+3                                                    NaN      africa eastern and southern  africa eastern and southern
+4                                                    NaN      africa eastern and southern  africa eastern and southern
+...                                                  ...                              ...                          ...
+16753                                                NaN                         zimbabwe                     zimbabwe
+16754                                                NaN                         zimbabwe                     zimbabwe
+16755                                                NaN                         zimbabwe                     zimbabwe
+16756                                                NaN                         zimbabwe                     zimbabwe
+16757                                                NaN                         zimbabwe                     zimbabwe
+
+[16758 rows x 3 columns], 'attributes': ['electricity production from coal sources (% of total)', 'country_name', 'country_name']}
+INFO:root:Execution Time: 2023-08-22 20:40:23
+INFO:root:Token used: 9973
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1335.270881652832ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000024510BCE9D0>,), {'claim': 'United State has a bigger production of coal in 2012 than in 2005.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States have a higher production of coal in 2012 compared to 2005?', 'visualization': 'Show the production of coal in the United States in 2012 and 2005.', 'reasoning_steps': ['Q1: What was the coal production of the United States in 2012?', 'Q2: What was the coal production of the United States in 2005?', 'Q3: Did the United States have a higher production of coal in 2012 compared to 2005?'], 'justification': 'To determine if the United States had a higher production of coal in 2012 compared to 2005, we need to examine the available data. However, the coal production data for both 2012 and 2005 is not currently available. Therefore, based on the information at hand, we cannot make a comparison between the coal production of the two years.'}], 'sub_table':                       country_name                 country_name  electricity production from coal sources (% of total)
+0      africa eastern and southern  africa eastern and southern                                                NaN    
+1      africa eastern and southern  africa eastern and southern                                                NaN    
+2      africa eastern and southern  africa eastern and southern                                                NaN    
+3      africa eastern and southern  africa eastern and southern                                                NaN    
+4      africa eastern and southern  africa eastern and southern                                                NaN    
+...                            ...                          ...                                                ...    
+16753                     zimbabwe                     zimbabwe                                                NaN    
+16754                     zimbabwe                     zimbabwe                                                NaN    
+16755                     zimbabwe                     zimbabwe                                                NaN    
+16756                     zimbabwe                     zimbabwe                                                NaN    
+16757                     zimbabwe                     zimbabwe                                                NaN    
+
+[16758 rows x 3 columns], 'attributes': ['country_name', 'country_name', 'electricity production from coal sources (% of total)']}
+INFO:root:Execution Time: 2023-08-22 20:41:53
+INFO:root:Token used: 9815
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1144.9530124664307ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000001373CE7C750>,), {'claim': 'United State has the highest energy consumption in 2011.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have the highest energy consumption in 2011?', 'visualization': 'Show a bar chart representing the energy consumption of each country in 2011.', 'reasoning_steps': ['Q1: What is the energy consumption of the United States in 2011?', 'Q2: What is the energy consumption of other countries in 2011?', 'Q3: Which country has the highest energy consumption in 2011?', 'Q4: Does the United States have the highest energy consumption in 2011?'], 'justification': "In 2011, the energy consumption of the United States ranged from 5612.07950307854 to 8438.40307747602. When comparing it to other countries, it's important to consider the energy consumption of each country. If we assume that the energy consumption of Curacao was higher than that of the United States in 2011, then the United States did not have the highest energy consumption that year. However, without specific data for Curacao and other countries, we cannot definitively answer the question of whether the United States had the highest energy consumption in 2011."}], 'sub_table':                       country_name  energy use (kg of oil equivalent per capita)
+0      africa eastern and southern                                           NaN
+1      africa eastern and southern                                           NaN
+2      africa eastern and southern                                           NaN
+3      africa eastern and southern                                           NaN
+4      africa eastern and southern                                           NaN
+...                            ...                                           ...
+16753                     zimbabwe                                           NaN
+16754                     zimbabwe                                           NaN
+16755                     zimbabwe                                           NaN
+16756                     zimbabwe                                           NaN
+16757                     zimbabwe                                           NaN
+
+[16758 rows x 2 columns], 'attributes': ['country_name', 'energy use (kg of oil equivalent per capita)']}
+INFO:root:Execution Time: 2023-08-22 22:50:34
+INFO:root:Token used: 10081
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1200.7830142974854ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000022C3D84C750>,), {'claim': 'United State has the highest energy consumption in 2011.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have the highest energy consumption in 2011?', 'visualization': 'Show a bar chart representing the energy consumption of each country in 2011.', 'reasoning_steps': ['Q1: What is the energy consumption of the United States in 2011?', 'Q2: What is the energy consumption of other countries in 2011?', 'Q3: Which country has the highest energy consumption in 2011?', 'Q4: Does the United States have the highest energy consumption in 2011?'], 'justification': 'In 2011, the energy consumption of the United States ranged from 116.465503720434 to 191.402326547271. Comparatively, the energy consumption of other countries in the same year ranged from 4.44994226601056 to 990.078383770867. Without specific data on individual countries, it cannot be definitively concluded which country had the highest energy consumption in 2011.'}], 'sub_table':        energy use (kg of oil equivalent) per $1,000 gdp (constant 2017 ppp)                 country_name
+0                                                    NaN                     africa eastern and southern
+1                                                    NaN                     africa eastern and southern
+2                                                    NaN                     africa eastern and southern
+3                                                    NaN                     africa eastern and southern
+4                                                    NaN                     africa eastern and southern
+...                                                  ...                                             ...
+16753                                                NaN                                        zimbabwe
+16754                                                NaN                                        zimbabwe
+16755                                                NaN                                        zimbabwe
+16756                                                NaN                                        zimbabwe
+16757                                                NaN                                        zimbabwe
+
+[16758 rows x 2 columns], 'attributes': ['energy use (kg of oil equivalent) per $1,000 gdp (constant 2017 ppp)', 'country_name']}
+INFO:root:Execution Time: 2023-08-22 22:54:38
+INFO:root:Token used: 10866
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: paraphrase-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 885.6310844421387ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002450A4DC750>,), {'claim': 'United State has the highest energy consumption in 2011.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Does the United States have the highest energy consumption in 2011?', 'visualization': 'Show a bar chart representing the energy consumption of each country in 2011.', 'reasoning_steps': ['Q1: What is the energy consumption of the United States in 2011?', 'Q2: What is the energy consumption of other countries in 2011?', 'Q3: Which country has the highest energy consumption in 2011?', 'Q4: Does the United States have the highest energy consumption in 2011?'], 'justification': "In 2011, the energy consumption of the United States was estimated to be between 5612.07950307854 and 8438.40307747602. This is within the global range of energy consumption, which was between 9.57919600295443 and 40710.1121759965. However, without specific data on the energy consumption of each country, we cannot definitively identify which country had the highest energy consumption. While 'curacao' was mentioned as a high energy consumer, without specific figures, we cannot confirm it had the highest consumption in 2011. Therefore, we cannot conclude that the United States did not have the highest energy consumption in 2011 based on the given data."}], 'sub_table':        energy use (kg of oil equivalent per capita)                 country_name
+0                                               NaN  africa eastern and southern
+1                                               NaN  africa eastern and southern
+2                                               NaN  africa eastern and southern
+3                                               NaN  africa eastern and southern
+4                                               NaN  africa eastern and southern
+...                                             ...                          ...
+16753                                           NaN                     zimbabwe
+16754                                           NaN                     zimbabwe
+16755                                           NaN                     zimbabwe
+16756                                           NaN                     zimbabwe
+16757                                           NaN                     zimbabwe
+
+[16758 rows x 2 columns], 'attributes': ['energy use (kg of oil equivalent per capita)', 'country_name']}
+INFO:root:Execution Time: 2023-08-22 23:17:59
+INFO:root:Token used: 10346

@@ -55,6 +55,10 @@ class ClaimDetector():
                 # extract the boundary
                 sentences = [sentence]
                 boundaries_dicts = claim_boundaries_client.run(sentences)
+                for dic in boundaries_dicts:
+                    if dic['span'][0] == dic['span'][1]:
+                        dic['claim'] = sentences[0]
+
                 if verbose:
                     print ('In sentence: '+sentences[0])
                     print ('['+str(boundaries_dicts[0]['span'][0])+', '+str(boundaries_dicts[0]['span'][1])+']: '
