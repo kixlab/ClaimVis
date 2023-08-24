@@ -1,6 +1,7 @@
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from Summarizer import Summarizer
+import pandas as pd
 import json
 import os
 
@@ -9,7 +10,7 @@ class DataMatcher:
         self.summarizer = Summarizer(datasrc=datasrc)
         self.embedder = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') # prepare sentence embedder
         
-        if datasrc: # only if datasrc is provided
+        if datasrc:
             self.datasrc = datasrc
             self.datasets = [filename for filename in os.listdir(self.datasrc) if filename.endswith('.csv')]
 
@@ -30,12 +31,20 @@ class DataMatcher:
                     json.dump(self.description, openfile)
                 openfile.close()
 
-    def find_top_k_datasets(self, claim: str, k: int = 2):
-        # Compute embeddings for the text and dataset descriptions
-        text_embedding = self.embedder.encode([claim])[0]
+    def find_top_k_datasets(self, claim: str, k: int = 2, method: str = "attr"):
+        assert self.datasrc, "Datasrc not specified."
 
-        # Compute cosine similarity between the text and dataset descriptions
-        similarities = cosine_similarity([text_embedding], self.dataset_embeddings)[0]
+        # Compute embeddings for the text and dataset descriptions
+        if method == "cosine":
+            similarities = self.similarity_batch(claim, self.dataset_embeddings)
+        elif method == "idf":
+            similarities = [self.idf_score(claim, self.description[dataset]['description']) for dataset in self.datasets]
+        elif method == "attr":
+            similarities = []
+            for dataset in self.datasets:
+                df = pd.read_csv(f"{self.datasrc}/{dataset}")
+                attributes = list(df.columns)
+                similarities.append(self.attr_score(claim, attributes))
         
         # Combine the dataset names, descriptions, and their corresponding similarities
         result = [(self.description[name]['name'], self.description[name]['description'], similarity) \
@@ -45,7 +54,7 @@ class DataMatcher:
 
         top_k_datasets = result[:k]
 
-        print("Most relevant datasets:")
+        print(f"Most relevant datasets using {method}")
         for dataset_name, _, similarity in top_k_datasets:
             print(f"Dataset: {dataset_name}, Similarity: {similarity:.2f}")
 
@@ -57,13 +66,16 @@ class DataMatcher:
         similarity = cosine_similarity([phrase1_embedding], [phrase2_embedding])[0][0]
         return similarity
     
-    def similarity_batch(self, phrase: str, batch_of_phrases: list[str]):
+    def similarity_batch(self, phrase: str, batch_of_phrases):
         phrase_embedding = self.embedder.encode([phrase])[0]
-        batch_of_embeddings = self.embedder.encode(batch_of_phrases)
+        if isinstance(batch_of_phrases[0], str):
+            batch_of_embeddings = self.embedder.encode(batch_of_phrases)
+        else: # embeddings are already computed
+            batch_of_embeddings = batch_of_phrases
         similarities = cosine_similarity([phrase_embedding], batch_of_embeddings)[0]
         return similarities
 
-    def similarity_idf(self, phrase1: str, phrase2: str):
+    def idf_score(self, phrase1: str, phrase2: str):
         from sklearn.feature_extraction.text import TfidfVectorizer
         
         # Create the Document Term Matrix
@@ -73,12 +85,16 @@ class DataMatcher:
         # Compute the cosine similarity
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
         return similarity
+    
+    def attr_score(self, phrase: str, attributes: list):
+        # Open the datasrc
+        return max(self.similarity_batch(phrase, attributes))
         
 
 if __name__ == "__main__":
     matcher = DataMatcher(datasrc="../Datasets")
     # claim = "The energy consumption level of the US was super bad last year."
     # matcher.find_top_k_datasets(claim, k=2)
-    phrase1 = "2011"
+    phrase1 = "Population age has been decreasing."
     phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
-    print(matcher.similarity_score(phrase1, phrase2))
+    matcher.find_top_k_datasets(phrase1, k=5, method="attr")
