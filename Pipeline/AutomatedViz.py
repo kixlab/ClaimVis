@@ -4,7 +4,6 @@ import spacy
 from spacy import displacy
 from datetime import datetime
 from nltk.corpus import wordnet as wn
-from pycorenlp import StanfordCoreNLP
 from nl4dv import NL4DV
 from nl4dv.utils import helpers
 from nl4dv.utils.constants import attribute_types
