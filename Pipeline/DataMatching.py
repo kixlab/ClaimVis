@@ -5,28 +5,30 @@ import json
 import os
 
 class DataMatcher:
-    def __init__(self, datasrc: str):
+    def __init__(self, datasrc: str=None):
         self.summarizer = Summarizer(datasrc=datasrc)
-        self.datasrc = datasrc
         self.embedder = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') # prepare sentence embedder
-        self.datasets = [filename for filename in os.listdir(self.datasrc) if filename.endswith('.csv')]
+        
+        if datasrc: # only if datasrc is provided
+            self.datasrc = datasrc
+            self.datasets = [filename for filename in os.listdir(self.datasrc) if filename.endswith('.csv')]
 
-        with open(f'{self.datasrc}/description/desc.json', 'r+') as openfile:
-            self.description = json.load(openfile)
+            with open(f'{self.datasrc}/description/desc.json', 'r+') as openfile:
+                self.description = json.load(openfile)
 
-            # prepare dataset embeddings
-            writeflag = False
-            for dataset in self.datasets:
-                if dataset not in self.description:
-                    self.description[dataset] = self.summarizer.summarize(dataset)
-                    writeflag = True
-            self.dataset_embeddings = self.embedder.encode([self.description[dataset] for dataset in self.datasets])
+                # prepare dataset embeddings
+                writeflag = False
+                for dataset in self.datasets:
+                    if dataset not in self.description:
+                        self.description[dataset] = self.summarizer.summarize(dataset)
+                        writeflag = True
+                self.dataset_embeddings = self.embedder.encode([self.description[dataset] for dataset in self.datasets])
 
-            # write summaries back to file
-            if writeflag:
-                openfile.seek(0)
-                json.dump(self.description, openfile)
-            openfile.close()
+                # write summaries back to file
+                if writeflag:
+                    openfile.seek(0)
+                    json.dump(self.description, openfile)
+                openfile.close()
 
     def find_top_k_datasets(self, claim: str, k: int = 2):
         # Compute embeddings for the text and dataset descriptions

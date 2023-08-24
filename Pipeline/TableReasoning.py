@@ -128,17 +128,20 @@ class TableReasoner(object):
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
         attributes_nlp = get_nl4dv_attributes(claim=claim, table=table)
         attributes = list(set(attributes + attributes_nlp))
+        col_set = set(table.columns)
     
         # further process the attributes
         for idx, attr in reversed(list(enumerate(attributes))):
             # fuzzy match when GPT hallucinating attributes
-            if attr not in table.columns: 
+            if attr not in col_set: 
                 similar_attr = max(table.columns, key=lambda col: fuzz.ratio(col, attr))
-                if fuzz.ratio(similar_attr, attr) > 50:
+                if fuzz.ratio(similar_attr, attr) > 50 and similar_attr not in attributes:
                     attributes[idx] = similar_attr
                 else: # delete from tail
                     del attributes[idx]       
 
+        # assert every column name in attribute is unique
+        assert len(attributes) == len(set(attributes)), "Column names in attributes are not unique"        
         return queries, vis_tasks, reasons, attributes
     
     def _decompose_query(self, query: str):
@@ -268,7 +271,7 @@ class TableReasoner(object):
                     return f"Ranging from {str(min(ans))} to {str(max(ans))}"
                 return str(ans)
             except Exception as e:
-                if verbose: print(e)
+                if verbose: print("error with list ans: ", e)
                 return []
                 
         for idx, (sqls, query) in enumerate(zip(sqlss, queries)):
