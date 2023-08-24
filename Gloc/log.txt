@@ -5868,3 +5868,154 @@ INFO:root:Execution Time: 2023-08-24 10:51:11
 INFO:root:Token used: 24770
 INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
 INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1230.7989597320557ms.
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 8931 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 4310 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:openai:error_code=context_length_exceeded error_message="This model's maximum context length is 4097 tokens. However, your messages resulted in 5711 tokens. Please reduce the length of the messages." error_param=messages error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x0000028702923410>,), {'claim': 'employment rate is higher than 5% in china.', 'table':                       country_name  ...  Wage and salaried workers, female (% of female employment) (modeled ILO estimate)
+0      Africa Eastern and Southern  ...                                                NaN                                
+1      Africa Eastern and Southern  ...                                          19.874301                                
+2      Africa Eastern and Southern  ...                                          19.831418                                
+3      Africa Eastern and Southern  ...                                          20.674383                                
+4      Africa Eastern and Southern  ...                                          20.644733                                
+...                            ...  ...                                                ...                                
+16753                     Zimbabwe  ...                                                NaN                                
+16754                     Zimbabwe  ...                                                NaN                                
+16755                     Zimbabwe  ...                                                NaN                                
+16756                     Zimbabwe  ...                                                NaN                                
+16757                     Zimbabwe  ...                                                NaN                                
+
+[16758 rows x 155 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the employment rate in China higher than 5%?', 'visualization': 'Show the employment rate in China.', 'reasoning_steps': ['Q1: What is the employment rate in China?', 'Q2: Is the employment rate in China higher than 5%?'], 'justification': 'The employment rate in China is a significant factor to consider. It ranges from 61.714% to 77.072%, indicating a relatively high level of employment. Therefore, it is accurate to say that the employment rate in China is higher than 5%, as the given range is well above this threshold.'}], 'sub_table':        part time employment, male (% of total male employment)  ...  self-employed, male (% of male employment) (modeled ilo estimate)
+0                                                    NaN        ...                                                NaN                
+1                                                    NaN        ...                                          68.365559                
+2                                                    NaN        ...                                          68.726341                
+3                                                    NaN        ...                                          67.273308                
+4                                                    NaN        ...                                          67.279620                
+...                                                  ...        ...                                                ...                
+16753                                                NaN        ...                                                NaN                
+16754                                                NaN        ...                                                NaN                
+16755                                                NaN        ...                                                NaN                
+16756                                                NaN        ...                                                NaN                
+16757                                                NaN        ...                                                NaN                
+
+[16758 rows x 49 columns], 'attributes': ['part time employment, male (% of total male employment)', 'part time employment, total (% of total employment)', 'labor force participation rate, male (% of male population ages 15-64) (modeled ilo estimate)', 'wage and salaried workers, female (% of female employment) (modeled ilo estimate)', 'country_name', 'labor force participation rate for ages 15-24, male (%) (national estimate)', 'contributing family workers, total (% of total employment) (modeled ilo estimate)', 'employment to population ratio, 15+, male (%) (national estimate)', 'gdp per person employed (constant 2017 ppp $)', 'employers, female (% of female employment) (modeled ilo estimate)', 'vulnerable employment, female (% of female employment) (modeled ilo estimate)', 'labor force participation rate for ages 15-24, female (%) (modeled ilo estimate)', 'employment to population ratio, ages 15-24, total (%) (modeled ilo estimate)', 'labor force participation rate, female (% of female population ages 15+) (national estimate)', 'labor force participation rate, female (% of female population ages 15-64) (modeled ilo estimate)', 'labor force participation rate, male (% of male population ages 15+) (modeled ilo estimate)', 'vulnerable employment, total (% of total employment) (modeled ilo estimate)', 'self-employed, female (% of female employment) (modeled ilo estimate)', 'part time employment, female (% of total female employment)', 'labor force participation rate for ages 15-24, male (%) (modeled ilo estimate)', 'employment to population ratio, 15+, total (%) (national estimate)', 'wage and salaried workers, male (% of male employment) (modeled ilo estimate)', 'labor force participation rate for ages 15-24, total (%) (modeled ilo estimate)', 'wage and salaried workers, total (% of total employment) (modeled ilo estimate)', 'employment to population ratio, 15+, male (%) (modeled ilo estimate)', 'ratio of female to male labor force participation rate (%) (modeled ilo estimate)', 'employment to population ratio, ages 15-24, total (%) (national estimate)', 'contributing family workers, female (% of female employment) (modeled ilo estimate)', 'employers, total (% of total employment) (modeled ilo estimate)', 'labor force participation rate, female (% of female population ages 15+) (modeled ilo estimate)', 'employment to population ratio, ages 15-24, male (%) (modeled ilo estimate)', 'employment to population ratio, ages 15-24, female (%) (modeled ilo estimate)', 'employment to population ratio, 15+, female (%) (modeled ilo estimate)', 'vulnerable employment, male (% of male employment) (modeled ilo estimate)', 'employment to population ratio, 15+, female (%) (national estimate)', 'employment to population ratio, ages 15-24, male (%) (national estimate)', 'labor force participation rate, total (% of total population ages 15+) (national estimate)', 'employers, male (% of male employment) (modeled ilo estimate)', 'contributing family workers, male (% of male employment) (modeled ilo estimate)', 'labor force participation rate for ages 15-24, total (%) (national estimate)', 'labor force participation rate, total (% of total population ages 15+) (modeled ilo estimate)', 'self-employed, total (% of total employment) (modeled ilo estimate)', 'employment to population ratio, ages 15-24, female (%) (national estimate)', 'labor force participation rate, male (% of male population ages 15+) (national estimate)', 'labor force participation rate for ages 15-24, female (%) (national estimate)', 'employment to population ratio, 15+, total (%) (modeled ilo estimate)', 'labor force participation rate, total (% of total population ages 15-64) (modeled ilo estimate)', 'ratio of female to male labor force participation rate (%) (national estimate)', 'self-employed, male (% of male employment) (modeled ilo estimate)']}
+INFO:root:Execution Time: 2023-08-24 11:47:12
+INFO:root:Token used: 21031
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1188.8320446014404ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002618AE51D90>,), {'claim': 'united state consumes more coal than india in 2011.', 'table':                       country_name  ...  Value lost due to electrical outages (% of sales for affected firms)
+0      Africa Eastern and Southern  ...                                                NaN                   
+1      Africa Eastern and Southern  ...                                           7.538889                   
+2      Africa Eastern and Southern  ...                                                NaN                   
+3      Africa Eastern and Southern  ...                                                NaN                   
+4      Africa Eastern and Southern  ...                                                NaN                   
+...                            ...  ...                                                ...                   
+16753                     Zimbabwe  ...                                                NaN                   
+16754                     Zimbabwe  ...                                                NaN                   
+16755                     Zimbabwe  ...                                                NaN                   
+16756                     Zimbabwe  ...                                                NaN                   
+16757                     Zimbabwe  ...                                                NaN                   
+
+[16758 rows x 52 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Did the United States consume more coal than India in 2011?', 'visualization': 'Show the coal consumption of the United States and India in 2011.', 'reasoning_steps': ['Q1: What was the coal consumption of the United States in 2011?', 'Q2: What was the coal consumption of India in 2011?', 'Q3: Did the United States consume more coal than India in 2011?', 'Q4: Did the United States consume more coal than India in 2011?'], 'justification': 'In order to determine whether the United States consumed more coal than India in 2011, we need to compare their respective coal consumption. The coal consumption of the United States in 2011 ranged from 34.2327337278988 to 57.6793133200982. On the other hand, the coal consumption of India in 2011 ranged from 48.3206058349754 to 75.3093989605236. Since the maximum consumption of the United States is less than the minimum consumption of India, we can conclude that India consumed more coal than the United States in 2011.'}], 'sub_table':        electricity production from coal sources (% of total)  ...                 country_name
+0                                                    NaN      ...  africa eastern and southern
+1                                                    NaN      ...  africa eastern and southern
+2                                                    NaN      ...  africa eastern and southern
+3                                                    NaN      ...  africa eastern and southern
+4                                                    NaN      ...  africa eastern and southern
+...                                                  ...      ...                          ...
+16753                                                NaN      ...                     zimbabwe
+16754                                                NaN      ...                     zimbabwe
+16755                                                NaN      ...                     zimbabwe
+16756                                                NaN      ...                     zimbabwe
+16757                                                NaN      ...                     zimbabwe
+
+[16758 rows x 5 columns], 'attributes': ['electricity production from coal sources (% of total)', 'electricity production from oil, gas and coal sources (% of total)', 'gdp per unit of energy use (constant 2017 ppp $ per kg of oil equivalent)', 'gdp per unit of energy use (ppp $ per kg of oil equivalent)', 'country_name']}
+INFO:root:Execution Time: 2023-08-24 12:01:40
+INFO:root:Token used: 11007
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 885.1199150085449ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x00000168AF8BCB90>,), {'claim': 'birth rates are declining worldwide.', 'table':                       country_name  ...  Survey mean consumption or income per capita, total population (2017 PPP $ per day)
+0      Africa Eastern and Southern  ...                                                NaN                                  
+1      Africa Eastern and Southern  ...                                                NaN                                  
+2      Africa Eastern and Southern  ...                                                NaN                                  
+3      Africa Eastern and Southern  ...                                                NaN                                  
+4      Africa Eastern and Southern  ...                                                NaN                                  
+...                            ...  ...                                                ...                                  
+16753                     Zimbabwe  ...                                                NaN                                  
+16754                     Zimbabwe  ...                                                NaN                                  
+16755                     Zimbabwe  ...                                                NaN                                  
+16756                     Zimbabwe  ...                                                NaN                                  
+16757                     Zimbabwe  ...                                                NaN                                  
+
+[16758 rows x 31 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the birth rate declining worldwide?', 'visualization': 'Show a line chart representing the birth rate over time.', 'reasoning_steps': ['Q1: What is the current birth rate worldwide?', 'Q2: What was the birth rate in the past?', 'Q3: Is the current birth rate lower than the past birth rate?', 'Q4: Is the birth rate declining worldwide?'], 'justification': 'To determine if the birth rate is declining worldwide, we need to compare the current birth rate with past birth rates. However, without access to this data, we cannot definitively say whether the birth rate is declining globally. Therefore, to make an accurate assessment, we need to obtain and analyze the relevant birth rate data.'}], 'sub_table': {'data':        date  ...  annualized average growth rate in per capita real survey mean consumption or income, bottom 40% of population (%)
+0      2022  ...                                                NaN                                                                
+1      2021  ...                                                NaN                                                                
+2      2020  ...                                                NaN                                                                
+3      2019  ...                                                NaN                                                                
+4      2018  ...                                                NaN                                                                
+...     ...  ...                                                ...                                                                
+16753  1964  ...                                                NaN                                                                
+16754  1963  ...                                                NaN                                                                
+16755  1962  ...                                                NaN                                                                
+16756  1961  ...                                                NaN                                                                
+16757  1960  ...                                                NaN                                                                
+
+[16758 rows x 3 columns]}, 'attributes': ['date', 'annualized average growth rate in per capita real survey mean consumption or income, total population (%)', 'annualized average growth rate in per capita real survey mean consumption or income, bottom 40% of population (%)']}
+INFO:root:Execution Time: 2023-08-24 12:54:18
+INFO:root:Token used: 9055
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:root:claim_boundaries_client.run = 1160.538911819458ms.
+INFO:root:##############################################################################################################################
+INFO:root:Calling function: reason
+INFO:root:Arguments: (<TableReasoning.TableReasoner object at 0x000002A1800754D0>,), {'claim': 'birth rates are declining worldwide.', 'table':                       country_name  ...  Survey mean consumption or income per capita, total population (2017 PPP $ per day)
+0      Africa Eastern and Southern  ...                                                NaN                                  
+1      Africa Eastern and Southern  ...                                                NaN                                  
+2      Africa Eastern and Southern  ...                                                NaN                                  
+3      Africa Eastern and Southern  ...                                                NaN                                  
+4      Africa Eastern and Southern  ...                                                NaN                                  
+...                            ...  ...                                                ...                                  
+16753                     Zimbabwe  ...                                                NaN                                  
+16754                     Zimbabwe  ...                                                NaN                                  
+16755                     Zimbabwe  ...                                                NaN                                  
+16756                     Zimbabwe  ...                                                NaN                                  
+16757                     Zimbabwe  ...                                                NaN                                  
+
+[16758 rows x 31 columns], 'verbose': True, 'fuzzy_match': True}
+INFO:root:Return Value: {'suggestions': [{'query': 'Is the birth rate declining worldwide?', 'visualization': 'Show a line chart representing the birth rate over time.', 'reasoning_steps': ['Q1: What is the current birth rate worldwide?', 'Q2: What was the birth rate in the past?', 'Q3: Is the current birth rate lower than the past birth rate?', 'Q4: Is the birth rate declining worldwide?'], 'justification': 'To determine if the birth rate is declining worldwide, we need to compare the current birth rate with past birth rates. However, without data on past birth rates, we cannot make a definitive comparison. Therefore, with the available data, we cannot conclusively determine if the birth rate is declining worldwide.'}], 'sub_table': {'data':        date  ...  annualized average growth rate in per capita real survey mean consumption or income, total population (%)
+0      2022  ...                                                NaN                                                        
+1      2021  ...                                                NaN                                                        
+2      2020  ...                                                NaN                                                        
+3      2019  ...                                                NaN                                                        
+4      2018  ...                                                NaN                                                        
+...     ...  ...                                                ...                                                        
+16753  1964  ...                                                NaN                                                        
+16754  1963  ...                                                NaN                                                        
+16755  1962  ...                                                NaN                                                        
+16756  1961  ...                                                NaN                                                        
+16757  1960  ...                                                NaN                                                        
+
+[16758 rows x 3 columns]}, 'attributes': ['date', 'annualized average growth rate in per capita real survey mean consumption or income, bottom 40% of population (%)', 'annualized average growth rate in per capita real survey mean consumption or income, total population (%)']}
+INFO:root:Execution Time: 2023-08-24 12:56:30
+INFO:root:Token used: 9153
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu

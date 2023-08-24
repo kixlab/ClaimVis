@@ -4,7 +4,6 @@ import spacy
 from spacy import displacy
 from datetime import datetime
 from nltk.corpus import wordnet as wn
-from pycorenlp import StanfordCoreNLP
 from nl4dv import NL4DV
 from nl4dv.utils import helpers
 from nl4dv.utils.constants import attribute_types
@@ -19,13 +18,15 @@ from Gloc.processor.ans_parser import AnsParser
 from DataMatching import DataMatcher
 
 class AutomatedViz(object):
-    def __init__(self, datasrc: str = None, table: pd.DataFrame = None, attributes: str = None):
+    def __init__(self, datasrc: str = None, table: dict = None, attributes: str = None, test: bool = False):
         self.datasrc = datasrc
 
-        # lower case the whole dataset
-        self.table = table if not table.empty else pd.read_csv(datasrc)
-        self.table.columns = self.table.columns.str.lower()
-        self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
+        # lower case the whole dataset if it's a test
+        self.table = table["data"] if table else pd.read_csv(datasrc)
+        self.table_name = table["name"] or "table"
+        if test:
+            self.table.columns = self.table.columns.str.lower()
+            self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
         self.attributes = attributes or list(self.table.columns)
         
@@ -142,7 +143,8 @@ class AutomatedViz(object):
                 if fuzz.ratio(ref, str(value)) > 0.8:
                     flag = True
                     break
-            if not flag and fuzz.ratio(ref, attr) <= 0.8:
+            if not flag and fuzz.ratio(ref, attr) <= 0.8 \
+                and self.datamatcher.similarity_score(ref, attr) <= 0.5:
                 response_dict['wrap'] = response_dict['wrap'].replace(f'{{{ref}}}', f'{ref}')
                 response_dict['map'].pop(ref)
             
@@ -171,7 +173,7 @@ class AutomatedViz(object):
                             ))  
             elif helpers.isint(ref) or helpers.isfloat(ref) or isAny(attr, helpers.isint) or isAny(attr, helpers.isfloat):
                 categories.append({
-                    'table_name': "",
+                    'table_name': self.table_name,
                     'label': ref,
                     'value': attr,
                     'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,

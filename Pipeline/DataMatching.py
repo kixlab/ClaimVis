@@ -36,6 +36,7 @@ class DataMatcher:
 
         # Compute cosine similarity between the text and dataset descriptions
         similarities = cosine_similarity([text_embedding], self.dataset_embeddings)[0]
+        
         # Combine the dataset names, descriptions, and their corresponding similarities
         result = [(self.description[name]['name'], self.description[name]['description'], similarity) \
                             for name, similarity in zip(self.datasets, similarities)]
@@ -55,6 +56,24 @@ class DataMatcher:
         phrase2_embedding = self.embedder.encode([phrase2])[0]
         similarity = cosine_similarity([phrase1_embedding], [phrase2_embedding])[0][0]
         return similarity
+    
+    def similarity_batch(self, phrase: str, batch_of_phrases: list[str]):
+        phrase_embedding = self.embedder.encode([phrase])[0]
+        batch_of_embeddings = self.embedder.encode(batch_of_phrases)
+        similarities = cosine_similarity([phrase_embedding], batch_of_embeddings)[0]
+        return similarities
+
+    def similarity_idf(self, phrase1: str, phrase2: str):
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        
+        # Create the Document Term Matrix
+        tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = tfidf_vectorizer.fit_transform([phrase1, phrase2])
+
+        # Compute the cosine similarity
+        similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+        return similarity
+        
 
 if __name__ == "__main__":
     matcher = DataMatcher(datasrc="../Datasets")

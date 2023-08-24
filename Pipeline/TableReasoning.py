@@ -395,7 +395,9 @@ class TableReasoner(object):
         
         return {
             "suggestions": reason_map,
-            "sub_table": db.get_table_df(),
+            "sub_table": {
+                "data": db.get_table_df()
+            },
             "attributes": attributes
         }
 

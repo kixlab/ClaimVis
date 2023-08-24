@@ -60,6 +60,7 @@ class Pipeline(object):
                             verbose=verbose,
                             fuzzy_match=True
                         ))
+                    claim_map[claim][-1]["sub_table"]["name"] = dataset
                     
             claims.append(claim)
                     
