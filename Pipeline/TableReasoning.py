@@ -14,6 +14,8 @@ from Gloc.utils.normalizer import post_process_sql
 from Gloc.nsql.database import NeuralDB
 from Gloc.utils.utils import majority_vote
 from fuzzywuzzy import fuzz
+from nl4dv import NL4DV
+from nl4dv.utils import helpers
 import math
 
 class TableReasoner(object):
@@ -94,6 +96,26 @@ class TableReasoner(object):
                 @explain: a list of exlanation for why the queries are suggested
                 @attributes: list of attribute used in the queries
         """
+        def get_nl4dv_attributes(claim: str, table: pd.DataFrame):
+            # initialize NL4DV
+            dependency_parser_config = {
+                    "name": "corenlp-server", 
+                    "url": "http://localhost:9000",
+                }
+            nl4dv = NL4DV(
+                        data_value=table,
+                        dependency_parser_config=dependency_parser_config
+                    )
+            _attrs_ = nl4dv.attribute_genie_instance
+            _query_ = nl4dv.query_genie_instance
+
+            # get attributes
+            ngrams = _query_.get_query_ngrams(claim)
+            attributes = _attrs_.extract_attributes(ngrams).keys()
+
+            return list(attributes)
+
+
         # suggest different queries in form of "[{query: ...}, {query: ...}}]"
         template = TemplateKey.QUERY_GENERATION_2 if table is None \
                                                 else TemplateKey.QUERY_GENERATION_3
@@ -104,18 +126,22 @@ class TableReasoner(object):
         )
 
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
+        attributes_nlp = get_nl4dv_attributes(claim=claim, table=table)
+        attributes = list(set(attributes + attributes_nlp))
+        col_set = set(table.columns)
     
         # further process the attributes
-        for idx, attr in enumerate(attributes):
+        for idx, attr in reversed(list(enumerate(attributes))):
             # fuzzy match when GPT hallucinating attributes
-            if attr not in table.columns: 
+            if attr not in col_set: 
                 similar_attr = max(table.columns, key=lambda col: fuzz.ratio(col, attr))
-                attributes[idx] = similar_attr
-            
-            # # find the span of each attribute within the claim
-            # attr_positions = [(claim.index(attr), claim.index(attr) + len(attr)) for attr in attributes]
-            # print(f"Attribute positions: {attr_positions}")
-        
+                if fuzz.ratio(similar_attr, attr) > 50 and similar_attr not in attributes:
+                    attributes[idx] = similar_attr
+                else: # delete from tail
+                    del attributes[idx]       
+
+        # assert every column name in attribute is unique
+        assert len(attributes) == len(set(attributes)), "Column names in attributes are not unique"        
         return queries, vis_tasks, reasons, attributes
     
     def _decompose_query(self, query: str):
@@ -245,7 +271,7 @@ class TableReasoner(object):
                     return f"Ranging from {str(min(ans))} to {str(max(ans))}"
                 return str(ans)
             except Exception as e:
-                if verbose: print(e)
+                if verbose: print("error with list ans: ", e)
                 return []
                 
         for idx, (sqls, query) in enumerate(zip(sqlss, queries)):
@@ -266,7 +292,7 @@ class TableReasoner(object):
                 pred_answer_list=preds
             )
             top_ans = process_ans(top_ans)
-            if verbose: print(f"A{idx+1}: {top_ans}\n{'*'*50}")
+            if verbose: print(f"A{idx+1}: {top_ans}\n{'*'*75}")
 
             answers.append(top_ans)
 
@@ -302,16 +328,11 @@ class TableReasoner(object):
                             table=table,
                             question=query,
                         )
-            dec_prompt.extend([{
-                "role": "user", 
-                "content": "\n".join(sub_queries)
-                },{
-                "role": "assistant", 
-                "content": "\n".join(answers)
-                },{
-                "role": "user",
-                "content": sub_queries[-1]
-            }])
+            dec_prompt.extend([
+                { "role": "user", "content": "\n".join(sub_queries) },
+                { "role": "assistant", "content": "\n".join(answers) },
+                { "role": "user", "content": sub_queries[-1] }
+            ])
             return dec_prompt
             
         db = NeuralDB(
@@ -324,7 +345,8 @@ class TableReasoner(object):
         suggestions, vis_tasks, _, attributes = self._suggest_queries(claim, table=db.get_table_df())
                     
         # update table with relevant attributes
-        db.update_table(map(lambda x: x.lower(), attributes)) 
+        if attributes: 
+            db.update_table(map(lambda x: x.lower(), attributes)) 
         if verbose: 
             print(f"generated queries: {suggestions}")
             if attributes: print(f"mapped attributes: {attributes}")
@@ -369,7 +391,7 @@ class TableReasoner(object):
                 "justification": evaluation,
             })
 
-        if verbose: print(f"final justifications: {reason_map}")
+        if verbose: print(f"final justifications: {reason_map}\n{'@'*75}")
         
         return {
             "suggestions": reason_map,

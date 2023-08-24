@@ -38,6 +38,8 @@ def retry(
             raise ValueError('No more retries') from e
         except RuntimeError as e: # context overshot
           kwargs["engine"] = Model.GPT3_16k
+        except KeyError as e: # service unavailable
+          pass
           
 
 
@@ -97,6 +99,9 @@ def _call_openai(
     raise ValueError('RateLimitError') from e
   except openai.error.InvalidRequestError as e:
     raise RuntimeError('InvalidRequestError') from e
+  except openai.error.ServiceUnavailableError as e:
+    time.sleep(10)
+    raise KeyError('ServiceUnavailableError') from e
 
 def call_model(
     model,

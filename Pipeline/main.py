@@ -121,7 +121,7 @@ class Pipeline(object):
 
 if __name__ == "__main__":
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "United State has the highest energy consumption in 2011."
+    text = "United States produced more coal than Asia from 2010."
     
     # try:
     pipeline.run(text)
