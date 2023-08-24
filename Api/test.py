@@ -4,6 +4,7 @@ import spacy
 from spacy import displacy
 from datetime import datetime
 from nltk.corpus import wordnet as wn
+from pycorenlp import StanfordCoreNLP
 from nl4dv import NL4DV
 from nl4dv.utils import helpers
 from nl4dv.utils.constants import attribute_types
@@ -15,43 +16,39 @@ import nltk
 import re
 from models import *
 from Gloc.processor.ans_parser import AnsParser
-from DataMatching import DataMatcher
 
 class AutomatedViz(object):
-    def __init__(self, datasrc: str = None, table: dict = None, attributes: str = None, test: bool = False):
+    def __init__(self, datasrc: str = None, table: pd.DataFrame = None, attributes: str = None):
         self.datasrc = datasrc
 
-        # lower case the whole dataset if it's a test
-        self.table = table["data"] if table else pd.read_csv(datasrc)
-        self.table_name = table["name"] or "table"
-        if test:
-            self.table.columns = self.table.columns.str.lower()
-            self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
+        # lower case the whole dataset
+        self.table = table if table is not None else pd.read_csv(datasrc)
+        self.table.columns = self.table.columns.str.lower()
+        self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
         self.attributes = attributes or list(self.table.columns)
         
-        # # initialize NL4DV
-        # label_attribute = None
-        # dependency_parser_config = {
-        #         "name": "corenlp-server", 
-        #         "url": "http://localhost:9000",
-        #     }
+        # initialize NL4DV
+        label_attribute = None
+        dependency_parser_config = {
+                "name": "corenlp-server", 
+                "url": "http://localhost:9000",
+            }
 
-        # self.nl4dv = NL4DV(
-        #                 verbose=False, 
-        #                 debug=True, 
-        #                 data_url=self.datasrc, 
-        #                 data_value=table,
-        #                 label_attribute=label_attribute, 
-        #                 dependency_parser_config=dependency_parser_config
-        #             )
-        # self.query_processor = self.nl4dv.query_genie_instance
-        # self.attribute_processor = self.nl4dv.attribute_genie_instance
-        # self.data_processor = self.nl4dv.data_genie_instance
+        self.nl4dv = NL4DV(
+                        verbose=False, 
+                        debug=True, 
+                        data_url=self.datasrc, 
+                        data_value=table,
+                        label_attribute=label_attribute, 
+                        dependency_parser_config=dependency_parser_config
+                    )
+        self.query_processor = self.nl4dv.query_genie_instance
+        self.attribute_processor = self.nl4dv.attribute_genie_instance
+        self.data_processor = self.nl4dv.data_genie_instance
 
         # initialize AnsParser
         self.parser = AnsParser()
-        self.datamatcher = DataMatcher()
 
     def tag_date_time(self, text: str, verbose: bool = False):
         # Parse date time from the claim
@@ -115,7 +112,7 @@ class AutomatedViz(object):
 
     def tag_attribute_gpt(self, text: str):
         message = [
-            {"role": "system", "content": """Given a list of attributes and a claim, please wrap the relevant references in the claim to the attributes with curly braces and return a map of references to the MOST SIMILAR attributes. For example, if the claim is 'The United State has the highest energy consumption in 2022.', and the attributes are ['country', 'energy consumption per capita', 'year'], then the output should be 
+            {"role": "system", "content": """Given a list of attributes and a claim, please wrap the relevant references in the claim to the attributes with curly braces and return a map of references to corresponding attributes. For example, if the claim is 'The United State has the highest energy consumption in 2022.', and the attributes are ['country', 'energy consumption per capita', 'year'], then the output should be 
              {
                 "wrap": 'The {United State} has the highest {energy consumption} in {2022}.',
                 "map": {
@@ -124,8 +121,7 @@ class AutomatedViz(object):
                     "2022": "year"
                 }
             }
-            DO NOT CHANGE or ADD any word within the wrap text except for curly braces.
-            DO NOT CREATE new attributes that are not in the list of attributes."""},
+            DO NOT CHANGE or ADD any word within the wrap except for curly braces."""},
             {"role": "user", "content": f"claim: {text.lower()}\nattributes: {self.attributes}"},
         ]
         response = call_model(
@@ -135,6 +131,8 @@ class AutomatedViz(object):
                         max_decode_steps=200,
                         samples=1
                     )[0]
+        # print(response)
+
         # parse the response
         response_dict = json.loads(response)
         for ref, attr in response_dict['map'].copy().items():
@@ -143,8 +141,7 @@ class AutomatedViz(object):
                 if fuzz.ratio(ref, str(value)) > 0.8:
                     flag = True
                     break
-            if not flag and fuzz.ratio(ref, attr) <= 0.8 \
-                and self.datamatcher.similarity_score(ref, attr) <= 0.5:
+            if not flag and fuzz.ratio(ref, attr) <= 0.8:
                 response_dict['wrap'] = response_dict['wrap'].replace(f'{{{ref}}}', f'{ref}')
                 response_dict['map'].pop(ref)
             
@@ -152,16 +149,16 @@ class AutomatedViz(object):
     
     def retrieve_data_points(self, text: str, verbose: bool = False):
         tag_map = self.tag_attribute_gpt(text)
-        if verbose: print(f"tagmap: {tag_map}")
 
         def isAny(attr, func: callable):
+            if verbose:
+                print(f"attribute: {attr}. func: {func}")
+                print(any(func(val) for val in self.table[attr].to_list()))
             return any(func(val) for val in self.table[attr].to_list())
 
-        # infer nominal, temporal, and quantitative attributes
         dates, fields, categories, datapoints = None, [], [], []
         for ref, attr in tag_map['map'].items():
-            if helpers.isdate(ref)[0] and self.datamatcher.similarity_score(attr, 'time') > 0.5:
-                if verbose: print(f"date: {helpers.isdate(ref)[1]}")
+            if helpers.isdate(ref)[0]:
                 dates = {
                     "value": attr,
                     "range": self.table[attr].to_list()
@@ -173,40 +170,34 @@ class AutomatedViz(object):
                             ))  
             elif helpers.isint(ref) or helpers.isfloat(ref) or isAny(attr, helpers.isint) or isAny(attr, helpers.isfloat):
                 categories.append({
-                    'table_name': self.table_name,
                     'label': ref,
                     'value': attr,
                     'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,
-                    'provenance': ""
+                    'provenance': "",
+                    'table_name': ""
                 })
             else: # nominal
-                fields.append(Field( name=attr, type="nominal" ))      
+                fields.append(Field(
+                                name=attr,
+                                type="nominal"
+                            ))      
             
-        if verbose:
-            print(f"dates: {dates}")
-            print(f"fields: {fields}")
-            print(f"categories: {categories}")
-
         # final pass to retrieve all datapoints
-        data_fields = list(set(map(lambda x: x.name, fields)))
+        data_fields = list(map(lambda x: x.name, fields))
         for category in categories:
-            for _, row in self.table[data_fields + [category['value']]].iterrows():
+            for row in self.table[data_fields + [category['value']]].itertuples(index=False):
                 datapoints.append(
                     DataPointValue(
                         tableName="",
-                        date=str(row[dates['value']]) if dates else "",
+                        date=str(getattr(row, dates['value'])),
                         category=category['value'],
-                        otherFields={attr: row[attr] for attr in data_fields},
+                        otherFields={attr: getattr(row, attr) for attr in data_fields},
                         unit=category['unit'],
-                        value=row[category['value']]
+                        value=getattr(row, category['value'])
                     )
                 )
         
-        # replace all the wrap text with attribute names
-        for ref, attr in tag_map['map'].items():
-            tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', f'{{{attr}}}')
-        
-        return [DataPointSet(
+        return DataPointSet(
                     statement=tag_map['wrap'],
                     dataPoints=datapoints,
                     fields=fields,
@@ -220,11 +211,11 @@ class AutomatedViz(object):
                                 'label': str(max(dates['range'])),
                                 'value': str(max(dates['range']))
                             }
-                        } if dates else None,
+                        },
                         values = categories,
                         otherFields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
                     )
-                )]
+                )
 
 if __name__ == "__main__":
     # tag_date_time("Some people are crazy enough to get out in the winter, especially november and december where it's freezing code outside.")

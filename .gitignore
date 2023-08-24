@@ -1,3 +1,8 @@
+# /Credentials/*
+/Credentials/info.py
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
 **/__pycache__/*
 Credentials/*
 cache/*
@@ -7,3 +12,4 @@ pyvenv.cfg
 Lib/*
 Other/*
 ```
+Gloc/log.txt
