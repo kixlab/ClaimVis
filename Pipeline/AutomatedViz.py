@@ -155,6 +155,7 @@ class AutomatedViz(object):
         def isAny(attr, func: callable):
             return any(func(val) for val in self.table[attr].to_list())
 
+        # infer nominal, temporal, and quantitative attributes
         dates, fields, categories, datapoints = None, [], [], []
         for ref, attr in tag_map['map'].items():
             if helpers.isdate(ref)[0] and self.datamatcher.similarity_score(attr, 'time') > 0.5:
@@ -198,6 +199,10 @@ class AutomatedViz(object):
                         value=row[category['value']]
                     )
                 )
+        
+        # replace all the wrap text with attribute names
+        for ref, attr in tag_map['map'].items():
+            tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', f'{{{attr}}}')
         
         return [DataPointSet(
                     statement=tag_map['wrap'],
