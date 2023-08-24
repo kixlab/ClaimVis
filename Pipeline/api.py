@@ -49,15 +49,19 @@ df = pd.read_csv("../Datasets/owid-energy-data.csv")
             statement="{value} in {date} between {country}", 
             dataPoints=[  # Two main data point of comparison
                 DataPointValue(tableName="Primary energy consumption", 
-                    country="United States", 
-                    date="2020", 
-                    category="Nuclear energy consumption", 
+                    fields = {
+                        country="United States", 
+                        date="2020", 
+                    }
+                    valueName="Nuclear energy consumption", 
                     value=1.0,
                     unit="TWh"),
                 DataPointValue(tableName="Primary energy consumption", 
-                    country="United Kingdom", 
-                    date="2020", 
-                    category="Nuclear energy consumption", 
+                    fields = {
+                        country="United Kingdom", 
+                        date="2020",
+                    }
+                    valueName="Nuclear energy consumption", 
                     value=1.0,
                     unit="TWh"),
             ],
@@ -71,16 +75,20 @@ df = pd.read_csv("../Datasets/owid-energy-data.csv")
                 type="nominal"
             )],
             ranges = Ranges(
-                date = { # will take the lowest and highest date from the data points
-                    'date_start': {
-                        'label': '2015', 
-                        'value': '2015'
+                fields = {
+                    date = { # will take the lowest and highest date from the data points
+                        'date_start': {
+                            'label': '2015', 
+                            'value': '2015'
+                        },
+                        'date_end': {
+                            'label': '2022',
+                            'value': '2022'
+                        }
                     },
-                    'date_end': {
-                        'label': '2022',
-                        'value': '2022'
-                    }
-                },
+                    country = ['United States', 'United Kingdom', 'Greece', 'Germany', 'South Korea', 'Japan', 'Vietnam'] # will assume that only one of these nominal attribute is present in the claim
+
+                }
                 values = [{ # will take numerical data attribute from the attribute sets
                     'label': 'Nuclear energy consumption', # human readable column name
                     'value': 'nuclear_consumption', # name in the table
@@ -98,7 +106,6 @@ df = pd.read_csv("../Datasets/owid-energy-data.csv")
                     'unit': 'TWh',
                     'provenance': 'The data was from Our World in Data, which is a non-profit organization that publishes data and research on the world\'s largest problems. The data was collected from the International Energy Agency (IEA) and the United Nations (UN).'
                 }],
-                country = ['United States', 'United Kingdom', 'Greece', 'Germany', 'South Korea', 'Japan', 'Vietnam'] # will assume that only one of these nominal attribute is present in the claim
             )
         )
     ]
