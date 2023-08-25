@@ -1,6 +1,6 @@
 # from pydantic import BaseModel, create_model
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union
 from pydantic import BaseModel as PydanticBaseModel
 from typing import Optional
 
@@ -28,15 +28,14 @@ class DateRange(BaseModel):
     date_end: OptionProps
 
 class Ranges(BaseModel):
-    date: Optional[DateRange]
     values: list[OptionProps]
-    otherFields: Dict[str, list]
+    fields: Dict[str, Union[list, DateRange]] ## Now date moved into the fields
 
 class DataPoint(BaseModel):
     tableName: str
     date: str
-    category: str
-    otherFields: Dict[str, any]
+    valueName: str ## Now valueName is the name of the field
+    fields: Dict[str, any]
 
 class DataPointValue(DataPoint):
     value: float
@@ -57,13 +56,6 @@ class GetVizSpecBody(BaseModel):
     tableName: str
     dataPoints: list[DataPoint]
 
-class GetVizDataBody(BaseModel):
-    countries: list[str]
-    date_start: int
-    date_end: int
-    categories: list[str]
-    
 class GetVizDataBodyNew(BaseModel):
-    date: DateRange
     values: list[OptionProps]
-    otherFields: Dict[str, list[OptionProps]]
+    fields: Dict[str, Union[list[OptionProps], DateRange]]
