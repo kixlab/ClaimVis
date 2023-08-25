@@ -10,7 +10,7 @@ import pandas as pd
 from nltk.tokenize import sent_tokenize
 from collections import defaultdict
 
-from lida import Manager
+from lida.modules import Manager
 from lida.datamodel import Goal
 import lida
 import pandas   as pd

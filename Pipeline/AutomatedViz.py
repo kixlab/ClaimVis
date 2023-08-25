@@ -204,20 +204,12 @@ class AutomatedViz(object):
                     DataPointValue(
                         tableName=self.table_name,
                         date=str(row[dates['value']]) if dates else "",
-                        category=category['value'],
-                        otherFields={attr: row[attr] for attr in data_fields},
+                        valueName=category['value'],
+                        fields={attr: row[attr] for attr in data_fields},
                         unit=category['unit'],
                         value=row[category['value']]
                     )
                 )
-        
-        # # reverse the map
-        # attr_map, filter_df = defaultdict(list), self.table
-        # for ref, attr in tag_map['map'].items():
-        #     # check if ref is an attribute
-        #     attr_map[attr].append(ref)
-        # for column, values in attr_map.items():
-        #     filtered_df = filtered_df[filtered_df[column].isin(values)]
         
         # replace all the wrap text with attribute names
         for ref, attr in tag_map['map'].items():
@@ -239,7 +231,7 @@ class AutomatedViz(object):
                             }
                         } if dates else None,
                         values = categories,
-                        otherFields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
+                        fields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
                     )
                 )]
 
