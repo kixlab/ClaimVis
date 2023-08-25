@@ -200,16 +200,16 @@ class AutomatedViz(object):
         datapoints, data_fields = [], list(set(map(lambda x: x.name, fields)))
         for category in categories:
             for _, row in self.table[data_fields + [category['value']]].iterrows():
-                datapoints.append(
-                    DataPointValue(
-                        tableName=self.table_name,
-                        date=str(row[dates['value']]) if dates else "",
-                        valueName=category['value'],
-                        fields={attr: row[attr] for attr in data_fields},
-                        unit=category['unit'],
-                        value=row[category['value']]
-                    )
+                dataPoint = DataPointValue(
+                    tableName=self.table_name,
+                    valueName=category['value'],
+                    fields={attr: row[attr] for attr in data_fields},
+                    unit=category['unit'],
+                    value=row[category['value']]
                 )
+                if dates:
+                    dataPoint.fields['date'] = str(row[dates['value']])
+                datapoints.append(dataPoint)
         
         # replace all the wrap text with attribute names
         for ref, attr in tag_map['map'].items():
