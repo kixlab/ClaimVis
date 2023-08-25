@@ -353,7 +353,7 @@ def post_process_sql(
         use_duckdb=True
     ):
     """Post process SQL: including basic fix and further fuzzy match on cell and SQL to process"""
-
+    # if verbose: print(f"pre processing SQL: {sql_str}")
     # rules of quotation marker differ between normal SQL and duckdb SQL
     COLQ = '"' if use_duckdb else '`'
     STRQs = ['\''] if use_duckdb else ['\'', '"'] # string quotation(s)
@@ -488,8 +488,11 @@ def post_process_sql(
             if value_str[0] == '%' or value_str[-1] == '%':
                 continue
             value_str = value_str.lower()
+
             # Fuzzy Match
-            attr = sql_tokens[value_idx-2].replace(COLQ, '')
+            if sql_tokens[value_idx-2][-1] != '"': continue
+            attr = sql_tokens[value_idx-2][1:-1]
+            if verbose: print(f"attr: {attr}")
             matched_cells = _get_matched_cells(value_str, df, attr=attr)
 
             if verbose: print(f"matched cells: {matched_cells}")
@@ -532,11 +535,12 @@ def post_process_sql(
         return new_sql_str
 
     sql_str = basic_fix(sql_str, list(df.columns), table_title)
+    # if verbose: print(f"post basic fix: {sql_str}")
 
     if process_program_with_fuzzy_match_on_db:
-        try:
+        # try:
             sql_str = fuzzy_match_process(sql_str, df, verbose)
-        except Exception as e:
-            print(e)
+        # except Exception as e:
+        #     print(e)
 
     return sql_str

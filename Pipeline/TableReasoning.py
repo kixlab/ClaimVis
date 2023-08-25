@@ -1,4 +1,5 @@
 # CoT few-shot prompting 
+from functools import cache
 import sys
 sys.path.append("../Gloc")
 sys.path.append("..")
@@ -13,7 +14,7 @@ from Gloc.processor.ans_parser import AnsParser
 from Gloc.utils.normalizer import post_process_sql
 from Gloc.nsql.database import NeuralDB
 from Gloc.utils.utils import majority_vote
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 from nl4dv import NL4DV
 from nl4dv.utils import helpers
 import math
@@ -86,36 +87,16 @@ class TableReasoner(object):
 
         return response
 
-    def _suggest_queries(self, claim: str, table: pd.DataFrame=None):
+    def _suggest_queries(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
         """
             Suggest queries given a claim (and a table)
-            Input: @claim
+            Input: @claim, @table
             Output: 
                 @query: list of suggested queries
                 @vis: a list of vis tasks
                 @explain: a list of exlanation for why the queries are suggested
                 @attributes: list of attribute used in the queries
         """
-        def get_nl4dv_attributes(claim: str, table: pd.DataFrame):
-            # initialize NL4DV
-            dependency_parser_config = {
-                    "name": "corenlp-server", 
-                    "url": "http://localhost:9000",
-                }
-            nl4dv = NL4DV(
-                        data_value=table,
-                        dependency_parser_config=dependency_parser_config
-                    )
-            _attrs_ = nl4dv.attribute_genie_instance
-            _query_ = nl4dv.query_genie_instance
-
-            # get attributes
-            ngrams = _query_.get_query_ngrams(claim)
-            attributes = _attrs_.extract_attributes(ngrams).keys()
-
-            return list(attributes)
-
-
         # suggest different queries in form of "[{query: ...}, {query: ...}}]"
         template = TemplateKey.QUERY_GENERATION_2 if table is None \
                                                 else TemplateKey.QUERY_GENERATION_3
@@ -126,8 +107,7 @@ class TableReasoner(object):
         )
 
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
-        # attributes_nlp = get_nl4dv_attributes(claim=claim, table=table)
-        # attributes = list(set(attributes + attributes_nlp))
+        attributes = list(set(attributes + more_attrs)) if more_attrs else attributes
         col_set = set(table.columns)
     
         # further process the attributes
@@ -269,7 +249,7 @@ class TableReasoner(object):
                 if len(ans) > 30:
                     # sometimes the answer is too long to fit into the prompt
                     ans = [x for x in ans if not math.isnan(x) and isinstance(x, (int, float))] 
-                    return f"Ranging from {str(min(ans))} to {str(max(ans))}"
+                    return f"Ranging from {str(min(ans))} to {str(max(ans))}, with average {str(sum(ans)/len(ans))}"
                 return str(ans)
             except Exception as e:
                 if verbose: print("error with list ans: ", e)
@@ -317,7 +297,13 @@ class TableReasoner(object):
         return self.parser.parse_evaluation(evaluation[0])
     
     # @log_decorator
-    def reason(self, claim: str, table: pd.DataFrame, verbose=False, fuzzy_match=False):
+    def reason(
+            self, 
+            claim: str, 
+            table: pd.DataFrame, 
+            verbose=False, 
+            fuzzy_match=False,
+            more_attrs: list = None):
         """
             Reasoning pipeline for CoT
             Input: claim, table
@@ -344,7 +330,11 @@ class TableReasoner(object):
             lower_case=True
         )
         # take first query from suggested queries
-        suggestions, vis_tasks, _, attributes = self._suggest_queries(claim, table=db.get_table_df())
+        suggestions, vis_tasks, _, attributes = self._suggest_queries(
+                                                        claim=claim, 
+                                                        table=db.get_table_df(), 
+                                                        more_attrs=more_attrs
+                                                    )
                     
         # update table with relevant attributes
         if attributes: 

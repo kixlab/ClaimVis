@@ -120,6 +120,7 @@ def tokenize(string, use_corenlp=False, use_duckdb=False):
 
     string = str(string)
     STRQs = ["'", '"'] if not use_duckdb else ["'"]
+    COLQ = "`" if not use_duckdb else "\""
 
     quote_idxs = [idx for idx, char in enumerate(string) if char in STRQs]
     assert len(quote_idxs) % 2 == 0, "Unexpected quote"
@@ -135,9 +136,20 @@ def tokenize(string, use_corenlp=False, use_duckdb=False):
         string = string[:qidx1] + key + string[qidx2+1:]
         vals[key] = val
 
+    double_idxs = [idx for idx, char in enumerate(string) if char == COLQ]
+    assert len(double_idxs) % 2 == 0, "Unexpected quote"
+    for j in range(len(double_idxs)-1, -1, -2):
+        # two consecutive double quotes
+        qidx1 = double_idxs[j-1]
+        qidx2 = double_idxs[j]
+        val = string[qidx1: qidx2+1]
+        key = "val_{}_{}".format(qidx1, qidx2)
+        string = string[:qidx1] + key + string[qidx2+1:]
+        vals[key] = val
+
     # tokenize sql
     toks_tmp = [word.lower() for word in tokenizer(string)]
-    # print(toks_tmp)
+
     toks = []
     for tok in toks_tmp:
         if tok.startswith('=val_'):

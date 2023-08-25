@@ -53,7 +53,9 @@ class Summarizer:
     def summarize(self, file_name: str):
         return {
             "name": file_name,
-            "description": self.prompt_description(file_name)
+            "description": self.prompt_description(file_name),
+            "columns": pd.read_csv(os.path.join(self.datasrc, file_name)).columns.tolist(),
+            "embedding": None
         }
 
     def update_description(self, file_name: str):

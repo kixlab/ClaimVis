@@ -8,7 +8,7 @@ from nl4dv import NL4DV
 from nl4dv.utils import helpers
 from nl4dv.utils.constants import attribute_types
 from Gloc.utils.llm import *
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 import pandas as pd
 import json
 import nltk

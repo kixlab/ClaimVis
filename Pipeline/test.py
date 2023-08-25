@@ -10,9 +10,13 @@ class Tester():
     def __init__(self, datasrc: str = None):
         self.datasrc = datasrc
 
-    def test_post_process_sql_2(self):
-        sql = "SELECT coal_production FROM w WHERE country = 'Indiae' and year = 2011"
-        table = pd.read_csv(os.path.join(self.datasrc, "owid-energy-data.csv"))
+    def test_post_process_sql(self):
+        sql = """SELECT "birth rate, crude (per 1,000 people)" FROM w WHERE "country_name" = 'Mexico' AND "date" = 2022"""
+        table = pd.read_csv(os.path.join(self.datasrc, "Health.csv"))
+        table.columns = table.columns.str.lower()
+        table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+        table.reset_index(inplace=True)
+        table.rename(columns={'index': 'row_id'}, inplace=True)
 
         new_sql = post_process_sql(
             sql_str=sql,
@@ -22,6 +26,6 @@ class Tester():
         print(new_sql)
 
 if __name__ == "__main__":
-    # tester = Tester(datasrc="../Datasets")
-    # tester.test_post_process_sql_2()
-    pass
+    tester = Tester(datasrc="../Datasets")
+    tester.test_post_process_sql()
+    # pass

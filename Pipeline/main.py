@@ -14,6 +14,7 @@ from lida.modules import Manager
 from lida.datamodel import Goal
 import lida
 import pandas   as pd
+
 import base64
 from io import BytesIO
 from PIL import Image
@@ -53,13 +54,14 @@ class Pipeline(object):
                 # if verbose: print(f"top k datasets: {top_k_datasets}")
 
                 # reason the claim
-                for dataset, des, similarity in top_k_datasets:
+                for dataset, des, similarity, relevant_attrs in top_k_datasets:
                     claim_map[claim].append(
                         self.table_reasoner.reason(
                             claim=sentence,
                             table=pd.read_csv(f"{self.datasrc}/{dataset}"),
                             verbose=verbose,
-                            fuzzy_match=True
+                            fuzzy_match=True,
+                            more_attrs=relevant_attrs
                         ))
                     claim_map[claim][-1]["sub_table"]["name"] = dataset
                     
@@ -123,7 +125,7 @@ class Pipeline(object):
 
 def main():
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "United States has higher coal production than Australia in 2010."
+    text = "Population density in China has increased by 30% since 2011."
     
     pipeline.run(text)
 
@@ -149,6 +151,7 @@ def profile_func(func):
 
 if __name__ == "__main__":
     from TableReasoning import main as table_reasoner_main
+    # from DataMatching import main as data_matcher_main
     profile_func(main) 
     # main()
     # table_reasoner_main()
