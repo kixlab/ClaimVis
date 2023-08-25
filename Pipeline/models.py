@@ -33,9 +33,8 @@ class Ranges(BaseModel):
 
 class DataPoint(BaseModel):
     tableName: str
-    date: str
     valueName: str ## Now valueName is the name of the field
-    fields: Dict[str, any]
+    fields: Dict[str, any] # Date is now moved to here
 
 class DataPointValue(DataPoint):
     value: float
