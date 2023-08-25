@@ -528,7 +528,7 @@ def parse_sql(toks, start_idx, tables_with_alias, schema):
     sql['select'] = select_col_units
     # where clause
     idx, where_conds = parse_where(toks, idx, tables_with_alias, schema, default_tables)
-    sql['where'] = where_condss
+    sql['where'] = where_conds
     # group by clause
     idx, group_col_units = parse_group_by(toks, idx, tables_with_alias, schema, default_tables)
     sql['groupBy'] = group_col_units

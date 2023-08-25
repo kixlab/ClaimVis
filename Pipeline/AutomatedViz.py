@@ -16,14 +16,23 @@ import re
 from models import *
 from Gloc.processor.ans_parser import AnsParser
 from DataMatching import DataMatcher
+from collections import defaultdict
 
 class AutomatedViz(object):
-    def __init__(self, datasrc: str = None, table: dict = None, attributes: str = None, test: bool = False):
+    def __init__(self, datasrc: str = None, table: dict or pd.DataFrame = None, attributes: str = None, test: bool = False):
         self.datasrc = datasrc
 
         # lower case the whole dataset if it's a test
-        self.table = table["data"] if table else pd.read_csv(datasrc)
-        self.table_name = table["name"] or "table"
+        if isinstance(table, dict):
+            self.table = table["data"]  
+            self.table_name = table["name"] 
+        elif isinstance(table, pd.DataFrame):
+            self.table = table
+            self.table_name = "table"
+        else: # load from csv
+            self.table = pd.read_csv(self.datasrc)
+            self.table_name = "table"
+
         if test:
             self.table.columns = self.table.columns.str.lower()
             self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
@@ -158,7 +167,7 @@ class AutomatedViz(object):
             return any(func(val) for val in self.table[attr].to_list())
 
         # infer nominal, temporal, and quantitative attributes
-        dates, fields, categories, datapoints = None, [], [], []
+        dates, fields, categories = None, [], []
         for ref, attr in tag_map['map'].items():
             if helpers.isdate(ref)[0] and self.datamatcher.similarity_score(attr, 'time') > 0.5:
                 if verbose: print(f"date: {helpers.isdate(ref)[1]}")
@@ -188,12 +197,12 @@ class AutomatedViz(object):
             print(f"categories: {categories}")
 
         # final pass to retrieve all datapoints
-        data_fields = list(set(map(lambda x: x.name, fields)))
+        datapoints, data_fields = [], list(set(map(lambda x: x.name, fields)))
         for category in categories:
             for _, row in self.table[data_fields + [category['value']]].iterrows():
                 datapoints.append(
                     DataPointValue(
-                        tableName="",
+                        tableName=self.table_name,
                         date=str(row[dates['value']]) if dates else "",
                         category=category['value'],
                         otherFields={attr: row[attr] for attr in data_fields},
@@ -201,6 +210,14 @@ class AutomatedViz(object):
                         value=row[category['value']]
                     )
                 )
+        
+        # # reverse the map
+        # attr_map, filter_df = defaultdict(list), self.table
+        # for ref, attr in tag_map['map'].items():
+        #     # check if ref is an attribute
+        #     attr_map[attr].append(ref)
+        # for column, values in attr_map.items():
+        #     filtered_df = filtered_df[filtered_df[column].isin(values)]
         
         # replace all the wrap text with attribute names
         for ref, attr in tag_map['map'].items():

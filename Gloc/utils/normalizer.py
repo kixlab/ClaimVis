@@ -4,7 +4,7 @@ import recognizers_suite
 from recognizers_suite import Culture
 import re
 import unicodedata
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 from multiprocessing import Pool
 from itertools import repeat
 
@@ -298,6 +298,51 @@ def normalize(x):
     return x
 
 
+def _get_matched_cells(value_str, df, fuzz_threshold=70, attr:str=None):
+    """
+    Get matched table cells with value token.
+    """
+    def calculate_fuzz_score(cell):
+        cell = str(cell)
+        fuzz_score = fuzz.ratio(value_str, cell)
+        if fuzz_score >= fuzz_threshold:
+            return (cell, fuzz_score)
+        else:
+            return None
+
+    if attr: df = df[[attr]]
+
+    matched_cells = df.applymap(calculate_fuzz_score).values.flatten()
+    matched_cells = [cell for cell in matched_cells if cell is not None]
+
+    if any(score == 100 for _, score in matched_cells):
+        return [cell for cell in matched_cells if cell[1] == 100]
+
+    matched_cells.sort(key=lambda x: x[1], reverse=True)
+    return matched_cells
+
+number_pattern = re.compile("[+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?")
+def _check_valid_fuzzy_match(value_str, matched_cell):
+    """
+    Check if the fuzzy match is valid, now considering:
+    1. The number/date should not be disturbed, but adding new number or deleting number is valid.
+    """
+    numbers_in_value = re.findall(number_pattern, value_str)
+    numbers_in_matched_cell = re.findall(number_pattern, matched_cell)
+    try:
+        numbers_in_value = [float(num.replace(',', '')) for num in numbers_in_value]
+    except:
+        print(f"Can't convert number string {numbers_in_value} into float in _check_valid_fuzzy_match().")
+    try:
+        numbers_in_matched_cell = [float(num.replace(',', '')) for num in numbers_in_matched_cell]
+    except:
+        print(
+            f"Can't convert number string {numbers_in_matched_cell} into float in _check_valid_fuzzy_match().")
+    numbers_in_value = set(numbers_in_value)
+    numbers_in_matched_cell = set(numbers_in_matched_cell)
+
+    return numbers_in_value.issubset(numbers_in_matched_cell) or numbers_in_matched_cell.issubset(numbers_in_value)
+            
 def post_process_sql(
         sql_str: str, 
         df: pd.DataFrame, 
@@ -399,58 +444,6 @@ def post_process_sql(
         Post-process SQL by fuzzy matching value with table contents.
         """
 
-        def _get_matched_cells(value_str, df, fuzz_threshold=70):
-            """
-            Get matched table cells with value token.
-            """
-            matched_cells = []
-            for row_id, row in df.iterrows():
-                for cell in row:
-                    cell = str(cell)
-                    fuzz_score = fuzz.ratio(value_str, cell)
-                    if fuzz_score == 100:
-                        matched_cells = [(cell, fuzz_score)]
-                        return matched_cells
-                    if fuzz_score >= fuzz_threshold:
-                        matched_cells.append((cell, fuzz_score))
-
-            matched_cells = sorted(matched_cells, key=lambda x: x[1], reverse=True)
-            return matched_cells
-
-        def _check_valid_fuzzy_match(value_str, matched_cell):
-            """
-            Check if the fuzzy match is valid, now considering:
-            1. The number/date should not be disturbed, but adding new number or deleting number is valid.
-            """
-            number_pattern = "[+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?"
-            numbers_in_value = re.findall(number_pattern, value_str)
-            numbers_in_matched_cell = re.findall(number_pattern, matched_cell)
-            try:
-                numbers_in_value = [float(num.replace(',', '')) for num in numbers_in_value]
-            except:
-                print(f"Can't convert number string {numbers_in_value} into float in _check_valid_fuzzy_match().")
-            try:
-                numbers_in_matched_cell = [float(num.replace(',', '')) for num in numbers_in_matched_cell]
-            except:
-                print(
-                    f"Can't convert number string {numbers_in_matched_cell} into float in _check_valid_fuzzy_match().")
-            numbers_in_value = set(numbers_in_value)
-            numbers_in_matched_cell = set(numbers_in_matched_cell)
-
-            if numbers_in_value.issubset(numbers_in_matched_cell) or numbers_in_matched_cell.issubset(numbers_in_value):
-                return True
-            else:
-                return False
-
-        # Drop trailing '\n```', a pattern that may appear in Codex SQL generation
-        sql_str = sql_str.rstrip('```').rstrip('\n')
-
-        # Replace QA module with placeholder
-        qa_pattern = f"QA\(.+?;.*?{COLQ}.+?{COLQ}.*?\)"
-        qas = re.findall(qa_pattern, sql_str)
-        for idx, qa in enumerate(qas):
-            sql_str = sql_str.replace(qa, f"placeholder{idx}")
-
         # Parse and replace SQL value with table contents
         sql_tokens = tokenize(
                         string=sql_str, 
@@ -484,9 +477,7 @@ def post_process_sql(
         assert len(sql_tokens) == len(sql_template_tokens)
         value_indices = [idx for idx in range(len(sql_template_tokens)) if sql_template_tokens[idx] == '[VALUE]']
         for value_idx in value_indices:
-            # Skip the value if the where condition column is QA module
-            if value_idx >= 2 and sql_tokens[value_idx - 2].startswith('placeholder'):
-                continue
+
             value_str = sql_tokens[value_idx]
             # Drop STRQ ... STRQ for fuzzy match
             is_string = False
@@ -498,10 +489,10 @@ def post_process_sql(
                 continue
             value_str = value_str.lower()
             # Fuzzy Match
-            matched_cells = _get_matched_cells(value_str, df)
+            attr = sql_tokens[value_idx-2].replace(COLQ, '')
+            matched_cells = _get_matched_cells(value_str, df, attr=attr)
 
-            if verbose:
-                print(matched_cells)
+            if verbose: print(f"matched cells: {matched_cells}")
 
             new_value_str = value_str
             if matched_cells:
@@ -509,7 +500,7 @@ def post_process_sql(
                 for matched_cell, fuzz_score in matched_cells:
                     if _check_valid_fuzzy_match(value_str, matched_cell):
                         new_value_str = matched_cell
-                        print(new_value_str, value_str)
+                        # print(new_value_str, value_str)
                         if verbose and new_value_str != value_str:
                             print("\tfuzzy match replacing!", value_str, '->', matched_cell, f'fuzz_score:{fuzz_score}')
                         break
@@ -536,16 +527,11 @@ def post_process_sql(
             else:
                 new_sql_str = new_sql_str.replace(f"{COLQ} {sql_col} {COLQ}", f"{COLQ}{sql_col}{COLQ}")
 
-        # Restore QA modules
-        for idx, qa in enumerate(qas):
-            new_sql_str = new_sql_str.replace(f"placeholder{idx}", qa)
-
         # Fix '<>' when composing the new sql
         new_sql_str = new_sql_str.replace('< >', '<>')
         return new_sql_str
 
     sql_str = basic_fix(sql_str, list(df.columns), table_title)
-    # print(sql_str)
 
     if process_program_with_fuzzy_match_on_db:
         try:

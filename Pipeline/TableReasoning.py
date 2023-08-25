@@ -126,8 +126,8 @@ class TableReasoner(object):
         )
 
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
-        attributes_nlp = get_nl4dv_attributes(claim=claim, table=table)
-        attributes = list(set(attributes + attributes_nlp))
+        # attributes_nlp = get_nl4dv_attributes(claim=claim, table=table)
+        # attributes = list(set(attributes + attributes_nlp))
         col_set = set(table.columns)
     
         # further process the attributes
@@ -219,6 +219,7 @@ class TableReasoner(object):
             psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
         
         if fuzzy_match:
+            # bottle neck due to fuzzy matching on big tables
             def process_psqls(psqls):
                 processed_psqls = []
                 for psql in psqls:
@@ -306,7 +307,8 @@ class TableReasoner(object):
                 \{
                     explain: "<TODO: explain why the reasoning is sound or not sound>"   
                     revised: "<TODO: revised reasoning>"
-                \}"""},
+                \}
+                RETAIN EVERY DATA from the old sequence into the new one."""},
                 {"role": "user", "content": reasoning},
             ],
             model=Model.GPT4 # 4
@@ -314,7 +316,7 @@ class TableReasoner(object):
 
         return self.parser.parse_evaluation(evaluation[0])
     
-    @log_decorator
+    # @log_decorator
     def reason(self, claim: str, table: pd.DataFrame, verbose=False, fuzzy_match=False):
         """
             Reasoning pipeline for CoT
@@ -402,34 +404,19 @@ class TableReasoner(object):
         }
 
 
-if __name__ == "__main__":
+def main():
     table_reasoner = TableReasoner()
-    # claim = "The Phantom is the best movies in term of imdb rating."
-    df = pd.read_csv("../Datasets/movies-w-year.csv")
-    # table_reasoner.reason(claim, df, verbose=True, fuzzy_match=False)
-    db = NeuralDB(
-        tables=[df],
-        add_row_id=True,
-        normalize=False,
-        lower_case=True
-    )
-    # print(db.get_table_df())
-    # attributes = ['title', 'imdb rating']
-    # db.update_table(attributes)
-    # print(db.get_table_df())
+    query = "The US produced more nuclear energy per capita than China in 2012."
+    # query = ["What is the total energy consumption of the US in 2012?", "What is the total energy consumption of China in 2012?", "What is the total energy consumption of the world in 2012?"]
+    df = pd.read_csv("../Datasets/owid-energy-data.csv")
+    table_reasoner.reason(query, df, verbose=True, fuzzy_match=True)
+    # table_reasoner._generate_sql(
+    #     query=query,
+    #     table=df,
+    #     template_key=TemplateKey.SQL_GENERATION_2,
+    #     fuzzy_match=True
+    # )
 
-    sql = """SELECT content rating FROM w GROUP BY content rating ORDER BY SUM("production budget") DESC LIMIT 1 """
-    print(sql)
-    psql = post_process_sql(
-        sql_str=sql,
-        df=db.get_table_df(),
-        process_program_with_fuzzy_match_on_db=True,
-        verbose=True
-    )
-    print(psql)
-    # print(fuzz.ratio("US", "America"))
-    # claim = "Africa has the highest population."
-    # df = pd.read_csv("../Datasets/owid-energy-data.csv")
-
-    # res = table_reasoner._suggest_queries(claim, df)
-    # print(res)
+if __name__ == "__main__":
+    pass
+    

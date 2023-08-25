@@ -79,8 +79,10 @@ class AnsParser(object):
     
     def parse_evaluation(self, message: str):
         match = re.search(r'revised: "(.*?)"', message)
-        
-        return match.group(1) if match else None
+        # return the whole message if no match
+        if match: return match.group(1)
+        match = re.search(r'"revised": "(.*?)"', message)
+        return match.group(1) if match else message
     
     def parse_unit(self, message: str):
         match = re.search(r'\((.*?)\)', message)

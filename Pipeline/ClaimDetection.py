@@ -15,7 +15,7 @@ class ClaimDetector():
     def __init__(self):
         pass
     
-    def detect(self, sentence: str, verbose: bool=False):
+    def detect(self, sentence: str, boundary_extract:bool=False, llm_classify:bool=False, verbose: bool=False):
         """ 
             Check if there is check-worthy claims in the sentence
             using ClaimBuster API
@@ -26,33 +26,40 @@ class ClaimDetector():
 
         # Send the GET request to the API and store the api response
         api_response = requests.get(url=api_endpoint, headers=request_headers).json()
-        if verbose: print(api_response)
+        if verbose: print("check result: ", api_response)
 
         # if the score is > .5 --> checkworthy
-        if api_response['results'][0]['score'] > .5:
-            """
-                create prompt chat to detect if the claim is check-worthy and data related.
-            """
-            res = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": """Label the following claims as 'Y' if they are data related, otherwise 'N' according to the following format.
-                    \{
-                        "verdict": "<TODO: Y or N>",
-                        "explain": "<TODO: explain why the claim can be verified using data or not>"
-                    \}"""},
-                    {"role": "user", "content": f"{sentence}"},
-                ]
-            )["choices"][0]['message']['content']
+        score = api_response['results'][0]['score']
+        if score > .5:
+            if llm_classify:
+                """
+                    create prompt chat to detect if the claim is check-worthy and data related.
+                """
+                res = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": """Label the following claims as 'Y' if they are data related, otherwise 'N' according to the following format.
+                        \{
+                            "verdict": "<TODO: Y or N>",
+                            "explain": "<TODO: explain why the claim can be verified using data or not>"
+                        \}"""},
+                        {"role": "user", "content": f"{sentence}"},
+                    ]
+                )["choices"][0]['message']['content']
 
-            verdict = re.search(r'"verdict": "(Y|N)"', res).group(1)
-            if verdict == 'Y':
-                if verbose: 
-                    print(f"statistically interesting: {api_response['results'][0]['score']}")
-                    explain = re.search(r'"explain": "(.+)"', res).group(1)
-                    print(f"explain: {explain}")
-
-                # extract the boundary
+                verdict = re.search(r'"verdict": "(Y|N)"', res).group(1)
+                if verdict == 'Y':
+                    if verbose: 
+                        print(f"statistically interesting: {api_response['results'][0]['score']}")
+                        explain = re.search(r'"explain": "(.+)"', res).group(1)
+                        print(f"explain: {explain}")
+                else:
+                    if verbose: print("statistically unrelated")
+                    # negative means unrelated to data
+                    return "", -score
+            
+            # # extract the boundary
+            if boundary_extract:
                 sentences = [sentence]
                 boundaries_dicts = claim_boundaries_client.run(sentences)
                 for dic in boundaries_dicts:
@@ -64,15 +71,14 @@ class ClaimDetector():
                     print ('['+str(boundaries_dicts[0]['span'][0])+', '+str(boundaries_dicts[0]['span'][1])+']: '
                         +boundaries_dicts[0]['claim'])
                     print ()
-                return boundaries_dicts[0]['claim'], api_response['results'][0]['score']
+
+                return boundaries_dicts[0]['claim'], score
             else:
-                if verbose: print("statistically unrelated")
-                # negative means unrelated to data
-                return "", -api_response['results'][0]['score']
+                return sentence, score
             
         else:
-            if verbose: print(f"non-checkworthy: {api_response['results'][0]['score']}")
-            return "", api_response['results'][0]['score']
+            if verbose: print(f"non-checkworthy: {score}")
+            return "", score
 
 if __name__ == "__main__":
     detector = ClaimDetector()

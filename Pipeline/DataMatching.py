@@ -95,6 +95,7 @@ if __name__ == "__main__":
     matcher = DataMatcher(datasrc="../Datasets")
     # claim = "The energy consumption level of the US was super bad last year."
     # matcher.find_top_k_datasets(claim, k=2)
-    phrase1 = "Population age has been decreasing."
+    phrase1 = "Population age has been decreasing since 2011."
     phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
-    matcher.find_top_k_datasets(phrase1, k=5, method="attr")
+    # matcher.find_top_k_datasets(phrase1, k=5, method="attr")
+    print(matcher.similarity_score(phrase1, "ffff"))

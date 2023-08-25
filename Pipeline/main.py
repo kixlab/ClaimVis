@@ -20,6 +20,7 @@ from PIL import Image
 import json
 import os
 import atexit
+from rapidfuzz import fuzz
 
 class Pipeline(object):
     def __init__(self, datasrc: str = None):
@@ -48,8 +49,8 @@ class Pipeline(object):
             if score > THRE_SHOLD:
                 if verbose: print(f"claim: {claim}")
                 # find top k datasets
-                top_k_datasets = self.data_matcher.find_top_k_datasets(claim, k=1)
-                if verbose: print(f"top k datasets: {top_k_datasets}")
+                top_k_datasets = self.data_matcher.find_top_k_datasets(claim, k=1, method="attr")
+                # if verbose: print(f"top k datasets: {top_k_datasets}")
 
                 # reason the claim
                 for dataset, des, similarity in top_k_datasets:
@@ -120,12 +121,35 @@ class Pipeline(object):
 
         self.trials += 1
 
-if __name__ == "__main__":
+def main():
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "United States produced more coal than Asia from 2010."
+    text = "United States has higher coal production than Australia in 2010."
     
-    # try:
     pipeline.run(text)
-    # except Exception as e:
-    #     print(e)
-        
+
+def profile_func(func):
+    import cProfile
+    import pstats
+
+    # Create a profiler
+    profiler = cProfile.Profile()
+
+    # Run the function you want to profile
+    profiler.runcall(func)
+
+    # Create a Stats object to format and print the profiler's data
+    stats = pstats.Stats(profiler)
+
+    # Sort the data by the cumulative time spent in the function
+    stats.sort_stats('cumulative')
+
+    # Print the profiling data
+    stats.print_stats(50)
+
+
+if __name__ == "__main__":
+    from TableReasoning import main as table_reasoner_main
+    profile_func(main) 
+    # main()
+    # table_reasoner_main()
+    # print(fuzz.ratio("pg13", "pg-13"))
