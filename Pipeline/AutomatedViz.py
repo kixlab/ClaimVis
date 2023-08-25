@@ -126,7 +126,7 @@ class AutomatedViz(object):
         message = [
             {"role": "system", "content": """Given a list of attributes and a claim, please wrap the relevant references in the claim to the attributes with curly braces and return a map of references to the MOST SIMILAR attributes. For example, if the claim is 'The United State has the highest energy consumption in 2022.', and the attributes are ['country', 'energy consumption per capita', 'year'], then the output should be 
              {
-                "wrap": 'The {United State} has the highest {energy consumption} in {2022}.',
+                "wrap": 'The {United States} has the highest {energy consumption} in {2022}.',
                 "map": {
                     "United State": "country",
                     "energy consumption": "energy consumption per capita",
@@ -169,7 +169,7 @@ class AutomatedViz(object):
         # infer nominal, temporal, and quantitative attributes
         dates, fields, categories = None, [], []
         for ref, attr in tag_map['map'].items():
-            if helpers.isdate(ref)[0] and self.datamatcher.similarity_score(attr, 'time') > 0.5:
+            if helpers.isdate(ref)[0] and attr in ['date', 'time', 'year']: #self.datamatcher.similarity_score(attr, 'time') > 0.5:
                 if verbose: print(f"date: {helpers.isdate(ref)[1]}")
                 dates = {
                     "value": attr,
@@ -190,7 +190,16 @@ class AutomatedViz(object):
                 })
             else: # nominal
                 fields.append(Field( name=attr, type="nominal" ))      
-            
+        
+        filtered_table = self.table
+        for field in fields:
+            if field.type == "nominal":
+                field_values = [t[0] for t in tag_map['map'].items() if t[1] == field.name]
+                filtered_table = filtered_table[filtered_table[field.name].isin(field_values)]
+            elif field.type == "temporal":
+                field_values = [t[0] for t in tag_map['map'].items() if t[1] == field.name]
+                filtered_table = filtered_table[filtered_table[field.name].isin(field_values)]
+
         if verbose:
             print(f"dates: {dates}")
             print(f"fields: {fields}")
@@ -199,7 +208,7 @@ class AutomatedViz(object):
         # final pass to retrieve all datapoints
         datapoints, data_fields = [], list(set(map(lambda x: x.name, fields)))
         for category in categories:
-            for _, row in self.table[data_fields + [category['value']]].iterrows():
+            for _, row in filtered_table[data_fields + [category['value']]].iterrows():
                 dataPoint = DataPointValue(
                     tableName=self.table_name,
                     valueName=category['value'],
