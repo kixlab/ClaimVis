@@ -113,7 +113,6 @@ class DataMatcher(object):
         return similarity
     
     def attr_score_batch(self, phrase: any, attributes: list):
-        # Open the datasrc
         return max(self.similarity_batch(phrase, attributes))
         
 

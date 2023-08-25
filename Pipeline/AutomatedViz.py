@@ -19,7 +19,13 @@ from DataMatching import DataMatcher
 from collections import defaultdict
 
 class AutomatedViz(object):
-    def __init__(self, datasrc: str = None, table: dict or pd.DataFrame = None, attributes: str = None, test: bool = False):
+    def __init__(
+            self, 
+            datasrc: str = None, 
+            table: dict or pd.DataFrame = None, 
+            attributes: str = None, 
+            test: bool = False
+        ):
         self.datasrc = datasrc
 
         # lower case the whole dataset if it's a test
@@ -38,25 +44,6 @@ class AutomatedViz(object):
             self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
         self.attributes = attributes or list(self.table.columns)
-        
-        # # initialize NL4DV
-        # label_attribute = None
-        # dependency_parser_config = {
-        #         "name": "corenlp-server", 
-        #         "url": "http://localhost:9000",
-        #     }
-
-        # self.nl4dv = NL4DV(
-        #                 verbose=False, 
-        #                 debug=True, 
-        #                 data_url=self.datasrc, 
-        #                 data_value=table,
-        #                 label_attribute=label_attribute, 
-        #                 dependency_parser_config=dependency_parser_config
-        #             )
-        # self.query_processor = self.nl4dv.query_genie_instance
-        # self.attribute_processor = self.nl4dv.attribute_genie_instance
-        # self.data_processor = self.nl4dv.data_genie_instance
 
         # initialize AnsParser
         self.parser = AnsParser()
@@ -169,7 +156,7 @@ class AutomatedViz(object):
         # infer nominal, temporal, and quantitative attributes
         dates, fields, categories = None, [], []
         for ref, attr in tag_map['map'].items():
-            if helpers.isdate(ref)[0] and self.datamatcher.similarity_score(attr, 'time') > 0.5:
+            if helpers.isdate(ref)[0] and self.datamatcher.attr_score_batch(attr, ['time', 'year', 'date']) > 0.5:
                 if verbose: print(f"date: {helpers.isdate(ref)[1]}")
                 dates = {
                     "value": attr,
@@ -191,6 +178,15 @@ class AutomatedViz(object):
             else: # nominal
                 fields.append(Field( name=attr, type="nominal" ))      
             
+        filtered_table = self.table
+        for field in fields:
+            if field.type == "nominal":
+                field_values = [t[0] for t in tag_map['map'].items() if t[1] == field.name]
+                filtered_table = filtered_table[filtered_table[field.name].isin(field_values)]
+            elif field.type == "temporal":
+                field_values = [t[0] for t in tag_map['map'].items() if t[1] == field.name]
+                filtered_table = filtered_table[filtered_table[field.name].isin(field_values)]
+
         if verbose:
             print(f"dates: {dates}")
             print(f"fields: {fields}")
@@ -199,7 +195,7 @@ class AutomatedViz(object):
         # final pass to retrieve all datapoints
         datapoints, data_fields = [], list(set(map(lambda x: x.name, fields)))
         for category in categories:
-            for _, row in self.table[data_fields + [category['value']]].iterrows():
+            for _, row in filtered_table[data_fields + [category['value']]].iterrows():
                 dataPoint = DataPointValue(
                     tableName=self.table_name,
                     valueName=category['value'],
