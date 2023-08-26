@@ -189,6 +189,6 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="For example, 50 years ago Mexico had a birthrate of almost 7, today it is 1.9.")
+    claim = UserClaimBody(userClaim="The labor force participation rate of China is higher than that of the United States in 2022.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)

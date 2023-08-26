@@ -25,10 +25,10 @@ from rapidfuzz import fuzz
 
 class Pipeline(object):
     def __init__(self, datasrc: str = None):
-        self.table_reasoner = TableReasoner()
         # self.summarizer = Summarizer()
         self.claim_detector = ClaimDetector()
         self.data_matcher = DataMatcher(datasrc=datasrc)
+        self.table_reasoner = TableReasoner(datamatcher=self.data_matcher)
 
         self.datasrc = datasrc
         with open("viz_trials/index.txt", "r") as f:
@@ -55,13 +55,15 @@ class Pipeline(object):
 
                 # reason the claim
                 for dataset, des, similarity, relevant_attrs in top_k_datasets:
+                    table = pd.read_csv(f"{self.datasrc}/{dataset}")
+                    table.name = dataset
                     claim_map[claim].append(
                         self.table_reasoner.reason(
                             claim=sentence,
-                            table=pd.read_csv(f"{self.datasrc}/{dataset}"),
+                            table=table,
                             verbose=verbose,
                             fuzzy_match=True,
-                            more_attrs=relevant_attrs
+                            more_attrs=relevant_attrs,
                         ))
                     claim_map[claim][-1]["sub_table"]["name"] = dataset
                     
@@ -125,7 +127,7 @@ class Pipeline(object):
 
 def main():
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "Population density in China has increased by 30% since 2011."
+    text = "No movies have a rating of 8.5 or higher"
     
     pipeline.run(text)
 

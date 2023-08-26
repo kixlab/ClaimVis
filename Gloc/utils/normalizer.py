@@ -110,8 +110,14 @@ def process_raw_table(
             df.columns = df.columns.str.lower()
             df = df.applymap(lambda s:s.lower() if type(s) == str else s)            
     
+    if isinstance(table, pd.DataFrame):
+        title = table.name if hasattr(table, 'name') else 'table'
+    else:
+        title = table['title'] if 'title' in table else 'table'
+
+    df.name = title
     return {
-        "title": table['title'] if 'title' in table else None,
+        "title": title,
         "table": df    
 	}
 
@@ -353,7 +359,7 @@ def post_process_sql(
         use_duckdb=True
     ):
     """Post process SQL: including basic fix and further fuzzy match on cell and SQL to process"""
-    # if verbose: print(f"pre processing SQL: {sql_str}")
+    if verbose: print(f"pre processing SQL: {sql_str}")
     # rules of quotation marker differ between normal SQL and duckdb SQL
     COLQ = '"' if use_duckdb else '`'
     STRQs = ['\''] if use_duckdb else ['\'', '"'] # string quotation(s)
@@ -538,9 +544,9 @@ def post_process_sql(
     # if verbose: print(f"post basic fix: {sql_str}")
 
     if process_program_with_fuzzy_match_on_db:
-        # try:
+        try:
             sql_str = fuzzy_match_process(sql_str, df, verbose)
-        # except Exception as e:
-        #     print(e)
+        except Exception as e:
+            print(e)
 
     return sql_str

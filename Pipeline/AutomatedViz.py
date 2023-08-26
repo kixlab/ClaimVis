@@ -187,10 +187,10 @@ class AutomatedViz(object):
                 field_values = [t[0] for t in tag_map['map'].items() if t[1] == field.name]
                 filtered_table = filtered_table[filtered_table[field.name].isin(field_values)]
 
-        if verbose:
-            print(f"dates: {dates}")
-            print(f"fields: {fields}")
-            print(f"categories: {categories}")
+        # if verbose:
+        #     print(f"dates: {dates}")
+        #     print(f"fields: {fields}")
+        #     print(f"categories: {categories}")
 
         # final pass to retrieve all datapoints
         datapoints, data_fields = [], list(set(map(lambda x: x.name, fields)))

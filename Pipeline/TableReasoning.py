@@ -17,6 +17,7 @@ from Gloc.utils.utils import majority_vote
 from rapidfuzz import fuzz
 from nl4dv import NL4DV
 from nl4dv.utils import helpers
+from DataMatching import DataMatcher
 import math
 
 class TableReasoner(object):
@@ -25,10 +26,12 @@ class TableReasoner(object):
             temperature=0.0, 
             max_decode_steps=500, 
             samples=1, 
-            model=Model.GPT3
+            model=Model.GPT3,
+            datamatcher: DataMatcher = None
         ):
         self.prompter = Prompter()
         self.parser = AnsParser()
+        self.datamatcher = datamatcher or DataMatcher()
 
         self.temperature = temperature # to change
         self.max_decode_steps = max_decode_steps # fixed
@@ -103,13 +106,46 @@ class TableReasoner(object):
         _, suggestions = self._call_api_1(
             question=claim,
             template_key=template,
-            table=table
+            table=table,
+            model=Model.GPT4 # 4
         )
-
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
-        attributes = list(set(attributes + more_attrs)) if more_attrs else attributes
-        col_set = set(table.columns)
-    
+        attributes, col_set = set(attributes + more_attrs), set(table.columns)
+        # add datefield if exist and infer datetime from the queries if not
+        time_batch = self.datamatcher.embedder.encode(["time", "date", "year"])
+        col_embeds = self.datamatcher.attrs_embeddings[self.datamatcher.datasets.index(table.name)]
+        datefields = []
+        for col, embed in zip(table.columns[1:], col_embeds): # row_id added to table so index starts at 1
+            score = self.datamatcher.attr_score_batch(embed, time_batch)
+            if score > .5: datefields.append((col, score))
+        best_datefield = max(datefields, key=lambda x: x[1])[0] if datefields else None
+        attributes.update(best_datefield)
+        attributes = list(attributes)
+
+        # infer datetime from the queries if not exist
+        if best_datefield:
+            oldest_date, newest_date = table[best_datefield].min(), table[best_datefield].max()      
+            prompt = [
+                {"role": "system", "content": f"""Please add date or time to the query if needed given the default oldest and newest dates: {oldest_date}, {newest_date} respectively. The rule should be as follows (I will give examples for you to follow):
+                    1. Add the most recent date when the query lacks date. E.g "US' GDP > China's GDP" --> "US' GDP > China's GDP IN {newest_date}"
+                    2. Add the most recent date when the query lacks the end date. E.g "US' GDP > China's GDP SINCE 2010" --> "US' GDP > China's GDP SINCE 2010 TO {newest_date}"
+                    3. Add the furthest date when the query lacks the start date. E.g "US' GDP > China's GDP TIL 2010" --> "US' GDP > China's GDP FROM 2010 TIL {oldest_date}"
+
+                    User will give multiple queries inform of:
+                    Q1: <query 1>
+                    Q2: <query 2>
+                    ...
+                        Please answer the queries in the following format:
+                        A1: <answer 1>
+                        A2: <answer 2>
+                        ..."""},
+                {"role": "user", "content": "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries)])}
+            ]
+            answers = self._call_api_2(prompt)
+            print("answers: ", answers)
+            raise NotImplementedError("Need to implement datetime inference")
+                
+
         # further process the attributes
         for idx, attr in reversed(list(enumerate(attributes))):
             # fuzzy match when GPT hallucinating attributes
@@ -303,7 +339,7 @@ class TableReasoner(object):
             table: pd.DataFrame, 
             verbose=False, 
             fuzzy_match=False,
-            more_attrs: list = None):
+            more_attrs: list = []):
         """
             Reasoning pipeline for CoT
             Input: claim, table
@@ -396,7 +432,7 @@ class TableReasoner(object):
 
 def main():
     table_reasoner = TableReasoner()
-    query = "The US produced more nuclear energy per capita than China in 2012."
+    query = "US' Stock market observes a dump of 30% in the summer of 2008."
     # query = ["What is the total energy consumption of the US in 2012?", "What is the total energy consumption of China in 2012?", "What is the total energy consumption of the world in 2012?"]
     df = pd.read_csv("../Datasets/owid-energy-data.csv")
     table_reasoner.reason(query, df, verbose=True, fuzzy_match=True)

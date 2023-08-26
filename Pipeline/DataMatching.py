@@ -1,6 +1,7 @@
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from Summarizer import Summarizer
+from rapidfuzz import fuzz
 import numpy as np
 import pandas as pd
 import json
@@ -81,6 +82,10 @@ class DataMatcher(object):
             for dataset_map in top_k_datasets:
                 ind, name = dataset_map[3], dataset_map[0]
                 dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], score_batches[ind]) if score > top_k_datasets[0][2] * .8]
+        else:
+            # reset dataset_map[3] to empty list
+            for dataset_map in top_k_datasets:
+                dataset_map[3] = []
 
         if verbose: print(f"Most relevant datasets using {method}")
         for dataset_name, _, similarity, relevant_attrs in top_k_datasets:
@@ -123,7 +128,12 @@ def main():
     phrase1 = "Since United States has imported too much coal, it's currency has dropped below Korea."
     phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
     # matcher.find_top_k_datasets(phrase1, k=5, method="attr")
-    matcher.find_top_k_datasets(phrase1, k=10, method="attr")
+    # matcher.find_top_k_datasets(phrase1, k=10, method="attr")
+    # print(matcher.attr_score_batch("country_name", ['time', 'year', 'date']))
+    print("America vs United States by fuzz.ratio: ", fuzz.ratio("America", "United States"))
+    print("America vs United States by embedding: ", matcher.similarity_score("America", "United States"))
+    print("America vs Africa by fuzz.ratio: ", fuzz.ratio("America", "Africa"))
+    print("America vs Africa by embedding: ", matcher.similarity_score("America", "Africa"))
 
 if __name__ == "__main__":
     main()
