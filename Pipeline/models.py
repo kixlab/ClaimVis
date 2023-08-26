@@ -2,7 +2,6 @@
 from enum import Enum
 from typing import Dict, Union
 from pydantic import BaseModel as PydanticBaseModel
-from typing import Optional
 
 class BaseModel(PydanticBaseModel):
     class Config:
@@ -58,3 +57,22 @@ class GetVizSpecBody(BaseModel):
 class GetVizDataBodyNew(BaseModel):
     values: list[OptionProps]
     fields: Dict[str, Union[list[OptionProps], DateRange]]
+
+
+class LogBase(BaseModel):
+    event: str
+    payload: str = None
+    environment: str
+    timestamp: str
+    url: str
+    username: str = None
+
+class LogCreate(LogBase):
+    pass
+
+class Log(LogBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+

@@ -1,10 +1,21 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from models import *
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 from main import Pipeline
 from AutomatedViz import AutomatedViz
+
+from . import crud, models, ORMModels
+from .database import SessionLocal, engine
+from sqlalchemy.orm import Session
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
 app.add_middleware(
@@ -153,6 +164,9 @@ def get_viz_spec(body: GetVizSpecBody): # needs update
     return skeleton_spec
 @app.post("/get_data")
 def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
+    tableName = body.tableName
+
+    df = pd.read_csv(f"../Datasets/{tableName}.csv")
 
     otherFieldNames = list(map(lambda x: x, body.fields))
     ## remove date from otherFieldsNames
@@ -185,6 +199,17 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
             del r['date']
         
     return res_dict
+
+@app.post("/logs", response_model = models.Log)
+def create_log(body: LogCreate, db: Session = Depends(get_db)):
+    return crud.create_log(db=db, log=body)
+
+@app.get("/logs", response_model = list[models.Log])
+def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), username: str = None):
+    if username:
+        return crud.get_logs_by_user(db=db, user=username, skip=skip, limit=limit)
+    else:
+        return crud.get_logs(db=db, skip=skip, limit=limit)
 
 
 if __name__ == "__main__":
