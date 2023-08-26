@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-df = pd.read_csv("../Datasets/owid-energy-data.csv")
+# df = pd.read_csv("../Datasets/owid-energy-data.csv")
 
 """
     Claim map has the following structure:
@@ -166,7 +166,7 @@ def get_viz_spec(body: GetVizSpecBody): # needs update
 def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
     tableName = body.tableName
 
-    df = pd.read_csv(f"../Datasets/{tableName}.csv")
+    df = pd.read_csv(f"../Datasets/{tableName}")
 
     otherFieldNames = list(map(lambda x: x, body.fields))
     ## remove date from otherFieldsNames
