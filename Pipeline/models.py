@@ -1,4 +1,5 @@
 # from pydantic import BaseModel, create_model
+import datetime
 from enum import Enum
 from typing import Dict, Union
 from pydantic import BaseModel as PydanticBaseModel
@@ -63,7 +64,7 @@ class LogBase(BaseModel):
     event: str
     payload: str = None
     environment: str
-    timestamp: str
+    client_timestamp: str
     url: str
     username: str = None
 
@@ -72,7 +73,8 @@ class LogCreate(LogBase):
 
 class Log(LogBase):
     id: int
+    created_at: datetime.datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from . import models, ORMModels
+import models, ORMModels
 
 def get_log(db: Session, log_id: int):
     return db.query(ORMModels.Log).filter(ORMModels.Log.id == log_id).first()

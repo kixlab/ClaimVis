@@ -6,8 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from main import Pipeline
 from AutomatedViz import AutomatedViz
 
-from . import crud, models, ORMModels
-from .database import SessionLocal, engine
+import log_crud, models, ORMModels
+from database import SessionLocal, engine
 from sqlalchemy.orm import Session
 
 def get_db():
@@ -202,14 +202,14 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
 
 @app.post("/logs", response_model = models.Log)
 def create_log(body: LogCreate, db: Session = Depends(get_db)):
-    return crud.create_log(db=db, log=body)
+    return log_crud.create_log(db=db, log=body)
 
 @app.get("/logs", response_model = list[models.Log])
 def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), username: str = None):
     if username:
-        return crud.get_logs_by_user(db=db, user=username, skip=skip, limit=limit)
+        return log_crud.get_logs_by_user(db=db, user=username, skip=skip, limit=limit)
     else:
-        return crud.get_logs(db=db, skip=skip, limit=limit)
+        return log_crud.get_logs(db=db, skip=skip, limit=limit)
 
 
 if __name__ == "__main__":
