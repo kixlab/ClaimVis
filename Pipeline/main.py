@@ -127,7 +127,7 @@ class Pipeline(object):
 
 def main():
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "America consumes more electricity than China in 2011."
+    text = "China outnumbers US in its total export since 2011."
     
     pipeline.run(text)
 

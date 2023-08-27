@@ -21,10 +21,12 @@ from collections import defaultdict
 class AutomatedViz(object):
     def __init__(
             self, 
+            matcher: DataMatcher = None,
             datasrc: str = None, 
             table: dict or pd.DataFrame = None, 
             attributes: str = None, 
-            test: bool = False
+            test: bool = False,
+            value_map: dict = None
         ):
         self.datasrc = datasrc
 
@@ -44,10 +46,11 @@ class AutomatedViz(object):
             self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
         self.attributes = attributes or list(self.table.columns)
+        self.value_map = value_map or dict()
 
         # initialize AnsParser
         self.parser = AnsParser()
-        self.datamatcher = DataMatcher()
+        self.datamatcher = matcher or DataMatcher()
 
     def tag_date_time(self, text: str, verbose: bool = False):
         # Parse date time from the claim
@@ -131,7 +134,7 @@ class AutomatedViz(object):
                         max_decode_steps=200,
                         samples=1
                     )[0]
-        # parse the response
+        # parse the response (not sure if this works for all cases)
         response_dict = json.loads(response)
         for ref, attr in response_dict['map'].copy().items():
             flag = False
@@ -154,15 +157,14 @@ class AutomatedViz(object):
             return any(func(val) for val in self.table[attr].to_list())
 
         # infer nominal, temporal, and quantitative attributes
-        dates, fields, categories = None, [], []
+        dates, fields, categories = None, set(), []
         for ref, attr in tag_map['map'].items():
             if helpers.isdate(ref)[0] and self.datamatcher.attr_score_batch(attr, ['time', 'year', 'date']) > 0.5:
-                if verbose: print(f"date: {helpers.isdate(ref)[1]}")
                 dates = {
                     "value": attr,
                     "range": self.table[attr].to_list()
                 }
-                fields.append(Field(
+                fields.add(Field(
                                 name=attr,
                                 type="temporal",
                                 timeUnit= self.parser.parse_unit(ref) or "year"
@@ -176,24 +178,36 @@ class AutomatedViz(object):
                     'provenance': ""
                 })
             else: # nominal
-                fields.append(Field( name=attr, type="nominal" ))      
+                fields.add(Field( name=attr, type="nominal" ))      
             
+        
+        if verbose: print(f"fields: {fields}, map: {self.value_map.keys()}")
+        assert len(fields) == len(self.value_map.keys()), "The number of fields should be the same as the number of values in the value map."
         filtered_table = self.table
         for field in fields:
             if field.type == "nominal":
-                field_values = [t[0] for t in tag_map['map'].items() if t[1] == field.name]
-                filtered_table = filtered_table[filtered_table[field.name].isin(field_values)]
+                filtered_table = filtered_table[filtered_table[field.name].isin(self.value_map[field.name])]
             elif field.type == "temporal":
-                field_values = [t[0] for t in tag_map['map'].items() if t[1] == field.name]
-                filtered_table = filtered_table[filtered_table[field.name].isin(field_values)]
+                if len(self.value_map[field.name]) == 1:
+                    value = self.value_map[field.name].pop()
+                    # Convert the value to the same type as the values in the table
+                    value = type(self.table[field.name].iloc[0])(value)
+                    filtered_table = filtered_table[filtered_table[field.name] == value]
+                else: # more than one
+                    assert len(self.value_map[field.name]) >= 2, "The number of values in the value map should be more than 1."
+                    # Convert the values to the same type as the values in the table
+                    values = [type(self.table[field.name].iloc[0])(v) for v in self.value_map[field.name]]
+                    old, recent = min(values), max(values)
+                    filtered_table = filtered_table[(filtered_table[field.name] >= old) & (filtered_table[field.name] <= recent)]
 
-        # if verbose:
-        #     print(f"dates: {dates}")
-        #     print(f"fields: {fields}")
-        #     print(f"categories: {categories}")
+        if verbose:
+            # print(f"dates: {dates}")
+            print(f"filtered table: {filtered_table}")
+            print(f"fields: {fields}")
+            print(f"categories: {categories}")
 
         # final pass to retrieve all datapoints
-        datapoints, data_fields = [], list(set(map(lambda x: x.name, fields)))
+        datapoints, data_fields = [], list(map(lambda x: x.name, fields))
         for category in categories:
             for _, row in filtered_table[data_fields + [category['value']]].iterrows():
                 dataPoint = DataPointValue(
