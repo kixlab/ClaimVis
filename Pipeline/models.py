@@ -42,6 +42,7 @@ class DataPointValue(DataPoint):
 
 class DataPointSet(BaseModel):
     statement: str
+    tableName: str
     dataPoints: list[DataPoint]
     fields: list[Field]
     ranges: Ranges
