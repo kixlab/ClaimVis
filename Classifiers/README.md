@@ -1,1 +1,0 @@
-This folder contains claim detection classifiers. Most of these are failed products.

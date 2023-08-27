@@ -246,6 +246,7 @@ class TableReasoner(object):
                         processed_psqls.append(post_process_sql(
                             sql_str=psql, 
                             df=table,
+                            matcher=self.datamatcher,
                             process_program_with_fuzzy_match_on_db=fuzzy_match,
                             verbose=False
                         ))

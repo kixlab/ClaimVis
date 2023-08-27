@@ -7,6 +7,8 @@ import unicodedata
 from rapidfuzz import fuzz
 from multiprocessing import Pool
 from itertools import repeat
+from functools import cache
+from Pipeline.DataMatching import DataMatcher
 
 from utils.sql.extraction_from_sql import *
 from utils.sql.all_keywords import ALL_KEY_WORDS
@@ -303,11 +305,16 @@ def normalize(x):
     x = re.sub('\s+', ' ', x, flags=re.U).lower().strip()
     return x
 
+import json
+# Load country_name.json
+with open('../Datasets/description/country_name.json', 'r') as f:
+    country_data = json.load(f)
 
-def _get_matched_cells(value_str, df, fuzz_threshold=70, attr:str=None):
+def _get_matched_cells(value_str, matcher: DataMatcher, df: pd.DataFrame, fuzz_threshold=70, attr:str=None):
     """
     Get matched table cells with value token.
     """
+    @cache
     def calculate_fuzz_score(cell):
         cell = str(cell)
         fuzz_score = fuzz.ratio(value_str, cell)
@@ -316,10 +323,23 @@ def _get_matched_cells(value_str, df, fuzz_threshold=70, attr:str=None):
         else:
             return None
 
-    if attr: df = df[[attr]]
+    matched_cells = []
+    value_embed = matcher.encode(value_str)  # Move this outside of the loops
 
-    matched_cells = df.applymap(calculate_fuzz_score).values.flatten()
-    matched_cells = [cell for cell in matched_cells if cell is not None]
+    if attr == 'country_name':  # cache 
+        # special case only compare with 250 country names
+        scores = matcher.similarity_batch(value_embed, [country['embedding'] for country in country_data])
+        matched_cells = [(country['name'], score) for country, score in zip(country_data, scores) if score > 0.5]
+    else:
+        if attr: df = df[[attr]] # the most important line here
+        if attr and df.dtypes[attr] == 'object':  # more general case
+            cells = list(df[attr].unique())
+            embeddings = matcher.encode(cells)
+            scores = matcher.similarity_batch(value_embed, embeddings)  # Use vectorized operation
+            matched_cells = [(cell, score) for cell, score in zip(cells, scores) if score > 0.5]
+        else:
+            matched_cells = df.applymap(calculate_fuzz_score).values.flatten()
+            matched_cells = [cell for cell in matched_cells if cell is not None]
 
     if any(score == 100 for _, score in matched_cells):
         return [cell for cell in matched_cells if cell[1] == 100]
@@ -352,6 +372,7 @@ def _check_valid_fuzzy_match(value_str, matched_cell):
 def post_process_sql(
         sql_str: str, 
         df: pd.DataFrame, 
+        matcher: DataMatcher,
         table_title: str=None, 
         process_program_with_fuzzy_match_on_db=True, 
         verbose=False,
@@ -499,7 +520,7 @@ def post_process_sql(
             if sql_tokens[value_idx-2][-1] != '"': continue
             attr = sql_tokens[value_idx-2][1:-1]
             if verbose: print(f"attr: {attr}")
-            matched_cells = _get_matched_cells(value_str, df, attr=attr)
+            matched_cells = _get_matched_cells(value_str=value_str, matcher=matcher, df=df, attr=attr)
 
             if verbose: print(f"matched cells: {matched_cells}")
 
@@ -544,9 +565,9 @@ def post_process_sql(
     # if verbose: print(f"post basic fix: {sql_str}")
 
     if process_program_with_fuzzy_match_on_db:
-        try:
+        # try:
             sql_str = fuzzy_match_process(sql_str, df, verbose)
-        except Exception as e:
-            print(e)
+        # except Exception as e:
+        #     print(e)
 
     return sql_str

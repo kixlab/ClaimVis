@@ -127,7 +127,7 @@ class Pipeline(object):
 
 def main():
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "The United State has the highest coal energy in the world in 2020."
+    text = "America consumes more electricity than China in 2011."
     
     pipeline.run(text)
 
@@ -153,7 +153,7 @@ def profile_func(func):
 
 if __name__ == "__main__":
     from TableReasoning import main as table_reasoner_main
-    # from DataMatching import main as data_matcher_main
+    from DataMatching import main as data_matcher_main
     profile_func(main) 
     # main()
     # table_reasoner_main()

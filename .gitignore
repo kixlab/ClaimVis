@@ -11,5 +11,6 @@ Scripts/*
 pyvenv.cfg
 Lib/*
 Other/*
+Classifiers/*
 ```
 Gloc/log.txt
