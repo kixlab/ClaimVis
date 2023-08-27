@@ -4,6 +4,7 @@ sys.path.append("..")
 
 from Gloc.utils.normalizer import post_process_sql
 import pandas as pd
+from Pipeline.DataMatching import DataMatcher
 import os
 
 class Tester():
@@ -11,17 +12,19 @@ class Tester():
         self.datasrc = datasrc
 
     def test_post_process_sql(self):
-        sql = """SELECT "birth rate, crude (per 1,000 people)" FROM w WHERE "country_name" = 'Mexico' AND "date" = 2022"""
-        table = pd.read_csv(os.path.join(self.datasrc, "Health.csv"))
+        sql = """SELECT "electric power consumption (kwh per capita)" FROM w WHERE "country_name"= \'America\' and "date" = 2011"""
+        table = pd.read_csv(os.path.join(self.datasrc, "Energy & Mining.csv"))
         table.columns = table.columns.str.lower()
         table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
         table.reset_index(inplace=True)
         table.rename(columns={'index': 'row_id'}, inplace=True)
+        matcher = DataMatcher()
 
         new_sql = post_process_sql(
             sql_str=sql,
             df=table,
-            verbose=True
+            verbose=True,
+            matcher=matcher
         )
         print(new_sql)
 

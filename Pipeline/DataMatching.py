@@ -1,3 +1,4 @@
+from functools import cache, lru_cache
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from Summarizer import Summarizer
@@ -35,14 +36,14 @@ class DataMatcher(object):
                         writeflag = True
                 
                     if "embedding" not in self.description[dataset]:
-                        self.description[dataset]["embedding"] = self.embedder.encode([self.description[dataset]['description']])[0].tolist()
+                        self.description[dataset]["embedding"] = self.encode(self.description[dataset]['description']).tolist()
                         writeflag = True
                     else:
                         self.dataset_embeddings.append(self.description[dataset]["embedding"])
 
                 embed_name = f"{dataset[:-5]}_column_embeddings.json"
                 if embed_name not in os.listdir(f"{self.datasrc}/description/"):
-                    column_embeddings = [self.embedder.encode([col_name])[0].tolist() for col_name in self.description[dataset]["columns"]]
+                    column_embeddings = [self.encode(col_name).tolist() for col_name in self.description[dataset]["columns"]]
                     with open(f"{self.datasrc}/description/{embed_name}", 'w') as f:
                         json.dump(column_embeddings, f)    
                     self.attrs_embeddings.append(column_embeddings)                    
@@ -53,6 +54,7 @@ class DataMatcher(object):
             # write summaries back to file
             if writeflag:
                 openfile.seek(0)
+                openfile.truncate(0)
                 json.dump(self.description, openfile)
             openfile.close()
 
@@ -66,7 +68,7 @@ class DataMatcher(object):
         elif method == "idf":
             similarities = [self.idf_score(claim, self.description[dataset]['description']) for dataset in self.datasets]
         elif method == "attr": # the most accurate match
-            embed = self.embedder.encode([claim])[0]
+            embed = self.encode(claim)
             score_batches = [self.similarity_batch(embed, self.attrs_embeddings[i])\
                                                              for i, dataset in enumerate(self.datasets)]
             similarities = [max(batch) for batch in score_batches]
@@ -93,15 +95,15 @@ class DataMatcher(object):
 
         return top_k_datasets
 
-    def similarity_score(self, phrase1: str, phrase2: str):
-        phrase1_embedding = self.embedder.encode([phrase1])[0]
-        phrase2_embedding = self.embedder.encode([phrase2])[0]
+    def similarity_score(self, phrase1, phrase2):
+        phrase1_embedding = self.encode(phrase1) if isinstance(phrase1, str) else phrase1
+        phrase2_embedding = self.encode(phrase2) if isinstance(phrase2, str) else phrase2
         similarity = cosine_similarity([phrase1_embedding], [phrase2_embedding])[0][0]
         return similarity
     
-    def similarity_batch(self, phrase: str, batch_of_phrases):
-        phrase_embedding = self.embedder.encode([phrase])[0] if isinstance(phrase, str) else phrase
-        batch_of_embeddings = self.embedder.encode(batch_of_phrases) \
+    def similarity_batch(self, phrase, batch_of_phrases):
+        phrase_embedding = self.encode(phrase) if isinstance(phrase, str) else phrase
+        batch_of_embeddings = self.encode(batch_of_phrases) \
                                     if isinstance(batch_of_phrases[0], str) else batch_of_phrases
         similarities = cosine_similarity([phrase_embedding], batch_of_embeddings)[0]
         return similarities
@@ -119,21 +121,40 @@ class DataMatcher(object):
     
     def attr_score_batch(self, phrase: any, attributes: list):
         return max(self.similarity_batch(phrase, attributes))
+    
+    # @lru_cache(maxsize=None)
+    def encode(self, phrase):
+        if isinstance(phrase, str):
+            return self.embedder.encode([phrase])[0]
+        elif isinstance(phrase, list):
+            return self.embedder.encode(phrase)
+        return phrase
         
 
 def main():
     matcher = DataMatcher(datasrc="../Datasets")
     # claim = "The energy consumption level of the US was super bad last year."
     # matcher.find_top_k_datasets(claim, k=2)
-    phrase1 = "Since United States has imported too much coal, it's currency has dropped below Korea."
-    phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
-    # matcher.find_top_k_datasets(phrase1, k=5, method="attr")
-    # matcher.find_top_k_datasets(phrase1, k=10, method="attr")
-    # print(matcher.attr_score_batch("country_name", ['time', 'year', 'date']))
-    print("America vs United States by fuzz.ratio: ", fuzz.ratio("America", "United States"))
-    print("America vs United States by embedding: ", matcher.similarity_score("America", "United States"))
-    print("America vs Africa by fuzz.ratio: ", fuzz.ratio("America", "Africa"))
-    print("America vs Africa by embedding: ", matcher.similarity_score("America", "Africa"))
+    # phrase1 = "Since United States has imported too much coal, it's currency has dropped below Korea."
+    # phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
+    # # matcher.find_top_k_datasets(phrase1, k=5, method="attr")
+    # # matcher.find_top_k_datasets(phrase1, k=10, method="attr")
+    # print(matcher.attr_score_batch("iso_code", ['time', 'year', 'date']))
+    health_dataset = pd.read_csv('../Datasets/Health.csv')    
+    unique_countries = health_dataset['country_name'].unique()
+    print(f"Unique countries: {unique_countries}")
+    print(f"Number of unique countries: {len(unique_countries)}")
+    country_embeddings = [matcher.embedder.encode([country])[0].tolist() for country in unique_countries]
+    country_save = [
+        {
+            "name": country,
+            "embedding": embedding
+        }
+        for country, embedding in zip(unique_countries, country_embeddings)
+    ]
+    # with open('../Datasets/description/country_name.json', 'w') as f:
+    #     json.dump(country_save, f)
+    
 
 if __name__ == "__main__":
     main()
