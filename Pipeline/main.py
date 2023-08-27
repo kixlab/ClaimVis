@@ -63,7 +63,7 @@ class Pipeline(object):
                             table=table,
                             verbose=verbose,
                             fuzzy_match=True,
-                            more_attrs=relevant_attrs,
+                            more_attrs=[attr.lower() for attr in relevant_attrs],
                         ))
                     claim_map[claim][-1]["sub_table"]["name"] = dataset
                     
@@ -127,7 +127,7 @@ class Pipeline(object):
 
 def main():
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "No movies have a rating of 8.5 or higher"
+    text = "The United State has the highest coal energy in the world in 2020."
     
     pipeline.run(text)
 

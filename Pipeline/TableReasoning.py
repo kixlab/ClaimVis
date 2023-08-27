@@ -107,26 +107,30 @@ class TableReasoner(object):
             question=claim,
             template_key=template,
             table=table,
-            model=Model.GPT4 # 4
+            model=Model.GPT3 # 4
         )
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
         attributes, col_set = set(attributes + more_attrs), set(table.columns)
         # add datefield if exist and infer datetime from the queries if not
         time_batch = self.datamatcher.embedder.encode(["time", "date", "year"])
         col_embeds = self.datamatcher.attrs_embeddings[self.datamatcher.datasets.index(table.name)]
-        datefields = []
-        for col, embed in zip(table.columns[1:], col_embeds): # row_id added to table so index starts at 1
+        datefields, start_index = [], 1 if table.columns[0] == "row_id" else 0 # row_id added to table so index starts at 1
+        for col, embed in zip(table.columns[start_index:], col_embeds): 
             score = self.datamatcher.attr_score_batch(embed, time_batch)
             if score > .5: datefields.append((col, score))
         best_datefield = max(datefields, key=lambda x: x[1])[0] if datefields else None
-        attributes.update(best_datefield)
+        attributes.add(best_datefield)
         attributes = list(attributes)
 
         # infer datetime from the queries if not exist
         if best_datefield:
-            oldest_date, newest_date = table[best_datefield].min(), table[best_datefield].max()      
+            oldest_date, newest_date = table[best_datefield].min(), table[best_datefield].max()
             prompt = [
-                {"role": "system", "content": f"""Please add date or time to the query if needed given the default oldest and newest dates: {oldest_date}, {newest_date} respectively. The rule should be as follows (I will give examples for you to follow):
+                {"role": "system", "content": f"""Please add date or time to the query if needed. Please use the following default dates: 
+                 OLDEST: {oldest_date}
+                 NEWEST: {newest_date} 
+
+                 The rule should be as follows (I will give examples for you to follow):
                     1. Add the most recent date when the query lacks date. E.g "US' GDP > China's GDP" --> "US' GDP > China's GDP IN {newest_date}"
                     2. Add the most recent date when the query lacks the end date. E.g "US' GDP > China's GDP SINCE 2010" --> "US' GDP > China's GDP SINCE 2010 TO {newest_date}"
                     3. Add the furthest date when the query lacks the start date. E.g "US' GDP > China's GDP TIL 2010" --> "US' GDP > China's GDP FROM 2010 TIL {oldest_date}"
@@ -135,16 +139,15 @@ class TableReasoner(object):
                     Q1: <query 1>
                     Q2: <query 2>
                     ...
-                        Please answer the queries in the following format:
-                        A1: <answer 1>
-                        A2: <answer 2>
-                        ..."""},
+                    Please answer the queries in the following format:
+                    A1: <answer 1>
+                    A2: <answer 2>
+                    ..."""},
                 {"role": "user", "content": "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries)])}
             ]
-            answers = self._call_api_2(prompt)
-            print("answers: ", answers)
-            raise NotImplementedError("Need to implement datetime inference")
-                
+            answers = self._call_api_2(prompt, model=Model.GPT4)
+            # parse the answers
+            queries = self.parser.parse_sql_2(answers[0])
 
         # further process the attributes
         for idx, attr in reversed(list(enumerate(attributes))):

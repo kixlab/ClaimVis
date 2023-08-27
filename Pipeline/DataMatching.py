@@ -53,6 +53,7 @@ class DataMatcher(object):
             # write summaries back to file
             if writeflag:
                 openfile.seek(0)
+                openfile.truncate(0)
                 json.dump(self.description, openfile)
             openfile.close()
 
@@ -129,11 +130,9 @@ def main():
     phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
     # matcher.find_top_k_datasets(phrase1, k=5, method="attr")
     # matcher.find_top_k_datasets(phrase1, k=10, method="attr")
-    # print(matcher.attr_score_batch("country_name", ['time', 'year', 'date']))
-    print("America vs United States by fuzz.ratio: ", fuzz.ratio("America", "United States"))
-    print("America vs United States by embedding: ", matcher.similarity_score("America", "United States"))
-    print("America vs Africa by fuzz.ratio: ", fuzz.ratio("America", "Africa"))
-    print("America vs Africa by embedding: ", matcher.similarity_score("America", "Africa"))
+    print(matcher.attr_score_batch("iso_code", ['time', 'year', 'date']))
+
+    
 
 if __name__ == "__main__":
     main()
