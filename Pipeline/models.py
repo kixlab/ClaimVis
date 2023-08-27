@@ -1,8 +1,8 @@
 # from pydantic import BaseModel, create_model
+import datetime
 from enum import Enum
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 from pydantic import BaseModel as PydanticBaseModel
-from typing import Optional
 
 class BaseModel(PydanticBaseModel):
     class Config:
@@ -50,6 +50,7 @@ class DataPointValue(DataPoint):
 
 class DataPointSet(BaseModel):
     statement: str
+    tableName: str
     dataPoints: list[DataPoint]
     fields: list[Field]
     ranges: Ranges
@@ -64,5 +65,27 @@ class GetVizSpecBody(BaseModel):
     dataPoints: list[DataPoint]
 
 class GetVizDataBodyNew(BaseModel):
+    tableName: str
     values: list[OptionProps]
     fields: Dict[str, Union[list[OptionProps], DateRange]]
+
+
+class LogBase(BaseModel):
+    event: str
+    payload: str = None
+    environment: str
+    client_timestamp: str
+    url: str
+    username: Optional[str] = None
+
+class LogCreate(LogBase):
+    pass
+
+class Log(LogBase):
+    id: int
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
