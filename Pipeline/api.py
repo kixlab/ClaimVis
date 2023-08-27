@@ -202,6 +202,6 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="China outnumbers US in its total export since 2011.")
+    claim = UserClaimBody(userClaim="China burns a little more than 3 billion metric tons of coal every year.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
