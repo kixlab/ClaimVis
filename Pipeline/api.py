@@ -233,6 +233,6 @@ def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), use
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="The US is the biggest merchadise exporter in the world.")
+    claim = UserClaimBody(userClaim="Labor force participation rate of the US is higher than that of most G7 countries in 2011.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)

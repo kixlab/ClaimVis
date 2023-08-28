@@ -135,6 +135,7 @@ class AutomatedViz(object):
                     )[0]
         # parse the response (not sure if this works for all cases)
         response_dict = json.loads(response)
+        print("initial tagmap: ", response_dict)
         for ref, attr in response_dict['map'].copy().items():
             flag = False
             for value in self.table[attr]:

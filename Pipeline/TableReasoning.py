@@ -129,24 +129,30 @@ class TableReasoner(object):
         if best_datefield:
             oldest_date, newest_date = table[best_datefield].min(), table[best_datefield].max()
             prompt = [
-                {"role": "system", "content": f"""Please add date or time to the query if needed. Please use the following default dates: 
-                 OLDEST: {oldest_date}
-                 NEWEST: {newest_date} 
+                {"role": "system", "content": f"""Please add date or time to the query if needed. 
+                 
+                 The rules will be demonstrated via the following examples. Let's use default oldest and newest dates as 1960 and 2021, respectively.
+                    1. Add the most recent date when the query lacks date. E.g "US' GDP > China's GDP" --> "US' GDP > China's GDP in 2021"
+                    2. Add the most recent date when the query lacks the end date. E.g "US' GDP > China's GDP since 2010" --> "US' GDP > China's GDP since 2010 to 2021"
+                    3. Add the oldest date when the query lacks the start date. E.g "US' GDP > China's GDP until 2010" --> "US' GDP > China's GDP from 1960 until 2010"
 
-                 The rule should be as follows (I will give examples for you to follow):
-                    1. Add the most recent date when the query lacks date. E.g "US' GDP > China's GDP" --> "US' GDP > China's GDP IN {newest_date}"
-                    2. Add the most recent date when the query lacks the end date. E.g "US' GDP > China's GDP SINCE 2010" --> "US' GDP > China's GDP SINCE 2010 TO {newest_date}"
-                    3. Add the furthest date when the query lacks the start date. E.g "US' GDP > China's GDP TIL 2010" --> "US' GDP > China's GDP FROM 2010 TIL {oldest_date}"
-
-                    User will give multiple queries inform of:
+                    User will give multiple queries inform of
+                 /*
+                 Please use the following default dates:
+                 OLDEST: <oldest date>
+                 NEWEST: <newest date>
                     Q1: <query 1>
                     Q2: <query 2>
                     ...
+                 */
+
                     Please answer the queries in the following format:
                     A1: <answer 1>
                     A2: <answer 2>
                     ..."""},
-                {"role": "user", "content": "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries)])}
+                {"role": "user", "content": f"""Please use the following default dates: 
+                 OLDEST: {oldest_date}
+                 NEWEST: {newest_date}""" + "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries)])}
             ]
             answers = self._call_api_2(prompt, model=Model.GPT4)
             # parse the answers

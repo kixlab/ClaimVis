@@ -467,7 +467,6 @@ def post_process_sql(
                         use_corenlp=use_corenlp, 
                         use_duckdb=use_duckdb
                     )
-        if verbose: print(f"normal tokens: {sql_tokens}")
         sql_template_tokens = extract_partial_template_from_sql(
                                 sql=sql_str, 
                                 use_corenlp=use_corenlp,
@@ -489,11 +488,37 @@ def post_process_sql(
                 sql_tokens[idx] = tok.upper()
 
         if verbose:
-            print(sql_tokens)
-            print(sql_template_tokens)
+            print(f"normal tokens: {sql_tokens}")
+            print(f"template tokens: {sql_template_tokens}")
 
         assert len(sql_tokens) == len(sql_template_tokens)
         value_indices = [idx for idx in range(len(sql_template_tokens)) if sql_template_tokens[idx] == '[VALUE]']
+
+        # find group patterns like "WHERE a in (b, c, d)"
+        def find_token_groups(sql_template_tokens):
+            token_groups, current_group, in_group = [], [], False
+            for idx, token in enumerate(sql_template_tokens):
+                if token == '(' and sql_template_tokens[idx-1] == 'in':
+                    in_group = True
+                elif token == ')':
+                    in_group = False
+                    if current_group and current_group[0] != 'SELECT':
+                        token_groups.append(current_group)
+                    current_group = []
+                elif in_group and token != ',':
+                    current_group.append(idx)
+            return token_groups
+
+        token_groups = find_token_groups(sql_template_tokens)
+        for token_group in token_groups:
+            if sql_tokens[token_group[0]-3][-1] != '"': continue # skip if not a column
+            attr = sql_tokens[token_group[0]-3][1:-1]
+            if verbose: print(f"attr: {attr}")
+
+            for tok_ind in token_group:
+                value_map[attr].add(sql_template_tokens[tok_ind][1:-1])
+        
+        # check for the rest of the value tokens
         for value_idx in value_indices:
             value_str = sql_tokens[value_idx]
             # Drop STRQ ... STRQ for fuzzy match
@@ -502,16 +527,16 @@ def post_process_sql(
                 value_str = value_str[1:-1]
                 is_string = True
 
-            # If already fuzzy match, skip (but remember to add to value_map)
-            if sql_tokens[value_idx-2][-1] != '"': continue
+            # extract the corresponding attribute
+            if sql_tokens[value_idx-2][-1] != '"': continue # skip if not a column
             attr = sql_tokens[value_idx-2][1:-1]
             if verbose: print(f"attr: {attr}")
+            # If already fuzzy match, skip (but remember to add to value_map)
             if value_str[0] == '%' or value_str[-1] == '%':
                 start, end = 1 if value_str[0] == '%' else 0, -1 if value_str[-1] == '%' else None
                 value_map[attr].add(value_str[start:end])
                 continue
 
-            # value_str = value_str.lower()
             # Fuzzy Match: the bulkiest line here, cost a lot of time
             matched_cells = _get_matched_cells(value_str=value_str, matcher=matcher, df=df, attr=attr)
             if verbose: print(f"matched cells: {matched_cells}")
@@ -522,14 +547,15 @@ def post_process_sql(
                 for matched_cell, fuzz_score in matched_cells:
                     if _check_valid_fuzzy_match(value_str, matched_cell):
                         new_value_str = matched_cell
-                        # fill the value map
-                        value_map[attr].add(new_value_str)
+                        # fill the value map if is_string or is_date (simple ver)
+                        if is_string or "date" in attr.lower():
+                            value_map[attr].add(int(new_value_str))
 
                         if verbose and new_value_str != value_str:
                             print("\tfuzzy match replacing!", value_str, '->', matched_cell, f'fuzz_score:{fuzz_score}')
                         break
-            else:
-                value_map[attr].add(value_str)
+            elif is_string or "date" in attr.lower():
+                value_map[attr].add(int(value_str))
 
             if is_string:
                 new_value_str = f"{STRQs[0]}{new_value_str}{STRQs[0]}"
@@ -545,9 +571,9 @@ def post_process_sql(
     # if verbose: print(f"post basic fix: {sql_str}")
 
     if process_program_with_fuzzy_match_on_db:
-        # try:
+        try:
             return fuzzy_match_process(sql_str, df, verbose)
-        # except Exception as e:
-            # print(e)
+        except Exception as e:
+            print(e)
 
     return sql_str, dict()

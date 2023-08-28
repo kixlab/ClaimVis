@@ -13,8 +13,8 @@ class Tester():
         self.datasrc = datasrc
 
     def test_post_process_sql(self):
-        sql = """SELECT "coal_production" FROM w WHERE "country" = \'US\' AND "year" = 2022"""
-        table = pd.read_csv(os.path.join(self.datasrc, "owid-energy-data.csv"))
+        sql = """SELECT case when "Labor force participation rate, total (% of total population ages 15+) (national estimate)" > ( SELECT "Labor force participation rate, total (% of total population ages 15+) (national estimate)" FROM w WHERE "country_name" = \'United States\' and "date" = w.val_270_275 ) then 1 else 0 end AS higher_than_us FROM w WHERE "country_name" IN ( \'Canada\' , \'France\' , \'Germany\' , \'Italy\' , \'Japan\' , \'United Kingdom\' ) and "date" >= 1960 and "date" <= 2011"""
+        table = pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))
         # table.columns = table.columns.str.lower()
         # table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
         table.reset_index(inplace=True)
@@ -45,7 +45,7 @@ class Tester():
             normalize=False,
             lower_case=True
         )
-        sql = """SELECT "unemployment, female (% of female labor force) (national estimate)" FROM w WHERE "country_name" = \'United States\' and "date" = 2022"""
+        sql = """SELECT "country_name" FROM w WHERE "country_name" IN (\'Canada\', \'France\', \'Germany\', \'Italy\', \'Japan\', \'United Kingdom\') AND "date" BETWEEN 1960 AND 2011 AND "Labor force participation rate, total (% of total population ages 15+) (national estimate)" < (SELECT "Labor force participation rate, total (% of total population ages 15+) (national estimate)" FROM w WHERE "country_name" = \'United States\' AND "date" BETWEEN 1960 AND 2011)"""
         print(db.execute_query(sql))
 
 
