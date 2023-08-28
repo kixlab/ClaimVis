@@ -5,6 +5,7 @@ sys.path.append("..")
 from Gloc.utils.normalizer import post_process_sql
 import pandas as pd
 from Pipeline.DataMatching import DataMatcher
+from Gloc.nsql.database import NeuralDB
 import os
 
 class Tester():
@@ -36,9 +37,19 @@ class Tester():
         table = table[table['country_name'].isin(['united states', 'china'])]
         table = table[table['date'].isin([2022])]
         print(table)
+    
+    def test_retrieve_data_points(self):
+        db = NeuralDB(
+            tables=[pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))],
+            add_row_id=True,
+            normalize=False,
+            lower_case=True
+        )
+        sql = """SELECT "unemployment, female (% of female labor force) (national estimate)" FROM w WHERE "country_name" = \'United States\' and "date" = 2022"""
+        print(db.execute_query(sql))
 
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_post_process_sql()
+    tester.test_retrieve_data_points()
     # pass

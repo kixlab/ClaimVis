@@ -129,7 +129,7 @@ app.add_middleware(
 
 @app.post("/potential_data_point_sets")
 def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=False) -> list[DataPointSet]:
-    user_claim = body.userClaim.lower()
+    user_claim = body.userClaim
 
     if test: # for testing purposes
         attributes = ['coal_production', 'country', 'coal_prod_per_capita', 'coal_elec_per_capita', 'coal_cons_per_capita', 'year', 'coal_consumption']
@@ -233,6 +233,6 @@ def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), use
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="In the US, unemployment rate of males are higher than that of females.")
+    claim = UserClaimBody(userClaim="Thailand has higher fertility rate than other countries in 2010.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)

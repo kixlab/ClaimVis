@@ -311,7 +311,7 @@ class TableReasoner(object):
             preds = []
             for sql in sqls:
                 try:
-                    res = db.execute_query(sql.lower())
+                    res = db.execute_query(sql)
                     refined_res = self.parser.parse_sql_result(res)
                     # if verbose: print(f"refined: {refined_res}")
                     preds.append(refined_res)
@@ -387,7 +387,7 @@ class TableReasoner(object):
                     
         # update table with relevant attributes
         if attributes: 
-            db.update_table(map(lambda x: x.lower(), attributes)) 
+            db.update_table(attributes) 
         if verbose: 
             print(f"generated queries: {suggestions}")
             if attributes: print(f"mapped attributes: {attributes}")

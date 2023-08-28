@@ -125,7 +125,7 @@ class AutomatedViz(object):
             }
             DO NOT CHANGE or ADD any word within the wrap text except for curly braces.
             DO NOT CREATE new attributes that are not in the list of attributes."""},
-            {"role": "user", "content": f"claim: {text.lower()}\nattributes: {self.attributes}"},
+            {"role": "user", "content": f"claim: {text}\nattributes: {self.attributes}"},
         ]
         response = call_model(
                         model=Model.GPT4,
@@ -260,6 +260,6 @@ if __name__ == "__main__":
                     attributes=['primary_energy_consumption', 'year', 'country', 'coal_share_energy']
                 )
 
-    t = vizPipeline.retrieve_data_points("In the US, unemployment rate of males are higher than that of females.")
+    t = vizPipeline.retrieve_data_points("In America, unemployment rate of males are higher than that of females.")
     print(t)
     

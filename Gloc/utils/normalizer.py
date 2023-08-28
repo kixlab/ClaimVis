@@ -108,7 +108,7 @@ def process_raw_table(
         df = pd.DataFrame(data=rows, columns=header)
         if lower_case:
             df.columns = df.columns.str.lower()
-            df = df.applymap(lambda s:s.lower() if type(s) == str else s)            
+            # df = df.applymap(lambda s:s.lower() if type(s) == str else s)            
     
     if isinstance(table, pd.DataFrame):
         title = table.name if hasattr(table, 'name') else 'table'
@@ -529,7 +529,7 @@ def post_process_sql(
                         break
             else:
                 value_map[attr].add(value_str)
-                
+
             if is_string:
                 new_value_str = f"{STRQs[0]}{new_value_str}{STRQs[0]}"
             sql_tokens[value_idx] = new_value_str
