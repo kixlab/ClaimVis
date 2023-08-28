@@ -132,12 +132,12 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
     user_claim = body.userClaim.lower()
 
     if test: # for testing purposes
-        attributes = ["labor force participation rate, total (% of total population ages 15+) (modeled ilo estimate)", "country_name", "date"]
-        table = pd.read_csv("../Datasets/Social Protection & Labor.csv")
+        attributes = ['coal_production', 'country', 'coal_prod_per_capita', 'coal_elec_per_capita', 'coal_cons_per_capita', 'year', 'coal_consumption']
+        table = pd.read_csv("../Datasets/owid-energy-data.csv")
         table.columns = table.columns.str.lower()
         table = table[attributes]
-        value_map = {'country_name': {'united states', 'china'}, 'date': {'2022'}}
-
+        value_map = {'country': {'china'}, 'year': {'2022'}}
+        new_claim = user_claim
     else:
         pipeline = Pipeline(datasrc="../Datasets")
         claim_map, claims = pipeline.run(user_claim)
@@ -227,6 +227,6 @@ def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), use
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="China burns a little more than 3 billion metric tons of coal every year.")
+    claim = UserClaimBody(userClaim="China burns a little more than 3 billion metric tons of coal every year in 2022.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)

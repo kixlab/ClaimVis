@@ -203,7 +203,7 @@ class AutomatedViz(object):
         if verbose:
             # print(f"dates: {dates}")
             print(f"filtered table: {filtered_table}")
-            print(f"fields: {fields}")
+            # print(f"fields: {fields}")
             print(f"categories: {categories}")
 
         # final pass to retrieve all datapoints
@@ -217,6 +217,7 @@ class AutomatedViz(object):
                     unit=category['unit'],
                     value=row[category['value']]
                 )
+
                 if dates:
                     dataPoint.fields['date'] = str(row[dates['value']])
                 datapoints.append(dataPoint)
@@ -242,7 +243,8 @@ class AutomatedViz(object):
                         } if dates else None,
                         values = categories,
                         fields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
-                    )
+                    ),
+                    tableName=self.table_name
                 )]
 
 if __name__ == "__main__":
