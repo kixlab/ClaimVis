@@ -182,24 +182,28 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
     df = pd.read_csv(f"../Datasets/{tableName}")
 
     otherFieldNames = list(map(lambda x: x, body.fields))
+    dateFieldNames = [k if isinstance(v, DateRange) else None for (k, v) in body.fields.items()]
+    dateFieldName = dateFieldNames[0] if len(dateFieldNames) > 0 else None
     ## remove date from otherFieldsNames
-    otherFieldNames.remove('date')
-    if 'date' in body.fields:
-        date_start = int(body.fields['date'].date_start.value)
-        date_end = int(body.fields['date'].date_end.value)
+    otherFieldNames.remove(dateFieldName)
+    if dateFieldName:
+        date_start = int(body.fields[dateFieldName].date_start.value)
+        date_end = int(body.fields[dateFieldName].date_end.value)
         dates = [(i) for i in range(date_start, date_end + 1)]
     else:
         dates = None
     values = list(map(lambda x: x.value, body.values))
-    categories = otherFieldNames + ['year'] + values # add country and year to the list of categories
+    categories = otherFieldNames + [dateFieldName] + values # add country and year to the list of categories
 
     # select rows with dates
-    dataframe = df[df['year'].isin(dates)] if dates is not None else df
+    dataframe = df[df[dateFieldName].isin(dates)] if dates is not None else df
     for of in otherFieldNames:
         otherFieldValue = list(map(lambda x: x.value, body.fields[of]))
         dataframe = dataframe[dataframe[of].isin(otherFieldValue)]
     dataframe = dataframe[categories]
-    dataframe.rename(columns={'year': 'date'}, inplace=True)
+    dataframe.rename(columns={dateFieldName: 'date'}, inplace=True)
+
+    dataframe.fillna(0, inplace=True)
 
     res_dict = dataframe.to_dict(orient='records')
     for r in res_dict:
