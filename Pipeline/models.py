@@ -15,8 +15,8 @@ class DataTableEnum(str, Enum):
 class OptionProps(BaseModel):
     label: str
     value: str
-    unit: Optional[str]
-    provenance: Optional[str]
+    unit: Optional[str] = None
+    provenance: Optional[str] = None
 
 class Field(BaseModel):
     name: str
