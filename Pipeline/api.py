@@ -198,6 +198,7 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
     # select rows with dates
     dataframe = df[df[dateFieldName].isin(dates)] if dates is not None else df
     for of in otherFieldNames:
+        dataframe[of] = dataframe[of].apply(lambda x: x.lower())
         otherFieldValue = list(map(lambda x: x.value, body.fields[of]))
         dataframe = dataframe[dataframe[of].isin(otherFieldValue)]
     dataframe = dataframe[categories]
