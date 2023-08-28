@@ -27,8 +27,18 @@ class Tester():
             matcher=matcher
         )
         print(new_sql)
+    
+    def test_filter_data(self):
+        table = pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))
+        table.columns = table.columns.str.lower()
+        table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+
+        table = table[table['country_name'].isin(['united states', 'china'])]
+        table = table[table['date'].isin([2022])]
+        print(table)
+
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_post_process_sql()
+    tester.test_filter_data()
     # pass

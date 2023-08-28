@@ -23,6 +23,14 @@ class Field(BaseModel):
     type: str
     timeUnit: str = None
 
+    def __hash__(self):
+        return hash(self.name)
+    
+    def __eq__(self, other):
+        if isinstance(other, Field):
+            return self.name == other.name
+        return False
+
 class DateRange(BaseModel):
     date_start: OptionProps
     date_end: OptionProps

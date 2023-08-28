@@ -122,7 +122,6 @@ class DataMatcher(object):
     def attr_score_batch(self, phrase: any, attributes: list):
         return max(self.similarity_batch(phrase, attributes))
     
-    # @lru_cache(maxsize=None)
     def encode(self, phrase):
         if isinstance(phrase, str):
             return self.embedder.encode([phrase])[0]
@@ -135,26 +134,9 @@ def main():
     matcher = DataMatcher(datasrc="../Datasets")
     # claim = "The energy consumption level of the US was super bad last year."
     # matcher.find_top_k_datasets(claim, k=2)
-    # phrase1 = "Since United States has imported too much coal, it's currency has dropped below Korea."
-    # phrase2 = "Educational attainment, at least completed post-secondary, population 25+, female (%) (cumulative)"
-    # # matcher.find_top_k_datasets(phrase1, k=5, method="attr")
-    # # matcher.find_top_k_datasets(phrase1, k=10, method="attr")
-    # print(matcher.attr_score_batch("iso_code", ['time', 'year', 'date']))
-    health_dataset = pd.read_csv('../Datasets/Health.csv')    
-    unique_countries = health_dataset['country_name'].unique()
-    print(f"Unique countries: {unique_countries}")
-    print(f"Number of unique countries: {len(unique_countries)}")
-    country_embeddings = [matcher.embedder.encode([country])[0].tolist() for country in unique_countries]
-    country_save = [
-        {
-            "name": country,
-            "embedding": embedding
-        }
-        for country, embedding in zip(unique_countries, country_embeddings)
-    ]
-    # with open('../Datasets/description/country_name.json', 'w') as f:
-    #     json.dump(country_save, f)
-    
+    phrase1 = "maternal mortality ratio (national estimate, per 100,000 live births)."
+    phrase2 = "No country has Child mortality rate higher than 6% in 2011."
+    print(matcher.similarity_score("US' economy is larger than China's", "population"))
 
 if __name__ == "__main__":
     main()

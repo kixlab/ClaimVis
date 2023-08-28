@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List, Dict
 import pandas as pd
 import recognizers_suite
@@ -14,9 +15,6 @@ from utils.sql.extraction_from_sql import *
 from utils.sql.all_keywords import ALL_KEY_WORDS
 
 culture = Culture.English
-
-# def normalize_column(header, df):
-#     df[header] = df[header].map(lambda x: str_normalize(x))
 
 def get_headers_and_rows(table: Dict or pd.DataFrame):
     if isinstance(table, pd.DataFrame):
@@ -183,10 +181,6 @@ def convert_df_type(df: pd.DataFrame, lower_case=True):
             df[_header] = df[_header].map(lambda x: "NaN" if x in [str(None), str(None).lower()] else x)
 
     # Normalize cell values.
-    # Should move this to offline processing
-    # with Pool() as p:
-    #     p.starmap(normalize_column, zip(df.columns, repeat(df)))
-
     for header in df.columns:
         df[header] = df[header].map(lambda x: str_normalize(x))
 
@@ -323,19 +317,15 @@ def _get_matched_cells(value_str, matcher: DataMatcher, df: pd.DataFrame, fuzz_t
         else:
             return None
 
-    matched_cells = []
-    value_embed = matcher.encode(value_str)  # Move this outside of the loops
-
     if attr == 'country_name':  # cache 
         # special case only compare with 250 country names
-        scores = matcher.similarity_batch(value_embed, [country['embedding'] for country in country_data])
+        scores = matcher.similarity_batch(value_str, [country['embedding'] for country in country_data])
         matched_cells = [(country['name'], score) for country, score in zip(country_data, scores) if score > 0.5]
     else:
         if attr: df = df[[attr]] # the most important line here
         if attr and df.dtypes[attr] == 'object':  # more general case
             cells = list(df[attr].unique())
-            embeddings = matcher.encode(cells)
-            scores = matcher.similarity_batch(value_embed, embeddings)  # Use vectorized operation
+            scores = matcher.similarity_batch(value_str, cells)  # Use vectorized operation
             matched_cells = [(cell, score) for cell, score in zip(cells, scores) if score > 0.5]
         else:
             matched_cells = df.applymap(calculate_fuzz_score).values.flatten()
@@ -470,7 +460,7 @@ def post_process_sql(
         """
         Post-process SQL by fuzzy matching value with table contents.
         """
-
+        value_map = defaultdict(set)
         # Parse and replace SQL value with table contents
         sql_tokens = tokenize(
                         string=sql_str, 
@@ -504,7 +494,6 @@ def post_process_sql(
         assert len(sql_tokens) == len(sql_template_tokens)
         value_indices = [idx for idx in range(len(sql_template_tokens)) if sql_template_tokens[idx] == '[VALUE]']
         for value_idx in value_indices:
-
             value_str = sql_tokens[value_idx]
             # Drop STRQ ... STRQ for fuzzy match
             is_string = False
@@ -520,6 +509,7 @@ def post_process_sql(
             if sql_tokens[value_idx-2][-1] != '"': continue
             attr = sql_tokens[value_idx-2][1:-1]
             if verbose: print(f"attr: {attr}")
+            # the bulkiest line here, cost a lot of time
             matched_cells = _get_matched_cells(value_str=value_str, matcher=matcher, df=df, attr=attr)
 
             if verbose: print(f"matched cells: {matched_cells}")
@@ -530,7 +520,9 @@ def post_process_sql(
                 for matched_cell, fuzz_score in matched_cells:
                     if _check_valid_fuzzy_match(value_str, matched_cell):
                         new_value_str = matched_cell
-                        # print(new_value_str, value_str)
+                        # fill the value map
+                        value_map[attr].add(new_value_str.lower())
+
                         if verbose and new_value_str != value_str:
                             print("\tfuzzy match replacing!", value_str, '->', matched_cell, f'fuzz_score:{fuzz_score}')
                         break
@@ -538,36 +530,19 @@ def post_process_sql(
                 new_value_str = f"{STRQs[0]}{new_value_str}{STRQs[0]}"
             sql_tokens[value_idx] = new_value_str
         # Compose new sql string
-        # Clean column name in SQL since columns may have been tokenized in the postprocessing, e.g., (ppp) -> ( ppp )
         new_sql_str = ' '.join(sql_tokens)
-        sql_columns = re.findall(f'{COLQ}\s(.*?)\s{COLQ}', new_sql_str)
-        for sql_col in sql_columns:
-            matched_columns = []
-            for col in df.columns:
-                score = fuzz.ratio(sql_col.lower(), col)
-                if score == 100:
-                    matched_columns = [(col, score)]
-                    break
-                if score >= 80:
-                    matched_columns.append((col, score))
-            matched_columns = sorted(matched_columns, key=lambda x: x[1], reverse=True)
-            if matched_columns:
-                matched_col = matched_columns[0][0]
-                new_sql_str = new_sql_str.replace(f"{COLQ} {sql_col} {COLQ}", f"{COLQ}{matched_col}{COLQ}")
-            else:
-                new_sql_str = new_sql_str.replace(f"{COLQ} {sql_col} {COLQ}", f"{COLQ}{sql_col}{COLQ}")
 
         # Fix '<>' when composing the new sql
         new_sql_str = new_sql_str.replace('< >', '<>')
-        return new_sql_str
+        return new_sql_str, value_map
 
     sql_str = basic_fix(sql_str, list(df.columns), table_title)
     # if verbose: print(f"post basic fix: {sql_str}")
 
     if process_program_with_fuzzy_match_on_db:
-        # try:
-            sql_str = fuzzy_match_process(sql_str, df, verbose)
-        # except Exception as e:
-        #     print(e)
+        try:
+            return fuzzy_match_process(sql_str, df, verbose)
+        except Exception as e:
+            print(e)
 
-    return sql_str
+    return sql_str, None

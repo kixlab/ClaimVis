@@ -1,4 +1,5 @@
 # CoT few-shot prompting 
+from collections import defaultdict
 from functools import cache
 import sys
 sys.path.append("../Gloc")
@@ -196,8 +197,8 @@ class TableReasoner(object):
             query: str, 
             table: pd.DataFrame,
             template_key: TemplateKey,
-            samples: int = 5,
-            temperature: float = 0.4,
+            samples: int = 10,
+            temperature: float = 0.6,
             fuzzy_match: bool = False
         ):
         """
@@ -236,27 +237,34 @@ class TableReasoner(object):
         # list of list of sqls --> be careful when handling this case
         elif template_key == TemplateKey.SQL_GENERATION_2:
             psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
+            # transpose psqls
+            psqls = list(map(list, zip(*psqls)))
         
         if fuzzy_match:
             # bottle neck due to fuzzy matching on big tables
+            sql_cache, value_map = set(), defaultdict(set) # control the number of distinct sqls
             def process_psqls(psqls):
                 processed_psqls = []
                 for psql in psqls:
-                    if isinstance(psql, str):
-                        processed_psqls.append(post_process_sql(
-                            sql_str=psql, 
-                            df=table,
-                            matcher=self.datamatcher,
-                            process_program_with_fuzzy_match_on_db=fuzzy_match,
-                            verbose=False
-                        ))
+                    if isinstance(psql, str) and psql not in sql_cache:
+                        sql_cache.add(psql)
+                        new_sql_str, new_val_map = post_process_sql(
+                                                        sql_str=psql, 
+                                                        df=table,
+                                                        matcher=self.datamatcher,
+                                                        process_program_with_fuzzy_match_on_db=fuzzy_match,
+                                                        verbose=False
+                                                    )
+                        processed_psqls.append(new_sql_str)
+                        for k, v in new_val_map.items():
+                            value_map[k].update(v)
                     elif isinstance(psql, list):
                         processed_psqls.append(process_psqls(psql))
                 return processed_psqls
             
-            return process_psqls(psqls)
+            return process_psqls(psqls), value_map
         else:
-            return psqls
+            return psqls, None
     
     def _exec_sqls_from_sub_queries(
             self,
@@ -266,7 +274,7 @@ class TableReasoner(object):
             verbose: bool=False,
             fuzzy_match: bool=False
         ):
-        answers = []
+        answers, value_map = [], None
         if is_sequential: # sequential prompting
             sqlss = [self._generate_sql(
                         query=query, 
@@ -275,20 +283,18 @@ class TableReasoner(object):
                         fuzzy_match=fuzzy_match
                     ) for query in queries]
         else: # parallel prompting
-            sqlss = self._generate_sql(
-                        query=queries,
-                        table=db.get_table(),
-                        template_key=TemplateKey.SQL_GENERATION_2,
-                        fuzzy_match=fuzzy_match
-                    )
-            # transpose sqlss
-            sqlss = list(map(list, zip(*sqlss)))
+            sqlss, value_map = self._generate_sql(
+                                    query=queries,
+                                    table=db.get_table(),
+                                    template_key=TemplateKey.SQL_GENERATION_2,
+                                    fuzzy_match=fuzzy_match
+                                )
         
         def process_ans(ans: list):
             try:
                 if len(ans) > 30:
                     # sometimes the answer is too long to fit into the prompt
-                    ans = [x for x in ans if not math.isnan(x) and isinstance(x, (int, float))] 
+                    ans = [x for x in ans if isinstance(x, (int, float)) and not math.isnan(x)] 
                     return f"Ranging from {str(min(ans))} to {str(max(ans))}, with average {str(sum(ans)/len(ans))}"
                 return str(ans)
             except Exception as e:
@@ -317,26 +323,25 @@ class TableReasoner(object):
 
             answers.append(top_ans)
 
-        return answers
+        return answers, value_map
     
     def _evaluate_soundness(self, reasoning:str): 
         evaluation = self._call_api_2(
             prompt = [
                 {"role": "system", "content": """You are an amazing logician. You are given a sequence of logical deduction based on real-world data. 
-                You need to evaluate the soundness of the reasoning and fix the reasoning while still retain the core idea and be as informative as possible in the following format.
+                You need to evaluate the soundness of the reasoning and fix the reasoning while still RETAIN the core idea and be as informative as possible in the following format.
                 \{
                     explain: "<TODO: explain why the reasoning is sound or not sound>"   
                     revised: "<TODO: revised reasoning>"
-                \}
-                RETAIN EVERY DATA from the old sequence into the new one."""},
+                \}"""},
                 {"role": "user", "content": reasoning},
             ],
-            model=Model.GPT4 # 4
+            model=Model.GPT3 # 4
         )
 
         return self.parser.parse_evaluation(evaluation[0])
     
-    # @log_decorator
+    @log_decorator
     def reason(
             self, 
             claim: str, 
@@ -353,7 +358,7 @@ class TableReasoner(object):
         def build_dec_prompt(sub_queries: list, answers: list):
             dec_prompt = self.prompter.build_prompt(
                             template_key=TemplateKey.DEC_REASONING_2,
-                            table=table,
+                            table=db.get_table_df(),
                             question=query,
                         )
             dec_prompt.extend([
@@ -390,13 +395,13 @@ class TableReasoner(object):
             if verbose: print(f"steps of reasoning: {sub_queries}")
 
             # execute sql corresponding to each subquery (up to the second last one)
-            answers = self._exec_sqls_from_sub_queries(
-                            db=db,
-                            queries=sub_queries[:-1], 
-                            is_sequential=False,
-                            verbose=verbose,
-                            fuzzy_match=fuzzy_match
-                        )
+            answers, value_map = self._exec_sqls_from_sub_queries(
+                                        db=db,
+                                        queries=sub_queries[:-1], 
+                                        is_sequential=False,
+                                        verbose=verbose,
+                                        fuzzy_match=fuzzy_match
+                                    )
             
             sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
             answers = [f"A{i+1}: {ans}" for i, ans in enumerate(answers)]
@@ -421,6 +426,7 @@ class TableReasoner(object):
                 "visualization": vis_tasks[idx],
                 "reasoning_steps": sub_queries,
                 "justification": evaluation,
+                "value_map": value_map
             })
 
         if verbose: print(f"final justifications: {reason_map}\n{'@'*75}")

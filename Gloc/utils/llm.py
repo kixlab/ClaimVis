@@ -9,10 +9,12 @@ from typing import TypeVar
 import openai
 import tensorflow as tf
 from Credentials.info import *
-
 from common.functionlog import *
+import logging
 
-openai.api_key = openai_api
+# openai.api_key = openai_api
+# Configure logging to write to a file
+logging.basicConfig(filename='../Gloc/log.txt', level=logging.INFO)
 
 class Model(str, enum.Enum):
   GPT3 = 'gpt-3.5-turbo'
@@ -94,10 +96,11 @@ def _call_openai(
     return contents, reply['usage']['total_tokens']
 
   except openai.error.RateLimitError as e:
-    print('Sleeping 60 secs.')
-    time.sleep(60)
+    print('Sleeping 10 secs.')
+    time.sleep(10)
     raise ValueError('RateLimitError') from e
   except openai.error.InvalidRequestError as e:
+    logging.info(f"Super long prompt: {'@'*100}\n{prompt}\n{'@'*100}")
     raise RuntimeError('InvalidRequestError') from e
   except openai.error.ServiceUnavailableError as e:
     time.sleep(10)

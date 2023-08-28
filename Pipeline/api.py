@@ -31,14 +31,19 @@ app.add_middleware(
     Claim map has the following structure:
 
     claim_map = {
-        "sentence_i": [
+        "sentence_1": [
             { # each of the justification corresponds to a dataset
-                suggestions: [
+                "suggestions": [
                     {
                         "query": ...,
                         "visualization": ...,
                         "reasoning_steps": [...],
-                        "justification": ...
+                        "justification": ...,
+                        "value_map": {
+                            "col_1": {...}, # value is a set
+                            "col_2": {...},
+                            ...
+                        }
                     },
                     {...}
                 ],
@@ -47,7 +52,7 @@ app.add_middleware(
             },
             {...}
         ],
-        "sentence_j": [...],
+        "sentence_2": [...],
         ...
     }
 """
@@ -127,22 +132,30 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
     user_claim = body.userClaim.lower()
 
     if test: # for testing purposes
-        attributes = ['labor force participation rate, female (% of female population ages 15-64) (modeled ilo estimate)', 'vulnerable employment, female (% of female employment) (modeled ilo estimate)', 'coverage of unemployment benefits and almp in 2nd quintile (% of population)', 'vulnerable employment, total (% of total employment) (modeled ilo estimate)', 'children in employment, male (% of male children ages 7-14)', 'wage and salaried workers, total (% of total employment) (modeled ilo estimate)', 'children in employment, study and work (% of children in employment, ages 7-14)', 'ratio of female to male labor force participation rate (%) (national estimate)', 'unemployment with intermediate education, female (% of female labor force with intermediate education)', 'labor force with basic education (% of total working-age population with basic education)', 'labor force participation rate for ages 15-24, male (%) (national estimate)', 'unemployment, youth female (% of female labor force ages 15-24) (national estimate)', 'labor force participation rate, male (% of male population ages 15+) (modeled ilo estimate)', 'benefit incidence of social safety net programs to poorest quintile (% of total safety net benefits)', 'share of youth not in education, employment or training, total (% of youth population)', 'country_name', 'labor force with basic education, male (% of male working-age population with basic education)', 'average working hours of children, study and work, male, ages 7-14 (hours per week)', 'labor force with intermediate education, male (% of male working-age population with intermediate education)', 'labor force participation rate, male (% of male population ages 15-64) (modeled ilo estimate)', 'self-employed, female (% of female employment) (modeled ilo estimate)', 'benefit incidence of unemployment benefits and almp to poorest quintile (% of total u/almp benefits)', 'unemployment with basic education, male (% of male labor force with basic education)', 'employment in services (% of total employment) (modeled ilo estimate)', 'self-employed, male (% of male employment) (modeled ilo estimate)', 'coverage of social protection and labor programs (% of population)', 'labor force with intermediate education, female (% of female working-age population with intermediate education)', 'child employment in agriculture, female (% of female economically active children ages 7-14)', 'employers, female (% of female employment) (modeled ilo estimate)', 'labor force participation rate, total (% of total population ages 15+) (modeled ilo estimate)', 'part time employment, male (% of total male employment)', 'self-employed, total (% of total employment) (modeled ilo estimate)', 'child employment in services, male (% of male economically active children ages 7-14)', 'children in employment, female (% of female children ages 7-14)', 'unemployment, male (% of male labor force) (modeled ilo estimate)', 'labor force, total', 'average working hours of children, study and work, female, ages 7-14 (hours per week)', 'children in employment, work only, male (% of male children in employment, ages 7-14)', 'coverage of social insurance programs in richest quintile (% of population)', 'average working hours of children, working only, male, ages 7-14 (hours per week)', 'employment in industry, male (% of male employment) (modeled ilo estimate)', 'unemployment with intermediate education, male (% of male labor force with intermediate education)', 'employers, total (% of total employment) (modeled ilo estimate)', 'contributing family workers, male (% of male employment) (modeled ilo estimate)', 'unemployment with advanced education (% of total labor force with advanced education)']
-        table = pd.read_csv("../Datasets/Social Protection & Labor.csv").iloc[:100]
+        attributes = ["labor force participation rate, total (% of total population ages 15+) (modeled ilo estimate)", "country_name", "date"]
+        table = pd.read_csv("../Datasets/Social Protection & Labor.csv")
         table.columns = table.columns.str.lower()
         table = table[attributes]
+        value_map = {'country_name': {'united states', 'china'}, 'date': {'2022'}}
+
     else:
         pipeline = Pipeline(datasrc="../Datasets")
         claim_map, claims = pipeline.run(user_claim)
         # if verbose: print(claim_map)
 
         reason = claim_map[claims[0]][0]
-        table, attributes = reason["sub_table"], reason["attributes"]
+        new_claim, table, attributes, value_map = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"]
         # if verbose: print(table, attributes)
 
     # given a table and its attributes, return the data points
-    AutoViz = AutomatedViz(table=table, attributes=attributes, test=test)
-    return AutoViz.retrieve_data_points(text=user_claim, verbose=verbose)
+    AutoViz = AutomatedViz(
+                table=table, 
+                attributes=attributes, 
+                test=test, 
+                value_map=value_map, 
+                matcher=pipeline.data_matcher if not test else None
+            )
+    return AutoViz.retrieve_data_points(text=new_claim, verbose=verbose)
 
 @app.post("/get_viz_spec")
 def get_viz_spec(body: GetVizSpecBody): # needs update
@@ -214,6 +227,6 @@ def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), use
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="The labor force participation rate of China is higher than that of the United States in 2022.")
+    claim = UserClaimBody(userClaim="China outnumbers US in its total export since 2011.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
