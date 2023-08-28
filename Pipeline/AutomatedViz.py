@@ -226,26 +226,30 @@ class AutomatedViz(object):
         for ref, attr in tag_map['map'].items():
             tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', f'{{{attr}}}')
         
-        return [DataPointSet(
-                    statement=tag_map['wrap'],
-                    dataPoints=datapoints,
-                    fields=fields,
-                    ranges=Ranges(
-                        date = { # will take the lowest and highest date from the data points
-                            'date_start': {
-                                'label': str(min(dates['range'])), 
-                                'value': str(min(dates['range']))
-                            },
-                            'date_end': {
-                                'label': str(max(dates['range'])),
-                                'value': str(max(dates['range']))
-                            }
-                        } if dates else None,
-                        values = categories,
-                        fields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
-                    ),
-                    tableName=self.table_name
-                )]
+        newSet = DataPointSet(
+                statement=tag_map['wrap'],
+                dataPoints=datapoints,
+                fields=fields,
+                ranges=Ranges(
+                    values = categories,
+                    fields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
+                ),
+                tableName=self.table_name
+            )
+        # fetch the name of the temporal field
+        temporal_field_name = [field.name for field in fields if field.type == "temporal"][0]
+        newSet.ranges.fields[temporal_field_name] = DateRange(
+            date_start={
+                'label': str(min(dates['range'])), 
+                'value': str(min(dates['range']))
+            },
+            date_end={
+                'label': str(max(dates['range'])),
+                'value': str(max(dates['range']))
+            }
+        ) if dates else None
+        
+        return [newSet]
 
 if __name__ == "__main__":
     # tag_date_time("Some people are crazy enough to get out in the winter, especially november and december where it's freezing code outside.")
@@ -256,6 +260,6 @@ if __name__ == "__main__":
                     attributes=['primary_energy_consumption', 'year', 'country', 'coal_share_energy']
                 )
 
-    t = vizPipeline.retrieve_data_points("The United State has the highest coal energy in the world in 2020.")
+    t = vizPipeline.retrieve_data_points("In the US, unemployment rate of males are higher than that of females.")
     print(t)
     

@@ -500,18 +500,19 @@ def post_process_sql(
             if value_str[0] in STRQs and value_str[-1] in STRQs:
                 value_str = value_str[1:-1]
                 is_string = True
-            # If already fuzzy match, skip
-            if value_str[0] == '%' or value_str[-1] == '%':
-                continue
-            value_str = value_str.lower()
 
-            # Fuzzy Match
+            # If already fuzzy match, skip (but remember to add to value_map)
             if sql_tokens[value_idx-2][-1] != '"': continue
             attr = sql_tokens[value_idx-2][1:-1]
             if verbose: print(f"attr: {attr}")
-            # the bulkiest line here, cost a lot of time
-            matched_cells = _get_matched_cells(value_str=value_str, matcher=matcher, df=df, attr=attr)
+            if value_str[0] == '%' or value_str[-1] == '%':
+                start, end = 1 if value_str[0] == '%' else 0, -1 if value_str[-1] == '%' else None
+                value_map[attr].add(value_str[start:end])
+                continue
 
+            # value_str = value_str.lower()
+            # Fuzzy Match: the bulkiest line here, cost a lot of time
+            matched_cells = _get_matched_cells(value_str=value_str, matcher=matcher, df=df, attr=attr)
             if verbose: print(f"matched cells: {matched_cells}")
 
             new_value_str = value_str
@@ -521,11 +522,14 @@ def post_process_sql(
                     if _check_valid_fuzzy_match(value_str, matched_cell):
                         new_value_str = matched_cell
                         # fill the value map
-                        value_map[attr].add(new_value_str.lower())
+                        value_map[attr].add(new_value_str)
 
                         if verbose and new_value_str != value_str:
                             print("\tfuzzy match replacing!", value_str, '->', matched_cell, f'fuzz_score:{fuzz_score}')
                         break
+            else:
+                value_map[attr].add(value_str)
+                
             if is_string:
                 new_value_str = f"{STRQs[0]}{new_value_str}{STRQs[0]}"
             sql_tokens[value_idx] = new_value_str
@@ -545,4 +549,4 @@ def post_process_sql(
         except Exception as e:
             print(e)
 
-    return sql_str, None
+    return sql_str, dict()

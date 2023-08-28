@@ -46,7 +46,8 @@ class TableReasoner(object):
         table: pd.DataFrame = None,
         samples: int = -1,
         temperature: float = -1,
-        model: Model = Model.GPT3
+        model: Model = Model.GPT3,
+        max_decode_steps: int = -1
     ):
         """
             Call API for few-shot prompting using a question, a template, and a table 
@@ -61,7 +62,7 @@ class TableReasoner(object):
 
         response = call_model(
             model=model,
-            max_decode_steps=self.max_decode_steps,
+            max_decode_steps=max_decode_steps if max_decode_steps > 0 else self.max_decode_steps,
             temperature=temperature if temperature > 0 else self.temperature,
             prompt=prompt,
             samples=samples if samples > 0 else self.samples
@@ -74,7 +75,8 @@ class TableReasoner(object):
             prompt: list,
             temperature: float = -1,
             samples: int = -1,
-            model: Model = Model.GPT3
+            model: Model = Model.GPT3, 
+            max_decode_steps: int = -1
         ):
         """
             Call API using a provide prompt
@@ -84,7 +86,7 @@ class TableReasoner(object):
         response = call_model(
             model=model,
             temperature=temperature if temperature > 0 else self.temperature,
-            max_decode_steps=self.max_decode_steps,
+            max_decode_steps=max_decode_steps if max_decode_steps > 0 else self.max_decode_steps,
             prompt=prompt,
             samples=samples if samples > 0 else self.samples
         )
@@ -197,9 +199,10 @@ class TableReasoner(object):
             query: str, 
             table: pd.DataFrame,
             template_key: TemplateKey,
-            samples: int = 10,
+            samples: int = 15,
             temperature: float = 0.6,
-            fuzzy_match: bool = False
+            fuzzy_match: bool = False,
+            max_decode_steps: int = 700
         ):
         """
             Generate SQL queries based on the provided query and table.
@@ -226,8 +229,9 @@ class TableReasoner(object):
                         question=query,
                         template_key=template_key,
                         table=table,
-                        samples=samples if samples > 0 else self.samples, # need samples to aggregate
-                        temperature=temperature if temperature > 0 else self.temperature # need some creativity
+                        samples=samples, # need samples to aggregate
+                        temperature=temperature, # need some creativity
+                        max_decode_steps=max_decode_steps # need to be long enough
                     )
 
         if template_key == TemplateKey.NSQL_GENERATION:
@@ -336,7 +340,7 @@ class TableReasoner(object):
                 \}"""},
                 {"role": "user", "content": reasoning},
             ],
-            model=Model.GPT3 # 4
+            model=Model.GPT4 # 4
         )
 
         return self.parser.parse_evaluation(evaluation[0])
@@ -402,15 +406,13 @@ class TableReasoner(object):
                                         verbose=verbose,
                                         fuzzy_match=fuzzy_match
                                     )
-            
             sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
             answers = [f"A{i+1}: {ans}" for i, ans in enumerate(answers)]
             # generate prompt for decomposed reasoning
             dec_prompt = build_dec_prompt(sub_queries, answers)
             # if verbose: print(f"full prompt:\n{dec_prompt}")
-
             answers.extend(self._call_api_2(dec_prompt))
-            # print("answers: ", answers)
+
             justification = self._call_api_2(
                 prompt = [
                     {"role": "system", "content": """You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
