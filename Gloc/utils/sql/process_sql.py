@@ -147,7 +147,7 @@ def tokenize(string, use_corenlp=False, use_duckdb=False):
         string = string[:qidx1] + key + string[qidx2+1:]
         vals[key] = val
 
-    # tokenize sql
+    # tokenize sql/ remember to lower-case here so template parsing succeeds
     toks_tmp = [word.lower() for word in tokenizer(string)]
 
     toks = []

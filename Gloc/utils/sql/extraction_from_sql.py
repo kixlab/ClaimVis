@@ -484,7 +484,6 @@ def extract_partial_template_from_sql(sql, schema={}, use_corenlp=False, use_duc
 				use_corenlp=use_corenlp, 
 				use_duckdb=use_duckdb
 			)
-	# print(toks)
 	template = []
 	# ignore_follow_up_and = False
 	len_ = len(toks)

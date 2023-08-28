@@ -30,7 +30,6 @@ class AutomatedViz(object):
         ):
         self.datasrc = datasrc
 
-        # lower case the whole dataset if it's a test
         if isinstance(table, dict):
             self.table = table["data"]  
             self.table_name = table["name"] 
@@ -41,7 +40,7 @@ class AutomatedViz(object):
             self.table = pd.read_csv(self.datasrc)
             self.table_name = "table"
 
-        if test:
+        if test: # lower case the whole dataset if it's a test
             self.table.columns = self.table.columns.str.lower()
             self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         

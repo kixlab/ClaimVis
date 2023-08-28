@@ -63,7 +63,7 @@ class Pipeline(object):
                             table=table,
                             verbose=verbose,
                             fuzzy_match=True,
-                            more_attrs=[attr.lower() for attr in relevant_attrs],
+                            more_attrs=relevant_attrs,
                         ))
                     claim_map[claim][-1]["sub_table"]["name"] = dataset
                     

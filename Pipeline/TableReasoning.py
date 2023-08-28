@@ -376,7 +376,7 @@ class TableReasoner(object):
             tables=[table],
             add_row_id=True,
             normalize=False,
-            lower_case=True
+            lower_case=False
         )
         # take first query from suggested queries
         suggestions, vis_tasks, _, attributes = self._suggest_queries(

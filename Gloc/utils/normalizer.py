@@ -467,6 +467,7 @@ def post_process_sql(
                         use_corenlp=use_corenlp, 
                         use_duckdb=use_duckdb
                     )
+        if verbose: print(f"normal tokens: {sql_tokens}")
         sql_template_tokens = extract_partial_template_from_sql(
                                 sql=sql_str, 
                                 use_corenlp=use_corenlp,
@@ -544,9 +545,9 @@ def post_process_sql(
     # if verbose: print(f"post basic fix: {sql_str}")
 
     if process_program_with_fuzzy_match_on_db:
-        try:
+        # try:
             return fuzzy_match_process(sql_str, df, verbose)
-        except Exception as e:
-            print(e)
+        # except Exception as e:
+            # print(e)
 
     return sql_str, dict()

@@ -13,10 +13,10 @@ class Tester():
         self.datasrc = datasrc
 
     def test_post_process_sql(self):
-        sql = """SELECT AVG ( "unemployment, total (% of total labor force) (national estimate)" ) > 7 FROM w WHERE "country_name" LIKE \'%asia%\' and "date" = 2022"""
-        table = pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))
-        table.columns = table.columns.str.lower()
-        table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+        sql = """SELECT "coal_production" FROM w WHERE "country" = \'US\' AND "year" = 2022"""
+        table = pd.read_csv(os.path.join(self.datasrc, "owid-energy-data.csv"))
+        # table.columns = table.columns.str.lower()
+        # table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
         table.reset_index(inplace=True)
         table.rename(columns={'index': 'row_id'}, inplace=True)
         matcher = DataMatcher()
@@ -51,5 +51,5 @@ class Tester():
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_retrieve_data_points()
+    tester.test_post_process_sql()
     # pass
