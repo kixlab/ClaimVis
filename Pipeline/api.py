@@ -183,7 +183,7 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
     df = pd.read_csv(f"../Datasets/{tableName}")
 
     otherFieldNames = list(map(lambda x: x, body.fields))
-    dateFieldNames = [k if isinstance(v, DateRange) else None for (k, v) in body.fields.items()]
+    dateFieldNames = [k for (k, v) in body.fields.items() if isinstance(v, DateRange)]
     dateFieldName = dateFieldNames[0] if len(dateFieldNames) > 0 else None
     ## remove date from otherFieldsNames
     otherFieldNames.remove(dateFieldName)
