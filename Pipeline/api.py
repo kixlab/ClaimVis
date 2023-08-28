@@ -199,9 +199,9 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
     # select rows with dates
     dataframe = df[df[dateFieldName].isin(dates)] if dates is not None else df
     for of in otherFieldNames:
-        dataframe[of] = dataframe[of].apply(lambda x: x.lower())
         otherFieldValue = list(map(lambda x: x.value, body.fields[of]))
         dataframe = dataframe[dataframe[of].isin(otherFieldValue)]
+    # df.columns = df.columns.str.lower()
     dataframe = dataframe[categories]
     dataframe.rename(columns={dateFieldName: 'date'}, inplace=True)
 
@@ -229,6 +229,15 @@ def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), use
         return log_crud.get_logs_by_user(db=db, user=username, skip=skip, limit=limit)
     else:
         return log_crud.get_logs(db=db, skip=skip, limit=limit)
+
+@app.get('/dataset_explanation') 
+def get_dataset_explanation(dataset: str, column_name: str):
+    df = pd.read_csv(f"../Datasets/info/{dataset}")
+    df = df[df['title'] == column_name]
+    df.fillna(0, inplace=True)
+
+    return df.to_dict(orient='records')
+
 
 
 if __name__ == "__main__":
