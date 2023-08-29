@@ -54,6 +54,7 @@ class DataPointSet(BaseModel):
     dataPoints: list[DataPoint]
     fields: list[Field]
     ranges: Ranges
+    reasoning: Optional[str] = None
 
 class UserClaimBody(BaseModel):
     userClaim: str

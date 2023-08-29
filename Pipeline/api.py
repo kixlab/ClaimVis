@@ -144,7 +144,7 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
         # if verbose: print(claim_map)
 
         reason = claim_map[claims[0]][0]
-        new_claim, table, attributes, value_map = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"]
+        new_claim, table, attributes, value_map, reasoning = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"], reason["suggestions"][0]["justification"]
         # if verbose: print(table, attributes)
 
     # given a table and its attributes, return the data points
@@ -152,10 +152,14 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
                 table=table, 
                 attributes=attributes, 
                 test=test, 
-                value_map=value_map, 
                 matcher=pipeline.data_matcher if not test else None
             )
-    return AutoViz.retrieve_data_points(text=new_claim, verbose=verbose)
+    return AutoViz.retrieve_data_points(
+                        text=new_claim, 
+                        value_map=value_map, 
+                        reasoning=reasoning, 
+                        verbose=verbose
+                    )
 
 @app.post("/get_viz_spec")
 def get_viz_spec(body: GetVizSpecBody): # needs update
@@ -240,7 +244,7 @@ def get_dataset_explanation(dataset: str, column_name: str):
 
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="North American countries have higher export than China in 2011.")
+    claim = UserClaimBody(userClaim="For example, 50 years ago Mexico had a birthrate of almost 7, today it is 1.9.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
 

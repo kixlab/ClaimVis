@@ -25,8 +25,7 @@ class AutomatedViz(object):
             datasrc: str = None, 
             table: dict or pd.DataFrame = None, 
             attributes: str = None, 
-            test: bool = False,
-            value_map: dict = None
+            test: bool = False
         ):
         self.datasrc = datasrc
 
@@ -45,7 +44,6 @@ class AutomatedViz(object):
             self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
         self.attributes = attributes or list(self.table.columns)
-        self.value_map = value_map or dict()
 
         # initialize AnsParser
         self.parser = AnsParser()
@@ -149,7 +147,7 @@ class AutomatedViz(object):
             
         return response_dict
     
-    def retrieve_data_points(self, text: str, verbose: bool = False):
+    def retrieve_data_points(self, text: str, value_map: dict, reasoning: str = None, verbose: bool = False):
         tag_map = self.tag_attribute_gpt(text)
         if verbose: print(f"tagmap: {tag_map}")
 
@@ -181,22 +179,22 @@ class AutomatedViz(object):
                 fields.add(Field( name=attr, type="nominal" ))      
             
         
-        if verbose: print(f"fields: {fields}, map: {self.value_map.keys()}")
-        assert len(fields) == len(self.value_map.keys()), "The number of fields should be the same as the number of values in the value map."
+        if verbose: print(f"fields: {fields}, map: {value_map.keys()}")
+        assert len(fields) == len(value_map.keys()), "The number of fields should be the same as the number of values in the value map."
         filtered_table = self.table
         for field in fields:
             if field.type == "nominal":
-                filtered_table = filtered_table[filtered_table[field.name].isin(self.value_map[field.name])]
+                filtered_table = filtered_table[filtered_table[field.name].isin(value_map[field.name])]
             elif field.type == "temporal":
-                if len(self.value_map[field.name]) == 1:
-                    value = self.value_map[field.name].pop()
+                if len(value_map[field.name]) == 1:
+                    value = value_map[field.name].pop()
                     # Convert the value to the same type as the values in the table
                     value = type(self.table[field.name].iloc[0])(value)
                     filtered_table = filtered_table[filtered_table[field.name] == value]
                 else: # more than one
-                    assert len(self.value_map[field.name]) >= 2, "The number of values in the value map should be more than 1."
+                    assert len(value_map[field.name]) >= 2, "The number of values in the value map should be more than 1."
                     # Convert the values to the same type as the values in the table
-                    values = [type(self.table[field.name].iloc[0])(v) for v in self.value_map[field.name]]
+                    values = [type(self.table[field.name].iloc[0])(v) for v in value_map[field.name]]
                     old, recent = min(values), max(values)
                     filtered_table = filtered_table[(filtered_table[field.name] >= old) & (filtered_table[field.name] <= recent)]
 
@@ -237,7 +235,8 @@ class AutomatedViz(object):
                     values = categories,
                     fields = {attr: list(set(self.table[attr].to_list())) for attr in data_fields}
                 ),
-                tableName=self.table_name
+                tableName=self.table_name,
+                reasoning=reasoning
             )
         # fetch the name of the temporal field
         temporal_field_name = [field.name for field in fields if field.type == "temporal"][0]
