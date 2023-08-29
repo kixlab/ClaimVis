@@ -145,6 +145,9 @@ class AutomatedViz(object):
         tag_map = self.tag_attribute_gpt(text)
         if verbose: print(f"tagmap: {tag_map}")
 
+        info_table = pd.read_csv(f'../Datasets/info/{self.table_name}')
+        info_table.columns = info_table.columns.str.lower()
+
         def isAny(attr, func: callable):
             return any(func(val) for val in self.table[attr].to_list())
 
@@ -162,12 +165,22 @@ class AutomatedViz(object):
                                 timeUnit= self.parser.parse_unit(ref) or "year"
                             ))  
             elif helpers.isint(ref) or helpers.isfloat(ref) or isAny(attr, helpers.isint) or isAny(attr, helpers.isfloat):
+                provenance = info_table[info_table['value'] == attr]['source']
+                if len(provenance) > 0:
+                    provenance = provenance.iloc[0]
+                else:
+                    provenance = info_table[info_table['title'] == attr]['source']
+                    if len(provenance) > 0:
+                        provenance = provenance.iloc[0]
+                    else:
+                        provenance = ""
+
                 categories.append({
                     'table_name': self.table_name,
                     'label': ref,
                     'value': attr,
                     'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,
-                    'provenance': ""
+                    'provenance': provenance
                 })
             else: # nominal
                 fields.add(Field( name=attr, type="nominal" ))      
