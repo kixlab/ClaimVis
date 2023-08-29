@@ -42,8 +42,6 @@ def retry(
           kwargs["engine"] = Model.GPT3_16k
         except KeyError as e: # service unavailable
           pass
-          
-
 
     return newfn
 

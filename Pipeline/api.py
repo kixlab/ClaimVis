@@ -141,11 +141,12 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
         reasoning = None
     else:
         pipeline = Pipeline(datasrc="../Datasets")
-        claim_map, claims = pipeline.run_on_text(user_claim)
+        # claim_map, claims = pipeline.run_on_text(user_claim)
+        claim_map, claims = pipeline.run_on_user_claim(body, verbose=verbose)
         # if verbose: print(claim_map)
 
         reason = claim_map[claims[0]][0]
-        new_claim, table, attributes, value_map, reasoning = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"], reason["suggestions"][0]["justification"]
+        new_claim, table, attributes, value_map, reasoning, viz_task = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
         # if verbose: print(table, attributes)
 
     # given a table and its attributes, return the data points
@@ -155,7 +156,7 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
                 matcher=pipeline.data_matcher if not test else None
             )
     return AutoViz.retrieve_data_points(
-                        text=new_claim, 
+                        text=viz_task, 
                         value_map=value_map, 
                         reasoning=reasoning, 
                         verbose=verbose
@@ -244,7 +245,9 @@ def get_dataset_explanation(dataset: str, column_name: str):
 
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="Birth rates are declining worldwide.")
+    paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
+    userClaim = "They have donated 5 billion USD worth of food and clothes to Africa since 1999."
+    claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
 

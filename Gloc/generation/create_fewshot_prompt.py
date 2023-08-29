@@ -188,7 +188,6 @@ dec_reasoning_2 = [
     }
 ]
 
-
 sql_generation = [
     {
         "role": "system",
@@ -644,9 +643,6 @@ Q: 2 of the 7 top - ranked figure skate team be from france"""
     }
 ]
 
-
-
-
 sql_gen_2 = [
     {"role": "system", "content": "Generate SQL given the question and table."},
 
@@ -795,8 +791,7 @@ row_id	rank	name	nation	points	places
 Q1: How many of the 7 top - ranked figure skate teams are from france?"""},
     {"role": "assistant", "content": """A1: SELECT COUNT(*) FROM w WHERE nation = 'france' AND rank <= 7"""}
 ]
-
-# 
+ 
 query_gen_3 = [
     {"role": "system", "content": """You are an amazing data analyst and logician! You are given a table and a statement. Please suggest me a list of suggestions, each containing:
         1. A query that can be verified using the data attributes within the table. The query must be an improved version of the orginal statement.
@@ -948,7 +943,40 @@ Statement: American's housing in 2023 is more active than that in 2010."""
         ]"""
     }
 ]
+
+claims_extraction_with_context = [
+    {"role": "system", "content": """You are a superb inference engine! You are given a Sentence and a Context Paragraph containing the sentence. Please do 2 following things:
+    1. Extract claim(s) from the sentence. You can rephrase some of the claims to make them more readable.
+    2. Resolve ambiguous references in the claim(s) using the context paragraph.
+    Think about how you can use the context paragraph to resolve the ambiguous references using the "Reason" field."""},
+
+    {"role": "user", "context": """PARAGRAPH: The US had had a bad downwards trend of fertility since the 70s of the 19th century. After declining steadily from 4.53 in 1970, the first year the government started compiling such data, the total fertility rate began to sink more quickly in the 2000s during the financial crises, dropping below 1.0 in 2018. Aferwards it seems to have recovered a little bit, but still remains below 1.0. The US is not the only country that has a low fertility rate. Japan, South Korea, and many European countries are also facing the same problem. The US government has been trying to encourage people to have more children, but the effect is not obvious.
+    SENTENCE: After declining steadily from 4.53 in 1970, the first year the government started compiling such data, the total fertility rate began to sink more quickly in the 2000s during the financial crises, dropping below 1.0 in 2018."""},
+    {"role": "assistant", "content": """{
+        "Reason": "The sentence is about the fertility rate of the US from 1970 to 2000 to 2018. 
+        There is an ambiguous reference within the sentence. 'the government' refers to the US government. 
+        There are 3 claims in the sentence.",
+        "Claims": [
+            "The US' fertility rate declinned steadily from 4.53 in 1970.",
+            "The US' fertility rate began to sink more quickly in the 2000s during the financial crises.",
+            "The US' fertility rate dropped below 1.0 in 2018."
+        ]
+    }"""},
+
+    {"role": "user", "context": """PARAGRAPH: Japan's Stock market has observed a significant drop in total cap in the 2008 recession. While the trend continued to spiral down even further 22% next year, no one paid much attention to it until everything just popped and crashed abruptly, dragging the market down another 25% at the end of 2010. By the closure of 2011, the total cap has dropped by 60% from its peak in 2007. The market has been recovering since then, but it is still 40% below its peak.
+    SENTENCE: While the trend continued to spiral down even further 22% early next year, no one paid much attention to it until everything just popped and crashed abruptly, dragging the market down another 25% at the end of the year."""},
+    {"role": "assistant", "content": """{
+        "Reason": "The sentence is about the stock market of Japan from 2008 to 2011. 
+        There are several ambiguous references within the sentence. 'the trend' refers to the trend of the total cap of the Japan stock market. 'next year' refers to 2009. 'it' refers to the Japan stock market.
+        There are 2 claims in the sentence.",
+        "claims": [
+            "The total cap of Japan's stock market dropped 22% in 2009.",
+            "The total cap of Japan's stock market dropped 25% at the end of 2010."
+        ]
+    }"""},
+
+]
 import json
 # save pro to query_generation_2.json
-with open("fewshots/query_generation_3.json", "w") as f:
-    json.dump(query_gen_3, f, indent=4)
+with open("fewshots/claim_extraction.json", "w") as f:
+    json.dump(claims_extraction_with_context, f, indent=4)

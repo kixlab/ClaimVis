@@ -32,6 +32,8 @@ class TemplateKey(str, enum.Enum):
     SQL_GENERATION = 'sql'
     SQL_GENERATION_2 = 'sql2'
 
+    CLAIM_EXTRACTION = 'ext'
+
 class Prompter(object):
     def __init__(self) -> None:
         # respectively read pre-prompt files in fewshots folders and 
@@ -122,6 +124,11 @@ class Prompter(object):
                     answer_text=None,
                     nsql=""
                 )
+            })
+        elif template_key == TemplateKey.CLAIM_EXTRACTION:
+            template.append({
+                "role": "user",
+                "content": f"""PARAGRAPH: {kwargs['paragraph']}\n   SENTENCE: {kwargs['userClaim']}"""
             })
 
         return template

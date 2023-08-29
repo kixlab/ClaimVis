@@ -22,6 +22,9 @@ import json
 import os
 import atexit
 from rapidfuzz import fuzz
+from models import UserClaimBody
+from Gloc.generation.claimvis_prompt import TemplateKey
+import re
 
 class Pipeline(object):
     def __init__(self, datasrc: str = None):
@@ -51,6 +54,24 @@ class Pipeline(object):
         ):
         return self.data_matcher.find_top_k_datasets(claim, k=k, method=method, verbose=verbose)
     
+    def extract_claims(self, body: UserClaimBody):
+        userClaim, paragraph = body.userClaim, body.paragraph
+        if paragraph is None:
+            return userClaim
+        
+        prompter = self.table_reasoner.prompter
+        # extract claims and disambiguate from paragraph
+        prompt = prompter.build_prompt(
+                            template_key=TemplateKey.CLAIM_EXTRACTION,
+                            table=None,
+                            paragraph=paragraph,
+                            userClaim=userClaim
+                        )
+        result = self.table_reasoner._call_api_2(prompt=prompt)[0]
+
+        match = re.search(r'"Claims": (\[.*?\])', result, re.DOTALL)
+        return json.loads(match.group(1)) if match else []
+    
     def reason(
             self, 
             claim: str,
@@ -70,6 +91,37 @@ class Pipeline(object):
                     )
         reason_map["sub_table"]["name"] = dataset
         return reason_map
+    
+    def run_on_user_claim(
+            self, 
+            body: UserClaimBody, 
+            THRE_SHOLD: float = .5,
+            verbose: bool = True
+        ):
+        claim_map, claims = defaultdict(list), []
+        for claim in self.extract_claims(body):
+            claim, score = self.detect_claim(claim, verbose=verbose)
+            if score > THRE_SHOLD:
+                if verbose: print(f"claim: {claim}")
+                # find top k datasets
+                top_k_datasets = self.find_top_k_datasets(claim, verbose=verbose)
+
+                # reason the claim
+                for dataset, des, similarity, relevant_attrs in top_k_datasets:
+                    claim_map[claim].append(
+                        self.reason(
+                            claim=claim,
+                            dataset=dataset,
+                            relevant_attrs=relevant_attrs,
+                            fuzzy_match=True,
+                            verbose=verbose
+                        )
+                    )
+                    
+            claims.append(claim)
+                    
+        return claim_map, claims
+
     
     def run_on_text(self, text: str, THRE_SHOLD: float = .5, verbose: bool = True):
         """
@@ -114,7 +166,7 @@ class Pipeline(object):
     
     def create_trial(self, claim:str):
         """
-        This function creates a visualization trial for a given claim. It uses the pipeline to reason the claim and generate a visualization.
+        This function creates a visualization trial for a given claim. It uses the pipeline to reason the claim and generate a visualization based on LIDA.
 
         Parameters:
             claim (str): The claim to create a trial for.
@@ -178,9 +230,11 @@ class Pipeline(object):
 
 def main():
     pipeline = Pipeline(datasrc="../Datasets")
-    text = "China outnumbers US in its total export since 2011."
+    text = "The country's imports and exports rank 1st in the world, accounting for more than 12% of total global trade."
+    paragraph = "China has been the world's largest exporter of goods since 2009. Official estimates suggest Chinese exports amounted to $2.097 trillion in 2017. Since 2013, China has also become the largest trading nation in the world. The country's imports and exports rank 1st in the world, accounting for more than 12% of total global trade. China is also the world's second-largest importer and the second-largest foreign investor. China is a member of numerous formal and informal multilateral organizations, including the WTO, APEC, BRICS, the Shanghai Cooperation Organization (SCO), the BCIM and the G20. Using a PPP exchange rate of 1 yuan = US$0.15 (2017 Annual Average) China's total GDP in 2017 was US$23.12 trillion. In 2018, China's autonomous regions had the highest nominal GDP per capita, with Shanghai at US$25,383, followed by Beijing at US$22,914, Tianjin at US$21,724, and Jiangsu at US$20,753."
     
-    pipeline.run(text)
+    x = pipeline.extract_claims(UserClaimBody(userClaim=text, paragraph=paragraph))
+    print(x)
 
 def profile_func(func):
     import cProfile

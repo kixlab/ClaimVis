@@ -1,6 +1,7 @@
 # CoT few-shot prompting 
 from collections import defaultdict
 from functools import cache
+from itertools import zip_longest
 import sys
 sys.path.append("../Gloc")
 sys.path.append("..")
@@ -127,7 +128,7 @@ class TableReasoner(object):
 
         # infer datetime from the queries if not exist
         if best_datefield:
-            oldest_date, newest_date = table[best_datefield].min(), table[best_datefield].max()
+            oldest_date, newest_date = table[best_datefield].min(), 2020 # 2020 has the most data
             prompt = [
                 {"role": "system", "content": f"""Please add date or time to the query if needed. 
                  
@@ -153,11 +154,13 @@ class TableReasoner(object):
                     ..."""},
                 {"role": "user", "content": f"""Please use the following default dates: 
                  OLDEST: {oldest_date}
-                 NEWEST: {newest_date}""" + "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries)])}
+                 NEWEST: {newest_date}""" + "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries + vis_tasks)])}
             ]
             answers = self._call_api_2(prompt, model=Model.GPT4)
             # parse the answers
-            queries = self.parser.parse_sql_2(answers[0])
+            answers = self.parser.parse_sql_2(answers[0])
+            # chop to queries and vis tasks
+            queries, vis_tasks = answers[:len(queries)], answers[len(queries):]
 
         # further process the attributes
         for idx, attr in reversed(list(enumerate(attributes))):
@@ -248,8 +251,8 @@ class TableReasoner(object):
         # list of list of sqls --> be careful when handling this case
         elif template_key == TemplateKey.SQL_GENERATION_2:
             psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
-            # transpose psqls
-            psqls = list(map(list, zip(*psqls)))
+            # transpose psqls, pad with "SELECT" if needed
+            psqls = list(map(list, zip_longest(*psqls, fillvalue="SELECT")))
         
         if fuzzy_match:
             # bottle neck due to fuzzy matching on big tables
@@ -300,6 +303,7 @@ class TableReasoner(object):
                                     template_key=TemplateKey.SQL_GENERATION_2,
                                     fuzzy_match=fuzzy_match
                                 )
+            # if verbose: print(f"SQLs: {sqlss}")
         
         def process_ans(ans: list):
             try:
