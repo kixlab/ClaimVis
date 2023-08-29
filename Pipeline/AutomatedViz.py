@@ -148,6 +148,18 @@ class AutomatedViz(object):
         info_table = pd.read_csv(f'../Datasets/info/{self.table_name}')
         info_table.columns = info_table.columns.str.lower()
 
+        def get_provenance(attr: str):
+            provenance = info_table[info_table['value'] == attr]['source']
+            if len(provenance) > 0:
+                provenance = provenance.iloc[0]
+            else:
+                provenance = info_table[info_table['title'] == attr]['source']
+                if len(provenance) > 0:
+                    provenance = provenance.iloc[0]
+                else:
+                    provenance = ""
+            return provenance
+
         def isAny(attr, func: callable):
             return any(func(val) for val in self.table[attr].to_list())
 
@@ -165,22 +177,12 @@ class AutomatedViz(object):
                                 timeUnit= self.parser.parse_unit(ref) or "year"
                             ))  
             elif helpers.isint(ref) or helpers.isfloat(ref) or isAny(attr, helpers.isint) or isAny(attr, helpers.isfloat):
-                provenance = info_table[info_table['value'] == attr]['source']
-                if len(provenance) > 0:
-                    provenance = provenance.iloc[0]
-                else:
-                    provenance = info_table[info_table['title'] == attr]['source']
-                    if len(provenance) > 0:
-                        provenance = provenance.iloc[0]
-                    else:
-                        provenance = ""
-
                 categories.append({
                     'table_name': self.table_name,
                     'label': ref,
                     'value': attr,
                     'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,
-                    'provenance': provenance
+                    'provenance': get_provenance(attr)
                 })
             else: # nominal
                 fields.add(Field( name=attr, type="nominal" ))      
@@ -234,6 +236,16 @@ class AutomatedViz(object):
             else:
                 tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', "{value}")
         
+        # update categories with more potential attributes
+        for attr in set(self.attributes) - set(tag_map['map'].values()):
+            categories.append({
+                'table_name': self.table_name,
+                'label': attr,
+                'value': attr,
+                'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,
+                'provenance': get_provenance(attr)
+            })
+
         newSet = DataPointSet(
                 statement=tag_map['wrap'],
                 dataPoints=datapoints,

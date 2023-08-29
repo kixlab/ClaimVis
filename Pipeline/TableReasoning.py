@@ -116,7 +116,7 @@ class TableReasoner(object):
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
         attributes, col_set = set(attributes + more_attrs), set(table.columns)
         # add datefield if exist and infer datetime from the queries if not
-        time_batch = self.datamatcher.embedder.encode(["time", "date", "year"])
+        time_batch = self.datamatcher.encode(["time", "date", "year"])
         col_embeds = self.datamatcher.attrs_embeddings[self.datamatcher.datasets.index(table.name)]
         datefields, start_index = [], 1 if table.columns[0] == "row_id" else 0 # row_id added to table so index starts at 1
         for col, embed in zip(table.columns[start_index:], col_embeds): 
@@ -128,6 +128,8 @@ class TableReasoner(object):
 
         # infer datetime from the queries if not exist
         if best_datefield:
+            print(f"best datefield: {best_datefield}")
+            print(f"dates: {table[best_datefield]}")
             oldest_date, newest_date = table[best_datefield].min(), 2020 # 2020 has the most data
             prompt = [
                 {"role": "system", "content": f"""Please add date or time to the query if needed. 

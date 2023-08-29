@@ -245,8 +245,9 @@ def get_dataset_explanation(dataset: str, column_name: str):
 
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
-    userClaim = "They have donated 5 billion USD worth of food and clothes to Africa since 1999."
+    # paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
+    paragraph = ""
+    userClaim = "The US has a bigger economy than France."
     claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)

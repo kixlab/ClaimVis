@@ -56,8 +56,8 @@ class Pipeline(object):
     
     def extract_claims(self, body: UserClaimBody):
         userClaim, paragraph = body.userClaim, body.paragraph
-        if paragraph is None:
-            return userClaim
+        if not paragraph:
+            return [userClaim]
         
         prompter = self.table_reasoner.prompter
         # extract claims and disambiguate from paragraph
