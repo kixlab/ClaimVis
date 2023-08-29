@@ -38,42 +38,93 @@ class Pipeline(object):
     def clean_up(self):
         with open("viz_trials/index.txt", "w") as f:
             f.write(str(self.trials))
+
+    def detect_claim(self, claim:str, verbose: bool = True):
+        return self.claim_detector.detect(claim, verbose=verbose)
     
-    def run(self, text: str, THRE_SHOLD: float = .5, verbose: bool = True):
+    def find_top_k_datasets(
+            self, 
+            claim:str, 
+            k: int = 1, 
+            method: str = "attr", 
+            verbose: bool = True
+        ):
+        return self.data_matcher.find_top_k_datasets(claim, k=k, method=method, verbose=verbose)
+    
+    def reason(
+            self, 
+            claim: str,
+            dataset: str, 
+            relevant_attrs:list=[], 
+            fuzzy_match: str=True, 
+            verbose: bool = True
+        ):
+        table = pd.read_csv(f"{self.datasrc}/{dataset}")
+        table.name = dataset
+        reason_map = self.table_reasoner.reason(
+                        claim=claim,
+                        table=table,
+                        verbose=verbose,
+                        fuzzy_match=fuzzy_match,
+                        more_attrs=relevant_attrs,
+                    )
+        reason_map["sub_table"]["name"] = dataset
+        return reason_map
+    
+    def run_on_text(self, text: str, THRE_SHOLD: float = .5, verbose: bool = True):
+        """
+        This function runs the pipeline on the given text (multiple sentences).
+
+        Parameters:
+            text (str): The text to run the pipeline on.
+            THRE_SHOLD (float): The threshold for claim detection. Defaults to 0.5.
+            verbose (bool): Whether to print verbose output. Defaults to True.
+
+        Returns:
+            tuple: A tuple containing the claim map and the list of claims.
+        """
+
         # parse sentences from text
         sentences = sent_tokenize(text)
 
         # detect claims
         claim_map, claims = defaultdict(list), []
         for sentence in sentences:
-            claim, score = self.claim_detector.detect(sentence, verbose=verbose)
+            claim, score = self.detect_claim(sentence, verbose=verbose)
             if score > THRE_SHOLD:
                 if verbose: print(f"claim: {claim}")
                 # find top k datasets
-                top_k_datasets = self.data_matcher.find_top_k_datasets(claim, k=1, method="attr")
-                # if verbose: print(f"top k datasets: {top_k_datasets}")
+                top_k_datasets = self.find_top_k_datasets(claim, verbose=verbose)
 
                 # reason the claim
                 for dataset, des, similarity, relevant_attrs in top_k_datasets:
-                    table = pd.read_csv(f"{self.datasrc}/{dataset}")
-                    table.name = dataset
                     claim_map[claim].append(
-                        self.table_reasoner.reason(
-                            claim=sentence,
-                            table=table,
-                            verbose=verbose,
+                        self.reason(
+                            claim=claim,
+                            dataset=dataset,
+                            relevant_attrs=relevant_attrs,
                             fuzzy_match=True,
-                            more_attrs=relevant_attrs,
-                        ))
-                    claim_map[claim][-1]["sub_table"]["name"] = dataset
+                            verbose=verbose
+                        )
+                    )
                     
             claims.append(claim)
                     
         return claim_map, claims
     
     def create_trial(self, claim:str):
+        """
+        This function creates a visualization trial for a given claim. It uses the pipeline to reason the claim and generate a visualization.
+
+        Parameters:
+            claim (str): The claim to create a trial for.
+
+        Returns:
+            None
+        """
+        
         pipeline = Pipeline(datasrc="../Datasets")
-        claim_map, claims = pipeline.run(claim)
+        claim_map, claims = pipeline.run_on_text(claim)
         reason = claim_map[claims[0]][0] # only take the first dataset
         vis_task, sub_table = reason["suggestions"][0]["visualization"], reason["sub_table"]
 

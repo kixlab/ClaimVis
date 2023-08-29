@@ -24,8 +24,7 @@ class AutomatedViz(object):
             matcher: DataMatcher = None,
             datasrc: str = None, 
             table: dict or pd.DataFrame = None, 
-            attributes: str = None, 
-            test: bool = False
+            attributes: str = None
         ):
         self.datasrc = datasrc
 
@@ -38,10 +37,6 @@ class AutomatedViz(object):
         else: # load from csv
             self.table = pd.read_csv(self.datasrc)
             self.table_name = "table"
-
-        if test: # lower case the whole dataset if it's a test
-            self.table.columns = self.table.columns.str.lower()
-            self.table = self.table.applymap(lambda s:s.lower() if type(s) == str else s)
         
         self.attributes = attributes or list(self.table.columns)
 
@@ -217,7 +212,7 @@ class AutomatedViz(object):
                 )
 
                 if dates:
-                    dataPoint.fields['date'] = str(row[dates['value']])
+                    dataPoint.fields['date'] = int(row[dates['value']])
                 datapoints.append(dataPoint)
         
         # replace all the wrap text with attribute names

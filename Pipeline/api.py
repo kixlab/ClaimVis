@@ -132,15 +132,16 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
     user_claim = body.userClaim
 
     if test: # for testing purposes
-        attributes = ['coal_production', 'country', 'coal_prod_per_capita', 'coal_elec_per_capita', 'coal_cons_per_capita', 'year', 'coal_consumption']
-        table = pd.read_csv("../Datasets/owid-energy-data.csv")
-        table.columns = table.columns.str.lower()
+        attributes = ['Mortality rate, under-5, male (per 1,000 live births)', 'Death rate, crude (per 1,000 people)', 'Maternal mortality ratio (national estimate, per 100,000 live births)', 'Sex ratio at birth (male births per female births)', 'Low-birthweight babies (% of births)', 'Mortality rate, under-5, female (per 1,000 live births)', 'Mortality rate, infant, male (per 1,000 live births)', 'Mortality rate, infant, female (per 1,000 live births)', 'Birth rate, crude (per 1,000 people)', 'Number of maternal deaths', 'Mortality rate, infant (per 1,000 live births)', 'Fertility rate, total (births per woman)', 'Maternal mortality ratio (modeled estimate, per 100,000 live births)', 'Wanted fertility rate (births per woman)', 'date', 'Mortality rate, under-5 (per 1,000 live births)', 'Number of infant deaths', 'Lifetime risk of maternal death (1 in: rate varies by country)', 'Mortality rate, neonatal (per 1,000 live births)']
+        table = pd.read_csv("../Datasets/Health.csv")
+        # table.columns = table.columns.str.lower()
         table = table[attributes]
-        value_map = {'country': {'china'}, 'year': {'2022'}}
+        value_map = {'date': {'02', '2022', '1960', '96'}}
         new_claim = user_claim
+        reasoning = None
     else:
         pipeline = Pipeline(datasrc="../Datasets")
-        claim_map, claims = pipeline.run(user_claim)
+        claim_map, claims = pipeline.run_on_text(user_claim)
         # if verbose: print(claim_map)
 
         reason = claim_map[claims[0]][0]
@@ -151,7 +152,6 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
     AutoViz = AutomatedViz(
                 table=table, 
                 attributes=attributes, 
-                test=test, 
                 matcher=pipeline.data_matcher if not test else None
             )
     return AutoViz.retrieve_data_points(
@@ -244,7 +244,7 @@ def get_dataset_explanation(dataset: str, column_name: str):
 
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="For example, 50 years ago Mexico had a birthrate of almost 7, today it is 1.9.")
+    claim = UserClaimBody(userClaim="Birth rates are declining worldwide.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
 

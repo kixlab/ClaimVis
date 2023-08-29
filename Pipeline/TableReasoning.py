@@ -352,14 +352,15 @@ class TableReasoner(object):
 
         return self.parser.parse_evaluation(evaluation[0])
     
-    @log_decorator
+    # @log_decorator
     def reason(
             self, 
             claim: str, 
             table: pd.DataFrame, 
             verbose=False, 
             fuzzy_match=False,
-            more_attrs: list = []):
+            more_attrs: list = []
+        ):
         """
             Reasoning pipeline for CoT
             Input: claim, table
@@ -400,7 +401,7 @@ class TableReasoner(object):
             if attributes: print(f"mapped attributes: {attributes}")
 
         reason_map = []
-        for idx, query in enumerate(suggestions):
+        for idx, query in enumerate(suggestions[:1]):
             # decompose queries
             sub_queries = self._decompose_query(query)
             if verbose: print(f"steps of reasoning: {sub_queries}")
@@ -426,15 +427,15 @@ class TableReasoner(object):
                      You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
                     {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(sub_queries, answers))},
                 ]
-            )
+            )[0]
 
             # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
-            evaluation = self._evaluate_soundness(justification[0])
+            # justification = self._evaluate_soundness(justification)
             reason_map.append({
                 "query": query,
                 "visualization": vis_tasks[idx],
                 "reasoning_steps": sub_queries,
-                "justification": evaluation,
+                "justification": justification,
                 "value_map": value_map
             })
 
