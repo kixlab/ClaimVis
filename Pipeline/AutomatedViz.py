@@ -224,7 +224,10 @@ class AutomatedViz(object):
         
         # replace all the wrap text with attribute names
         for ref, attr in tag_map['map'].items():
-            tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', f'{{{attr}}}')
+            if attr in data_fields:
+                tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', f'{{{attr}}}')
+            else:
+                tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', "{value}")
         
         newSet = DataPointSet(
                 statement=tag_map['wrap'],

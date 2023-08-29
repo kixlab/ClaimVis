@@ -240,7 +240,7 @@ def get_dataset_explanation(dataset: str, column_name: str):
 
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="Albania has the highest unemployment rate in 2011.")
+    claim = UserClaimBody(userClaim="North American countries have higher export than China in 2011.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
 
