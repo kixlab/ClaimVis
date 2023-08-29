@@ -13,8 +13,8 @@ class Tester():
         self.datasrc = datasrc
 
     def test_post_process_sql(self):
-        sql = """SELECT case when "Labor force participation rate, total (% of total population ages 15+) (national estimate)" > ( SELECT "Labor force participation rate, total (% of total population ages 15+) (national estimate)" FROM w WHERE "country_name" = \'United States\' and "date" = w.val_270_275 ) then 1 else 0 end AS higher_than_us FROM w WHERE "country_name" IN ( \'Canada\' , \'France\' , \'Germany\' , \'Italy\' , \'Japan\' , \'United Kingdom\' ) and "date" >= 1960 and "date" <= 2011"""
-        table = pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))
+        sql = """SELECT "date" , "Merchandise exports (current US$)" FROM w WHERE ( "country_name" = \'China\' or "country_name" = \'United States\' ) and "date" BETWEEN 2011 and 2022 GROUP by "date" having "Merchandise exports (current US$)" > all ( SELECT "Merchandise exports (current US$)" FROM w WHERE "country_name" = \'United States\' and "date" BETWEEN 2011 and 2022 ) """
+        table = pd.read_csv(os.path.join(self.datasrc, "Private Sector.csv"))
         # table.columns = table.columns.str.lower()
         # table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
         table.reset_index(inplace=True)
@@ -31,21 +31,22 @@ class Tester():
     
     def test_filter_data(self):
         table = pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))
-        table.columns = table.columns.str.lower()
-        table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+        # table.columns = table.columns.str.lower()
+        # table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
 
         table = table[table['country_name'].isin(['united states', 'china'])]
         table = table[table['date'].isin([2022])]
         print(table)
     
     def test_retrieve_data_points(self):
+        table = pd.read_csv(os.path.join(self.datasrc, "Private Sector.csv"))
         db = NeuralDB(
-            tables=[pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))],
+            tables=[table],
             add_row_id=True,
             normalize=False,
             lower_case=True
         )
-        sql = """SELECT "country_name" FROM w WHERE "country_name" IN (\'Canada\', \'France\', \'Germany\', \'Italy\', \'Japan\', \'United Kingdom\') AND "date" BETWEEN 1960 AND 2011 AND "Labor force participation rate, total (% of total population ages 15+) (national estimate)" < (SELECT "Labor force participation rate, total (% of total population ages 15+) (national estimate)" FROM w WHERE "country_name" = \'United States\' AND "date" BETWEEN 1960 AND 2011)"""
+        sql = """SELECT "date" , "Merchandise exports (current US$)" FROM w WHERE ( "country_name" = \'China\' or "country_name" = \'United States\' ) and "date" BETWEEN 2011 and 2022 GROUP by "date" having MAX ( "Merchandise exports (current US$)" ) = "Merchandise exports (current US$)" """
         print(db.execute_query(sql))
 
 

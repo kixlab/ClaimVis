@@ -238,10 +238,11 @@ def get_dataset_explanation(dataset: str, column_name: str):
 
     return df.to_dict(orient='records')
 
-
-
-if __name__ == "__main__":
+def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
-    claim = UserClaimBody(userClaim="Labor force participation rate of the US is higher than that of most G7 countries in 2011.")
+    claim = UserClaimBody(userClaim="Albania has the highest unemployment rate in 2011.")
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
+
+if __name__ == "__main__":
+    pass

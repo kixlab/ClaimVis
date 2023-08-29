@@ -135,6 +135,7 @@ class TableReasoner(object):
                     1. Add the most recent date when the query lacks date. E.g "US' GDP > China's GDP" --> "US' GDP > China's GDP in 2021"
                     2. Add the most recent date when the query lacks the end date. E.g "US' GDP > China's GDP since 2010" --> "US' GDP > China's GDP since 2010 to 2021"
                     3. Add the oldest date when the query lacks the start date. E.g "US' GDP > China's GDP until 2010" --> "US' GDP > China's GDP from 1960 until 2010"
+                    4. Do not add date when the query already doesn't need more date. E.g "US' GDP > China's GDP in 2010" --> "US' GDP > China's GDP in 2010"
 
                     User will give multiple queries inform of
                  /*

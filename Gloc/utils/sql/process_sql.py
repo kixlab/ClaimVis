@@ -140,8 +140,9 @@ def tokenize(string, use_corenlp=False, use_duckdb=False):
     assert len(double_idxs) % 2 == 0, "Unexpected quote"
     for j in range(len(double_idxs)-1, -1, -2):
         # two consecutive double quotes
-        qidx1 = double_idxs[j-1]
-        qidx2 = double_idxs[j]
+        qidx1, qidx2 = double_idxs[j-1], double_idxs[j]
+        if string[qidx1-2:qidx1] == "w.":
+            qidx1 -= 2 # special case
         val = string[qidx1: qidx2+1]
         key = "val_{}_{}".format(qidx1, qidx2)
         string = string[:qidx1] + key + string[qidx2+1:]

@@ -10,7 +10,7 @@ import pandas as pd
 from nltk.tokenize import sent_tokenize
 from collections import defaultdict
 
-from lida import Manager
+from lida.modules import Manager
 from lida.datamodel import Goal
 import lida
 import pandas   as pd
@@ -154,7 +154,9 @@ def profile_func(func):
 if __name__ == "__main__":
     from TableReasoning import main as table_reasoner_main
     from DataMatching import main as data_matcher_main
-    profile_func(main) 
+    from api import main as api_main
+
+    profile_func(api_main) 
     # main()
     # table_reasoner_main()
     # print(fuzz.ratio("pg13", "pg-13"))

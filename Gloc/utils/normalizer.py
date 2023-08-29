@@ -494,7 +494,7 @@ def post_process_sql(
         assert len(sql_tokens) == len(sql_template_tokens)
         value_indices = [idx for idx in range(len(sql_template_tokens)) if sql_template_tokens[idx] == '[VALUE]']
 
-        # find group patterns like "WHERE a in (b, c, d)"
+        # find group patterns like "WHERE a in (b, c, d) where b, c, d are not tagged as [VALUE]"
         def find_token_groups(sql_template_tokens):
             token_groups, current_group, in_group = [], [], False
             for idx, token in enumerate(sql_template_tokens):
@@ -521,6 +521,8 @@ def post_process_sql(
         # check for the rest of the value tokens
         for value_idx in value_indices:
             value_str = sql_tokens[value_idx]
+            if value_str[:2] == "w." or value_str[:2] == "t.": 
+                continue # skip if not really a value but a special case of column name
             # Drop STRQ ... STRQ for fuzzy match
             is_string = False
             if value_str[0] in STRQs and value_str[-1] in STRQs:
@@ -528,8 +530,18 @@ def post_process_sql(
                 is_string = True
 
             # extract the corresponding attribute
-            if sql_tokens[value_idx-2][-1] != '"': continue # skip if not a column
-            attr = sql_tokens[value_idx-2][1:-1]
+            if sql_tokens[value_idx-2][-1] == '"' and \
+                sql_template_tokens[value_idx-1] == '[WHERE_OP]': # [COL] [WHERE_OP] [VALUE]
+
+                attr = sql_tokens[value_idx-2][1:-1]
+            elif sql_tokens[value_idx-4][-1] == '"' and \
+                sql_template_tokens[value_idx-3] == '[WHERE_OP]' and \
+                sql_template_tokens[value_idx-2] == '[VALUE]' and \
+                sql_tokens[value_idx-1] == 'and':
+
+                attr = sql_tokens[value_idx-4][1:-1]
+            else: # skip if not really a value
+                continue
             if verbose: print(f"attr: {attr}")
             # If already fuzzy match, skip (but remember to add to value_map)
             if value_str[0] == '%' or value_str[-1] == '%':
@@ -548,14 +560,14 @@ def post_process_sql(
                     if _check_valid_fuzzy_match(value_str, matched_cell):
                         new_value_str = matched_cell
                         # fill the value map if is_string or is_date (simple ver)
-                        if is_string or "date" in attr.lower():
-                            value_map[attr].add(int(new_value_str))
+                        if is_string or any(time in attr.lower() for time in ["date", "year"]):
+                            value_map[attr].add(new_value_str)
 
                         if verbose and new_value_str != value_str:
                             print("\tfuzzy match replacing!", value_str, '->', matched_cell, f'fuzz_score:{fuzz_score}')
                         break
-            elif is_string or "date" in attr.lower():
-                value_map[attr].add(int(value_str))
+            elif is_string or any(time in attr.lower() for time in ["date", "year"]):
+                value_map[attr].add(value_str)
 
             if is_string:
                 new_value_str = f"{STRQs[0]}{new_value_str}{STRQs[0]}"
