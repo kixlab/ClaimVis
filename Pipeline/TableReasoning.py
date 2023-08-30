@@ -340,9 +340,10 @@ class TableReasoner(object):
                 pred_answer_list=preds
             )
             top_ans = process_ans(top_ans)
-            if verbose: print(f"A{idx+1}: {top_ans}\n{'*'*75}")
+            unit = self.parser.parse_sql_unit(pred_sqls[0][0])
+            if verbose: print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")
 
-            answers.append(top_ans)
+            answers.append((top_ans, unit))
 
         return answers, value_map
     
@@ -425,7 +426,7 @@ class TableReasoner(object):
                                         fuzzy_match=fuzzy_match
                                     )
             sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
-            answers = [f"A{i+1}: {ans}" for i, ans in enumerate(answers)]
+            answers = [f"A{i+1}: {ans}. {unit}" for i, (ans, unit) in enumerate(answers)]
             # generate prompt for decomposed reasoning
             dec_prompt = build_dec_prompt(sub_queries, answers)
             # if verbose: print(f"full prompt:\n{dec_prompt}")
@@ -441,7 +442,7 @@ class TableReasoner(object):
                             )[0]
 
             # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
-            # justification = self._evaluate_soundness(justification)
+            justification = self._evaluate_soundness(justification)
             reason_map.append({
                 "query": query,
                 "visualization": vis_tasks[idx],
@@ -463,7 +464,7 @@ class TableReasoner(object):
 
 def main():
     table_reasoner = TableReasoner()
-    query = "US' Stock market observes a dump of 30% in the summer of 2008."
+    query = " The USA has the highest cumulative emissions of any country."
     # query = ["What is the total energy consumption of the US in 2012?", "What is the total energy consumption of China in 2012?", "What is the total energy consumption of the world in 2012?"]
     df = pd.read_csv("../Datasets/owid-energy-data.csv")
     table_reasoner.reason(query, df, verbose=True, fuzzy_match=True)

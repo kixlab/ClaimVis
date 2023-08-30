@@ -104,7 +104,7 @@ class DataMatcher(object):
                             max_decode_steps=300,
                             samples=1
                         )[0]
-            print(answer)
+
             answer = json.loads(answer)
             answer["Keywords"].append(claim) # add claim into keywords also
             len_keywords = len(answer["Keywords"])

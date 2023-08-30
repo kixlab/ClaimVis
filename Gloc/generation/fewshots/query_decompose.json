@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "You are a superb logician. You are given a query. Decompose it into a coherent sequence of sub-queries that can be verified using a database one-after-another. AVOID returning sub queries that retrieve a lot of data, THINK at the extreme."
+        "content": "You are a superb logician. You are given a query. Decompose it into a coherent sequence of sub-queries that can be verified using a database one-after-another. AVOID returning sub queries that retrieve a lot of data, THINK at the extreme by asking queries about the minimum or maximum."
     },
     {
         "role": "user",
@@ -59,16 +59,16 @@
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"Do all movies with IMDB rating higher than 70 have budget at least 50,000,000?\", we need to know: \"What is the lowest budget across movies with IMDB rating higher than 70?\" "
+        "content": "To answer the question \"Do all movies with IMDB rating higher than 70 have budget at least 50,000,000?\", we need to know: \"What is the LOWEST budget across movies with IMDB rating higher than 70?\" "
     },
 
     {
         "role": "user",
-        "content": "No students in the final exam have higher grades than Sam?"
+        "content": "Do no students in the final exam have higher grades than Sam?"
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"No students in the final exam have higher grades than Sam?\", we need to know: \"What is the grade of Sam?\", \"What is the highest grade across students in the final exam?\" "
+        "content": "To answer the question \"Do no students in the final exam have higher grades than Sam?\", we need to know: \"What is the grade of Sam?\", \"What is the HIGHEST grade across students in the final exam?\" "
     },
 
     {
@@ -82,11 +82,11 @@
 
     {
         "role": "user",
-        "content": "No people have a lower salary than 40,000$ a year?"
+        "content": "No people have a higher salary than 40,000$ a year?"
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"No people have a lower salary than 40,000$ a year?\", we need to know: \"What is the lowest salary across all people?\" "
+        "content": "To answer the question \"No people have a lower salary than 40,000$ a year?\", we need to know: \"What is the HIGHEST salary across all people?\" "
     },
 
     {
@@ -95,6 +95,6 @@
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"No countries have higher coal production than Germany plus Japan?\", we need to know: \"What is the coal production of Germany?\", \"What is the coal production of Japan?\", \"What is the total coal production of Germany plus Japan?\", \"What is the lowest coal production across countries?\" "
+        "content": "To answer the question \"No countries have higher coal production than Germany plus Japan?\", we need to know: \"What is the coal production of Germany?\", \"What is the coal production of Japan?\", \"What is the total coal production of Germany plus Japan?\", \"What is the LOWEST coal production across countries?\" "
     }
 ]

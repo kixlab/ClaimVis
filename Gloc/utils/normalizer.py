@@ -531,17 +531,22 @@ def post_process_sql(
 
             # extract the corresponding attribute
             if sql_tokens[value_idx-2][-1] == '"' and \
-                sql_template_tokens[value_idx-1] == '[WHERE_OP]': # [COL] [WHERE_OP] [VALUE]
+                sql_template_tokens[value_idx-1] == '[WHERE_OP]': # [COL] == [VALUE]
 
                 attr = sql_tokens[value_idx-2][1:-1]
             elif sql_tokens[value_idx-4][-1] == '"' and \
                 sql_template_tokens[value_idx-3] == '[WHERE_OP]' and \
                 sql_template_tokens[value_idx-2] == '[VALUE]' and \
-                sql_tokens[value_idx-1] == 'and':
+                sql_tokens[value_idx-1] == 'and': # BETWEEN [VALUE] and [VALUE]
 
                 attr = sql_tokens[value_idx-4][1:-1]
+            elif sql_tokens[value_idx-1] == '>' and \
+                sql_tokens[value_idx-2] == '<': # [COL] < > [VAL]
+
+                attr = sql_tokens[value_idx-3][1:-1]
             else: # skip if not really a value
                 continue
+
             if verbose: print(f"attr: {attr}")
             # If already fuzzy match, skip (but remember to add to value_map)
             if value_str[0] == '%' or value_str[-1] == '%':

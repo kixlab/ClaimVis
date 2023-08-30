@@ -89,3 +89,22 @@ class AnsParser(object):
         
         return match.group(1) if match else None
     
+    def parse_sql_unit(self, sql: str):
+        # sql has the form of "SELECT ... FROM table WHERE ..."
+        match = re.match(r'SELECT (.*?) FROM', sql).group(1)
+        # The unit can be in the form <AGGREGATION> ( <COLUMN> ) or <COLUMN>
+        # Paying attention to spaces
+        match = re.search(r'(\w+)\s*\(\s*(.*?)\s*\)|"(.*?)"', match)
+        if match.group(1):
+            agg, col_ = match.group(1), match.group(2)
+            if col_ == "*":
+                col = "all"
+            else: 
+                col = col_[1:-1]
+        else:
+            agg, col = "None", match.group(3)
+        
+        unit = self.parse_unit(col) or col # if no unit, return the whole column
+        return f"Unit: {unit}. Aggregation: {agg}"
+
+        
