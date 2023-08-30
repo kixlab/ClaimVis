@@ -149,15 +149,12 @@ class AutomatedViz(object):
         info_table.columns = info_table.columns.str.lower()
 
         def get_provenance(attr: str):
-            provenance = info_table[info_table['value'] == attr]['source']
-            if len(provenance) > 0:
-                provenance = provenance.iloc[0]
+            if 'value' in info_table.columns:
+                provenance = info_table[info_table['value'] == attr]['source'].iloc[0]
+            elif 'title' in info_table.columns:
+                provenance = info_table[info_table['title'] == attr]['source'].iloc[0]
             else:
-                provenance = info_table[info_table['title'] == attr]['source']
-                if len(provenance) > 0:
-                    provenance = provenance.iloc[0]
-                else:
-                    provenance = ""
+                provenance = ""
             return provenance
 
         def isAny(attr, func: callable):
