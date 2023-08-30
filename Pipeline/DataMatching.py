@@ -1,6 +1,11 @@
+import sys
+sys.path.append("../Gloc")
+sys.path.append("..")
+
 from functools import cache, lru_cache
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
+from Gloc.utils.llm import *
 from Summarizer import Summarizer
 from rapidfuzz import fuzz
 import numpy as np
@@ -72,6 +77,42 @@ class DataMatcher(object):
             score_batches = [self.similarity_batch(embed, self.attrs_embeddings[i])\
                                                              for i, dataset in enumerate(self.datasets)]
             similarities = [max(batch) for batch in score_batches]
+        elif method == "gpt": # semantic relatedness 
+            prompt = [
+                {"role": "system", "content": "You are an amazing extractor. Given a claim, your task is to extract keywords from it and generate more relevant keywords. Also please rate the relevance of each keyword to the claim on a scale of 0 to 1, with all scores summed to 1. Think step by step in the 'Reason' field."},
+
+                {"role": "user", "content": "The US economy is larger than China's."},
+                {"role": "assistant", "content": """{
+                    "Reason": " The claim is about the economy of the US and China. Some relevant keywords are 'economy', 'US', 'China'. 'economy' is related to 'GDP', 'Trade Volume', 'GDP per capita'. 'US' and 'China' are related to 'country'.",
+                    "Keywords": ["economy", "GDP", "Trade Volume", "GDP per capita", "US", "China", "country"],
+                    "Scores": [0.2, 0.1, 0.1, 0.1, 0.2, 0.2, 0.1]
+                }"""},
+
+                {"role": "user", "content": "After hitting an all time high of 445$ in July 2021, TSLA price drops to 355$ and stays there for a few month."},
+                {"role": "assistant", "content": """{
+                    "Reason": "The claim is about the price of TSLA. Some relevant keywords are 'price', 'TSLA', 'July', '2021'. 'TSLA price' is related to 'stock price', 'price change', 'stock market'. 'TSLA' is related to 'company', 'stock'. '2021' and 'July' are related to 'year', 'time', 'month'.",
+                    "Keywords": ["price", "TSLA", "July", "2021", "stock price", "price change", "stock market", "company", "stock", "year", "time", "month"],
+                    "Scores": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.1, 0.1, 0.05]
+                }"""},
+
+                {"role": "user", "content": claim},
+            ]
+            answer = call_model(
+                            model=Model.GPT3,
+                            prompt=prompt,
+                            temperature=0.0,
+                            max_decode_steps=300,
+                            samples=1
+                        )[0]
+            print(answer)
+            answer = json.loads(answer)
+            answer["Keywords"].append(claim) # add claim into keywords also
+            len_keywords = len(answer["Keywords"])
+            seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*len_keywords/(len_keywords+1) for score in answer["Scores"]], 1/(len_keywords+1)]
+            score_batches = [cosine_similarity(seed_embeds, self.attrs_embeddings[i]) \
+                                                                for i, _ in enumerate(self.datasets)]
+            similarities = [np.average(np.max(batch, axis=1), weights=weights) \
+                                                                for batch in score_batches]
         
         # Combine the dataset names, descriptions, similarities, and their corresponding index
         result = [[self.description[name]['name'], self.description[name]['description'], similarity, index] \
@@ -84,6 +125,11 @@ class DataMatcher(object):
             for dataset_map in top_k_datasets:
                 ind, name = dataset_map[3], dataset_map[0]
                 dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], score_batches[ind]) if score > top_k_datasets[0][2] * .8]
+        elif method == "gpt":
+            for dataset_map in top_k_datasets:
+                ind, name = dataset_map[3], dataset_map[0]
+                attr_scores = np.max(score_batches[ind], axis=0)
+                dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], attr_scores) if score > max(attr_scores) * .8]
         else:
             # reset dataset_map[3] to empty list
             for dataset_map in top_k_datasets:
@@ -134,9 +180,12 @@ def main():
     matcher = DataMatcher(datasrc="../Datasets")
     # claim = "The energy consumption level of the US was super bad last year."
     # matcher.find_top_k_datasets(claim, k=2)
-    phrase1 = "maternal mortality ratio (national estimate, per 100,000 live births)."
-    phrase2 = "No country has Child mortality rate higher than 6% in 2011."
-    print(matcher.similarity_score("US' economy is larger than China's", "population"))
+    phrase1 = "20% of US young are are literate."
+    phrase2 = " 2 billion people don't have access to clean drinking water."
+    # print(matcher.similarity_score("US' economy is larger than China's", "population"))
+    matcher.find_top_k_datasets(phrase2, k=10, method="gpt")
+    # x = matcher.similarity_batch("People using at least basic sanitation services, urban (% of urban population)", ["clean drinking water"])
+    # print(x)
 
 if __name__ == "__main__":
     main()

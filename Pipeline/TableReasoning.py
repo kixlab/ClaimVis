@@ -26,7 +26,7 @@ class TableReasoner(object):
     def __init__(
             self, 
             temperature=0.0, 
-            max_decode_steps=500, 
+            max_decode_steps=300, 
             samples=1, 
             model=Model.GPT3,
             datamatcher: DataMatcher = None
@@ -94,6 +94,10 @@ class TableReasoner(object):
 
         return response
 
+    def _suggest_queries_2(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
+        self.datamatcher.find_top_k_datasets(claim, k=1, method="attr", verbose=False)
+        pass
+
     def _suggest_queries(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
         """
             Suggest queries given a claim (and a table)
@@ -114,6 +118,7 @@ class TableReasoner(object):
             model=Model.GPT3 # 4
         )
         queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
+
         attributes, col_set = set(attributes + more_attrs), set(table.columns)
         # add datefield if exist and infer datetime from the queries if not
         time_batch = self.datamatcher.encode(["time", "date", "year"])
@@ -128,8 +133,6 @@ class TableReasoner(object):
 
         # infer datetime from the queries if not exist
         if best_datefield:
-            print(f"best datefield: {best_datefield}")
-            print(f"dates: {table[best_datefield]}")
             oldest_date, newest_date = table[best_datefield].min(), 2020 # 2020 has the most data
             prompt = [
                 {"role": "system", "content": f"""Please add date or time to the query if needed. 
@@ -168,14 +171,15 @@ class TableReasoner(object):
         for idx, attr in reversed(list(enumerate(attributes))):
             # fuzzy match when GPT hallucinating attributes
             if attr not in col_set: 
-                similar_attr = max(table.columns, key=lambda col: fuzz.ratio(col, attr))
-                if fuzz.ratio(similar_attr, attr) > 50 and similar_attr not in attributes:
+                lower_attr = attr.lower()
+                similar_attr = max(table.columns, key=lambda col: fuzz.ratio(col, lower_attr))
+                if fuzz.ratio(similar_attr.lower(), lower_attr) > 50 and similar_attr not in attributes:
                     attributes[idx] = similar_attr
                 else: # delete from tail
                     del attributes[idx]       
 
         # assert every column name in attribute is unique
-        assert len(attributes) == len(set(attributes)), "Column names in attributes are not unique"        
+        assert len(attributes) == len(set(attributes)), "Column names in attributes are not unique"     
         return queries, vis_tasks, reasons, attributes
     
     def _decompose_query(self, query: str):
@@ -428,12 +432,13 @@ class TableReasoner(object):
             answers.extend(self._call_api_2(dec_prompt))
 
             justification = self._call_api_2(
-                prompt = [
-                    {"role": "system", "content": """You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
-                     You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
-                    {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(sub_queries, answers))},
-                ]
-            )[0]
+                                prompt = [
+                                    {"role": "system", "content": """You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
+                                    You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
+                                    {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(sub_queries, answers))},
+                                ],
+                                model=Model.GPT4 # 4
+                            )[0]
 
             # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
             # justification = self._evaluate_soundness(justification)

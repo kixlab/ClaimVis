@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "Generate SQL given the question and table. Remember to wrap column name with double quotes if it contains spaces."
+        "content": "You are an amazing data analyst. Please generate relevant SQLs given a question and a context table. Remember to wrap column name with double quotes if it contains spaces. "
     },
     {
         "role": "user",

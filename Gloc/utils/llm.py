@@ -10,6 +10,7 @@ import openai
 import tensorflow as tf
 from Credentials.info import *
 from common.functionlog import *
+import asyncio
 import logging
 
 # openai.api_key = openai_api

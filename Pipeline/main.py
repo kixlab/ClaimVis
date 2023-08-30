@@ -54,7 +54,10 @@ class Pipeline(object):
         ):
         return self.data_matcher.find_top_k_datasets(claim, k=k, method=method, verbose=verbose)
     
-    def extract_claims(self, body: UserClaimBody):
+    def extract_claims(self, body: UserClaimBody or str):
+        if isinstance(body, str):
+            return sent_tokenize(body)
+        
         userClaim, paragraph = body.userClaim, body.paragraph
         if not paragraph:
             return [userClaim]
@@ -92,40 +95,9 @@ class Pipeline(object):
         reason_map["sub_table"]["name"] = dataset
         return reason_map
     
-    def run_on_user_claim(
-            self, 
-            body: UserClaimBody, 
-            THRE_SHOLD: float = .5,
-            verbose: bool = True
-        ):
-        claim_map, claims = defaultdict(list), []
-        for claim in self.extract_claims(body):
-            claim, score = self.detect_claim(claim, verbose=verbose)
-            if score > THRE_SHOLD:
-                if verbose: print(f"claim: {claim}")
-                # find top k datasets
-                top_k_datasets = self.find_top_k_datasets(claim, verbose=verbose)
-
-                # reason the claim
-                for dataset, des, similarity, relevant_attrs in top_k_datasets:
-                    claim_map[claim].append(
-                        self.reason(
-                            claim=claim,
-                            dataset=dataset,
-                            relevant_attrs=relevant_attrs,
-                            fuzzy_match=True,
-                            verbose=verbose
-                        )
-                    )
-                    
-            claims.append(claim)
-                    
-        return claim_map, claims
-
-    
-    def run_on_text(self, text: str, THRE_SHOLD: float = .5, verbose: bool = True):
+    def run_on_text(self, text: str or UserClaimBody, THRE_SHOLD: float = .5, verbose: bool = True):
         """
-        This function runs the pipeline on the given text (multiple sentences).
+        This function runs the pipeline on the given text (multiple sentences) or UserClaimBody (paragraph and sentence).
 
         Parameters:
             text (str): The text to run the pipeline on.
@@ -136,12 +108,8 @@ class Pipeline(object):
             tuple: A tuple containing the claim map and the list of claims.
         """
 
-        # parse sentences from text
-        sentences = sent_tokenize(text)
-
-        # detect claims
         claim_map, claims = defaultdict(list), []
-        for sentence in sentences:
+        for sentence in self.extract_claims(text):
             claim, score = self.detect_claim(sentence, verbose=verbose)
             if score > THRE_SHOLD:
                 if verbose: print(f"claim: {claim}")

@@ -13,8 +13,8 @@ class Tester():
         self.datasrc = datasrc
 
     def test_post_process_sql(self):
-        sql = """SELECT "date" , "Merchandise exports (current US$)" FROM w WHERE ( "country_name" = \'China\' or "country_name" = \'United States\' ) and "date" BETWEEN 2011 and 2022 GROUP by "date" having "Merchandise exports (current US$)" > all ( SELECT "Merchandise exports (current US$)" FROM w WHERE "country_name" = \'United States\' and "date" BETWEEN 2011 and 2022 ) """
-        table = pd.read_csv(os.path.join(self.datasrc, "Private Sector.csv"))
+        sql = """SELECT "Fertility rate, total (births per woman)" FROM w WHERE "country_name" = \'South Korea\' and "date" = 2020 """
+        table = pd.read_csv(os.path.join(self.datasrc, "Gender.csv"))
         # table.columns = table.columns.str.lower()
         # table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
         table.reset_index(inplace=True)

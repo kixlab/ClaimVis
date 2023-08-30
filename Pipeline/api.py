@@ -142,7 +142,7 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
     else:
         pipeline = Pipeline(datasrc="../Datasets")
         # claim_map, claims = pipeline.run_on_text(user_claim)
-        claim_map, claims = pipeline.run_on_user_claim(body, verbose=verbose)
+        claim_map, claims = pipeline.run_on_text(body, verbose=verbose)
         # if verbose: print(claim_map)
 
         reason = claim_map[claims[0]][0]
@@ -247,10 +247,10 @@ def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
     # paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
     paragraph = ""
-    userClaim = "The US has a bigger economy than France."
+    userClaim = "South Korea broke its own record for the world's lowest total fertility rate last year."
     claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
     l = potential_data_point_sets(claim, verbose=True, test=False)
     print(l)
 
 if __name__ == "__main__":
-    pass
+    main()

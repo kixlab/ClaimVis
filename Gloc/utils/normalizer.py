@@ -317,7 +317,7 @@ def _get_matched_cells(value_str, matcher: DataMatcher, df: pd.DataFrame, fuzz_t
         else:
             return None
 
-    if attr == 'country_name':  # cache 
+    if attr in ['country_name', 'country'] :  # cache 
         # special case only compare with 250 country names
         scores = matcher.similarity_batch(value_str, [country['embedding'] for country in country_data])
         matched_cells = [(country['name'], score) for country, score in zip(country_data, scores) if score > 0.5]
