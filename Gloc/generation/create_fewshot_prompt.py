@@ -976,6 +976,21 @@ claims_extraction_with_context = [
     }"""},
 
 ]
+
+claim_tagging = [
+    {"role": "system", "content": """Tag critical parts of the claim. Critical parts include: entity, value attribute, and datetime"""},
+
+    {"role": "user", "content": """CLAIM: 30% of the US total export comes from merchandise."""},
+    {"role": "assistant", "content": """In the {US}, {merchandise export} accounts for 30% of the {total export}."""},
+
+    {"role": "user", "content": """CLAIM: China's fertility rate declined steadily from 4.53 in 1970."""},
+    {"role": "assistant", "content": """In {China}, {fertility rate} declined steadily from 4.53 in {1970}."""},
+
+    {"role": "user", "content": """CLAIM: half of all women in low- and mid-income countries still have no bodily autonomy."""},
+    {"role": "assistant", "content": """dd"""},
+
+]
+
 import json
 # save pro to query_generation_2.json
 with open("fewshots/claim_extraction.json", "w") as f:

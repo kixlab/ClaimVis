@@ -96,7 +96,7 @@ class TableReasoner(object):
 
     def _suggest_queries_2(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
         self.datamatcher.find_top_k_datasets(claim, k=1, method="attr", verbose=False)
-        pass
+        
 
     def _suggest_queries(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
         """

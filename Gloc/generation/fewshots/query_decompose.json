@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "You are a superb logician. You are given a task to decompose the following question into a coherent sequence of sub-questions that you can query a database to obtain answers one-after-another. Please note that the original question becomes the final sub-question in the sequence."
+        "content": "You are a superb logician. You are given a query. Decompose it into a coherent sequence of sub-queries that can be verified using a database one-after-another. AVOID returning sub queries that retrieve a lot of data, THINK at the extreme."
     },
     {
         "role": "user",
@@ -29,11 +29,11 @@
     },
     {
         "role": "user",
-        "content": "On a moonless night, three fireflies danced in the evening breeze. They were joined by four less than a dozen more fireflies, before two of the fireflies flew away. How many fireflies remained?"
+        "content": "China export hits all time low in 2015?"
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"How many fireflies remained?\", we need to know: \"How many fireflies joined?\" "
+        "content": "To answer the question \"China export hits all time low in 2015?\", we need to know: \"What is China's export in 2015?\", \"What is the lowest export of China across time?\" "
     },
     {
         "role": "user",
@@ -59,7 +59,7 @@
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"Do all movies with IMDB rating higher than 70 have budget at least 50,000,000?\", we need to know: \"What is the least budget of all movies with IMDB rating higher than 70?\" "
+        "content": "To answer the question \"Do all movies with IMDB rating higher than 70 have budget at least 50,000,000?\", we need to know: \"What is the lowest budget across movies with IMDB rating higher than 70?\" "
     },
 
     {
@@ -68,7 +68,7 @@
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"No students in the final exam have higher grades than Sam?\", we need to know: \"What is the grade of Sam?\", \"What is the highest grade in the final exam?\" "
+        "content": "To answer the question \"No students in the final exam have higher grades than Sam?\", we need to know: \"What is the grade of Sam?\", \"What is the highest grade across students in the final exam?\" "
     },
 
     {
@@ -86,7 +86,7 @@
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"No people have a lower salary than 40,000$ a year?\", we need to know: \"What is the lowest salary among all people?\" "
+        "content": "To answer the question \"No people have a lower salary than 40,000$ a year?\", we need to know: \"What is the lowest salary across all people?\" "
     },
 
     {
@@ -95,6 +95,6 @@
     },
     {
         "role": "assistant",
-        "content": "To answer the question \"No countries have higher coal production than Germany plus Japan?\", we need to know: \"What is the coal production of Germany?\", \"What is the coal production of Japan?\", \"What is the total coal production of Germany plus Japan?\", \"What is the lowest coal production among all countries?\" "
+        "content": "To answer the question \"No countries have higher coal production than Germany plus Japan?\", we need to know: \"What is the coal production of Germany?\", \"What is the coal production of Japan?\", \"What is the total coal production of Germany plus Japan?\", \"What is the lowest coal production across countries?\" "
     }
 ]
