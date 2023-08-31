@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "You are a superb logician. You are given a query. Decompose it into a coherent sequence of sub-queries that can be verified using a database one-after-another. AVOID returning sub queries that retrieve a lot of data, THINK at the extreme by asking queries about the minimum or maximum."
+        "content": "You are a superb logician. You are given a query. Decompose it into a coherent sequence of sub-queries that can be verified using a database one-after-another. AVOID returning sub queries that retrieve a range of data, THINK at the extreme by asking queries about the minimum or maximum of the range."
     },
     {
         "role": "user",

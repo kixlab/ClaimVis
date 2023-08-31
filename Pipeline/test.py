@@ -14,8 +14,8 @@ class Tester():
         self.datasrc = datasrc
 
     def test_post_process_sql(self):
-        sql = """SELECT "Fertility rate, total (births per woman)" FROM w WHERE "country_name" <> \'South Korea\' and "date" = 2020 """
-        table = pd.read_csv(os.path.join(self.datasrc, "Gender.csv"))
+        sql = """SELECT SUM ( "People using at least basic drinking water services (% of population)" ) FROM w WHERE "date" = 2020 """
+        table = pd.read_csv(os.path.join(self.datasrc, "Environment.csv"))
         # table.columns = table.columns.str.lower()
         # table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
         table.reset_index(inplace=True)
@@ -52,12 +52,11 @@ class Tester():
 
     def test_parse_ans(self):
         parser = AnsParser()
-        message = """SELECT COUNT ( * ) FROM w WHERE "Fertility rate, total (births per woman)" < ( SELECT "Fertility rate, total (births per woman)" 
-FROM w WHERE "country_name" = \'Republic of Korea\' and "date" = 2020 ) and "date" = 2020"""
+        message = """SELECT "People using at least basic drinking water services", "hugo(% of population)" FROM w WHERE "date" = 2020"""
         print(parser.parse_sql_unit(message))
 
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_post_process_sql()
+    tester.test_parse_ans()
     # pass

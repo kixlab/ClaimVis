@@ -259,6 +259,7 @@ class TableReasoner(object):
             psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
             # transpose psqls, pad with "SELECT" if needed
             psqls = list(map(list, zip_longest(*psqls, fillvalue="SELECT")))
+        # print("pikachuuuuu")
         
         if fuzzy_match:
             # bottle neck due to fuzzy matching on big tables
@@ -339,6 +340,7 @@ class TableReasoner(object):
                 nsqls=sqls,
                 pred_answer_list=preds
             )
+            # print("SIpuuuuuuuuuuu")
             top_ans = process_ans(top_ans)
             unit = self.parser.parse_sql_unit(pred_sqls[0][0])
             if verbose: print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")
@@ -438,7 +440,7 @@ class TableReasoner(object):
                                     You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
                                     {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(sub_queries, answers))},
                                 ],
-                                model=Model.GPT4 # 4
+                                model=Model.GPT3 # 4
                             )[0]
 
             # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
