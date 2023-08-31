@@ -173,12 +173,14 @@ class AutomatedViz(object):
                                 type="temporal",
                                 timeUnit= self.parser.parse_unit(ref) or "year"
                             ))  
+            elif not helpers.isdate(ref)[0] and self.datamatcher.attr_score_batch(attr, ['time', 'year', 'date']) > 0.5:
+                continue
             elif helpers.isint(ref) or helpers.isfloat(ref) or isAny(attr, helpers.isint) or isAny(attr, helpers.isfloat):
                 categories.append({
                     'table_name': self.table_name,
-                    'label': ref,
+                    'label': attr,
                     'value': attr,
-                    'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,
+                    'unit': self.parser.parse_unit(attr) or ('number' if self.table[attr].dtype.name in ['int64', 'float64'] else self.table[attr].dtype.name),
                     'provenance': get_provenance(attr)
                 })
             else: # nominal
@@ -232,9 +234,12 @@ class AutomatedViz(object):
                 tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', f'{{{attr}}}')
             else:
                 tag_map['wrap'] = tag_map['wrap'].replace(f'{{{ref}}}', "{value}")
-        
+
+        field_names = list(map(lambda x: x.name, fields))
         # update categories with more potential attributes
         for attr in set(self.attributes) - set(tag_map['map'].values()):
+            if attr in field_names: # do not include the attributes that are already in the fields
+                continue
             categories.append({
                 'table_name': self.table_name,
                 'label': attr,
