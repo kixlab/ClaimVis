@@ -259,7 +259,7 @@ class TableReasoner(object):
             psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
             # transpose psqls, pad with "SELECT" if needed
             psqls = list(map(list, zip_longest(*psqls, fillvalue="SELECT")))
-        print("pikachuuuuu")
+        # print("pikachuuuuu")
         
         if fuzzy_match:
             # bottle neck due to fuzzy matching on big tables
@@ -340,7 +340,7 @@ class TableReasoner(object):
                 nsqls=sqls,
                 pred_answer_list=preds
             )
-            print("SIpuuuuuuuuuuu")
+            # print("SIpuuuuuuuuuuu")
             top_ans = process_ans(top_ans)
             unit = self.parser.parse_sql_unit(pred_sqls[0][0])
             if verbose: print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")

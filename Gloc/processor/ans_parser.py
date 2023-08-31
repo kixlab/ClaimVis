@@ -98,14 +98,12 @@ class AnsParser(object):
             match = re.search(r'(\w+)\s*\(\s*(.*)\s*\)|"(.*)"', match)
             if match.group(1):
                 agg, col_ = match.group(1), match.group(2)
-                print(agg, col_)
                 if col_ == "*":
                     col = "all"
                 else: 
                     col = col_[1:-1]
             else:
                 agg, col = "None", match.group(3)
-            print(agg, col)
             
             unit = self.parse_unit(col) or col # if no unit, return the whole column
             return f"Unit: {unit}. Aggregation: {agg}"
