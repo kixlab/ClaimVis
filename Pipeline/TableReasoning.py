@@ -144,12 +144,7 @@ class TableReasoner(object):
             return answers
         else:
             # use spacy dependency parsing
-            for idx, query in enumerate(queries):
-                if query.endswith(('.', '?')): # remove the period at the end
-                    query, end_ = query[:-1], query[-1]
-                else: 
-                    end_ = '' 
-                    
+            for idx, query in enumerate(queries):                    
                 doc, dates = self.nlp(query), []
                 # count the number of dates within the query
                 for ind, token in enumerate(doc):
@@ -157,7 +152,7 @@ class TableReasoner(object):
                         dates.append(ind)
                 
                 if len(dates) == 0: # add the most recent date
-                    query += f" in {end_default}"
+                    query = f"In {end_default}, {query}"
                 elif len(dates) == 1: # rules
                     ind = dates[0]-1
                     if doc[ind].text.lower() in ['since', 'from']:
@@ -165,7 +160,7 @@ class TableReasoner(object):
                     elif doc[ind].text.lower() in ['til', 'until']:
                         query = f"{doc[:ind]} from {start_default} {doc[ind:]}"
                 
-                queries[idx] = query + end_
+                queries[idx] = query
 
             return queries
                     

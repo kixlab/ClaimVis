@@ -216,12 +216,13 @@ class AutomatedViz(object):
         datapoints, data_fields = [], list(map(lambda x: x.name, fields))
         for category in categories:
             for _, row in filtered_table[data_fields + [category['value']]].iterrows():
+                val = row[category['value']]
                 dataPoint = DataPointValue(
                     tableName=self.table_name,
                     valueName=category['value'],
                     fields={attr: row[attr] for attr in data_fields},
                     unit=category['unit'],
-                    value=row[category['value']]
+                    value=round(val, 3) if isinstance(val, float) else val
                 )
 
                 if dates:
