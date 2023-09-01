@@ -85,9 +85,8 @@ class AnsParser(object):
         return match.group(1) if match else message
     
     def parse_unit(self, message: str):
-        match = re.search(r'\((.*?)\)', message)
-        
-        return match.group(1) if match else None
+        matches = re.findall(r'\((.*?)\)', message)
+        return matches[-1] if matches else None
     
     def parse_sql_unit(self, sql: str):
         try:

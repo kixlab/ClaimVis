@@ -430,7 +430,7 @@ class TableReasoner(object):
             
         db = NeuralDB(
             tables=[table],
-            add_row_id=True,
+            add_row_id=False,
             normalize=False,
             lower_case=False
         )

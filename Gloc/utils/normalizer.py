@@ -96,8 +96,17 @@ def process_raw_table(
             "table": pd.DataFrame
         }
     """
+    if isinstance(table, pd.DataFrame):
+        title = table.name if hasattr(table, 'name') else 'table'
+    else:
+        title = table['title'] if 'title' in table else 'table'
+    if isinstance(table, pd.DataFrame) and not add_row_id:
+        return {
+            "title": title,
+            "table": table
+        }
+    
     header, rows = get_headers_and_rows(table)
-
 	# prepare dataframe
     if add_row_id and 'row_id' not in header:
         header = ["row_id"] + header
@@ -109,11 +118,6 @@ def process_raw_table(
         if lower_case:
             df.columns = df.columns.str.lower()
             # df = df.applymap(lambda s:s.lower() if type(s) == str else s)            
-    
-    if isinstance(table, pd.DataFrame):
-        title = table.name if hasattr(table, 'name') else 'table'
-    else:
-        title = table['title'] if 'title' in table else 'table'
 
     df.name = title
     return {

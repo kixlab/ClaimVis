@@ -52,8 +52,10 @@ class Tester():
 
     def test_parse_ans(self):
         parser = AnsParser()
-        message = """SELECT "People using at least basic drinking water services", "hugo(% of population)" FROM w WHERE "date" = 2020"""
-        print(parser.parse_sql_unit(message))
+        # message = """SELECT "country" , "Annual total production-based emissions of carbon dioxide (CO₂), including land-use change (million tonnes)" FROM w WHERE "country" IS NOT null and "Annual total production-based emissions of carbon dioxide (CO₂), including land-use change (million tonnes)" IS NOT null and "Annual total production-based emissions of carbon dioxide (CO₂), including land-use change (million tonnes)" <> \'nan\'"""
+        message = """country" , "Annual total production-based emissions of carbon dioxide (CO₂), including land-use change (million tonnes)"""
+        # print(parser.parse_sql_unit(message))
+        print(parser.parse_unit(message))
 
     def test_tag_date_time(self):
         import spacy
@@ -89,5 +91,5 @@ class Tester():
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_tag_date_time()
+    tester.test_parse_ans()
     # pass

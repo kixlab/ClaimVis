@@ -106,7 +106,7 @@ class DataMatcher(object):
                         )[0]
             answer = json.loads(answer)
             answer["Keywords"].append(claim) # add claim into keywords also
-            # len_keywords = len(answer["Keywords"])
+
             WEIGHT = 1/3
             seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*(1-WEIGHT) for score in answer["Scores"]], WEIGHT]
             score_batches = [cosine_similarity(seed_embeds, self.attrs_embeddings[i]) \

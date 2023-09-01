@@ -188,7 +188,13 @@ class AutomatedViz(object):
             
         
         if verbose: print(f"fields: {fields}, map: {value_map.keys()}")
-        assert len(fields) == len(value_map.keys()), "The number of fields should be the same as the number of values in the value map."
+        try:
+            assert len(fields) == len(value_map.keys()), "The number of fields should be the same as the number of values in the value map."
+        except AssertionError as e:
+            # there exist some attributes that are not in the value map --> retrieve the whole range
+            for attr in set(map(lambda x: x.name, fields)) - set(value_map.keys()):
+                value_map[attr] = set(self.table[attr].to_list())
+
         filtered_table = self.table
         for field in fields:
             if field.type == "nominal":
