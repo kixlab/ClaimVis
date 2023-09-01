@@ -9,6 +9,7 @@ from AutomatedViz import AutomatedViz
 import log_crud, models, ORMModels
 from database import SessionLocal, engine
 from sqlalchemy.orm import Session
+from TableReasoning import TableReasoner
 
 def get_db():
     db = SessionLocal()
@@ -243,11 +244,17 @@ def get_dataset_explanation(dataset: str, column_name: str):
 
     return df.to_dict(orient='records')
 
+@app.get('/reasoning_evaluation')
+def get_reasoning_evaluation(reasoning: str):
+    # activate evaluation only when users click on the reasoning dropdown or call it right after the pipeline returned the data points
+    reasoner = TableReasoner()
+    return reasoner.evaluate_reasoning(reasoning)
+
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
     # paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
     paragraph = ""
-    userClaim = "20% people don’t have access to clean drinking water in the world."
+    userClaim = "The current fertility rate of Korea is near one third of the replacement rate."
     # A significant amount of New Zealand's GDP comes from tourism
     claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
     l = potential_data_point_sets(claim, verbose=True, test=False)

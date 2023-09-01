@@ -104,11 +104,11 @@ class DataMatcher(object):
                             max_decode_steps=300,
                             samples=1
                         )[0]
-
             answer = json.loads(answer)
             answer["Keywords"].append(claim) # add claim into keywords also
-            len_keywords = len(answer["Keywords"])
-            seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*len_keywords/(len_keywords+1) for score in answer["Scores"]], 1/(len_keywords+1)]
+            # len_keywords = len(answer["Keywords"])
+            WEIGHT = 1/3
+            seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*(1-WEIGHT) for score in answer["Scores"]], WEIGHT]
             score_batches = [cosine_similarity(seed_embeds, self.attrs_embeddings[i]) \
                                                                 for i, _ in enumerate(self.datasets)]
             similarities = [np.average(np.max(batch, axis=1), weights=weights) \
@@ -181,7 +181,7 @@ def main():
     # claim = "The energy consumption level of the US was super bad last year."
     # matcher.find_top_k_datasets(claim, k=2)
     phrase1 = "20% of US young are are literate."
-    phrase2 = " 2 billion people don't have access to clean drinking water."
+    phrase2 = "2 billion people don't have fresh water to drink everyday."
     # print(matcher.similarity_score("US' economy is larger than China's", "population"))
     matcher.find_top_k_datasets(phrase2, k=10, method="gpt")
     # x = matcher.similarity_batch("People using at least basic sanitation services, urban (% of urban population)", ["clean drinking water"])

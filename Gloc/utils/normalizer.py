@@ -531,7 +531,8 @@ def post_process_sql(
 
             # extract the corresponding attribute
             if sql_tokens[value_idx-2][-1] == '"' and \
-                sql_template_tokens[value_idx-1] == '[WHERE_OP]': # [COL] == [VALUE]
+                sql_template_tokens[value_idx-1] == '[WHERE_OP]' and\
+                sql_tokens[value_idx] != 'extract': # [COL] == [VALUE]
 
                 attr = sql_tokens[value_idx-2][1:-1]
             elif sql_tokens[value_idx-4][-1] == '"' and \
@@ -591,6 +592,6 @@ def post_process_sql(
         try:
             return fuzzy_match_process(sql_str, df, verbose)
         except Exception as e:
-            print(e)
+            print(e, ". error sql: ", sql_str)
 
     return sql_str, dict()

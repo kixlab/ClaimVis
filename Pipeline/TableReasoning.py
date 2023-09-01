@@ -20,6 +20,7 @@ from rapidfuzz import fuzz
 from nl4dv import NL4DV
 from nl4dv.utils import helpers
 from DataMatching import DataMatcher
+import spacy
 import math
 
 class TableReasoner(object):
@@ -33,12 +34,13 @@ class TableReasoner(object):
         ):
         self.prompter = Prompter()
         self.parser = AnsParser()
-        self.datamatcher = datamatcher or DataMatcher()
+        self.datamatcher = datamatcher
 
         self.temperature = temperature # to change
         self.max_decode_steps = max_decode_steps # fixed
         self.samples = samples # to change
         self.model = model # fixed
+        self.nlp = spacy.load("en_core_web_sm")
         
     def _call_api_1(
         self: object, 
@@ -97,43 +99,18 @@ class TableReasoner(object):
     def _suggest_queries_2(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
         self.datamatcher.find_top_k_datasets(claim, k=1, method="attr", verbose=False)
         
-
-    def _suggest_queries(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
+    def _infer_datetime(
+            self, 
+            queries: list, 
+            start_default: int = 1960,
+            end_default: int = 2021,
+            use_llm: bool=False):
         """
-            Suggest queries given a claim (and a table)
-            Input: @claim, @table
-            Output: 
-                @query: list of suggested queries
-                @vis: a list of vis tasks
-                @explain: a list of exlanation for why the queries are suggested
-                @attributes: list of attribute used in the queries
+            Infer datetime from queries
+            Input: queries
+            Output: queries with datetime
         """
-        # suggest different queries in form of "[{query: ...}, {query: ...}}]"
-        template = TemplateKey.QUERY_GENERATION_2 if table is None \
-                                                else TemplateKey.QUERY_GENERATION_3
-        _, suggestions = self._call_api_1(
-            question=claim,
-            template_key=template,
-            table=table,
-            model=Model.GPT3 # 4
-        )
-        queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
-
-        attributes, col_set = set(attributes + more_attrs), set(table.columns)
-        # add datefield if exist and infer datetime from the queries if not
-        time_batch = self.datamatcher.encode(["time", "date", "year"])
-        col_embeds = self.datamatcher.attrs_embeddings[self.datamatcher.datasets.index(table.name)]
-        datefields, start_index = [], 1 if table.columns[0] == "row_id" else 0 # row_id added to table so index starts at 1
-        for col, embed in zip(table.columns[start_index:], col_embeds): 
-            score = self.datamatcher.attr_score_batch(embed, time_batch)
-            if score > .5: datefields.append((col, score))
-        best_datefield = max(datefields, key=lambda x: x[1])[0] if datefields else None
-        attributes.add(best_datefield)
-        attributes = list(attributes)
-
-        # infer datetime from the queries if not exist
-        if best_datefield:
-            oldest_date, newest_date = table[best_datefield].min(), 2020 # 2020 has the most data
+        if use_llm:
             prompt = [
                 {"role": "system", "content": f"""Please add date or time to the query if needed. 
                  
@@ -158,15 +135,80 @@ class TableReasoner(object):
                     A2: <answer 2>
                     ..."""},
                 {"role": "user", "content": f"""Please use the following default dates: 
-                 OLDEST: {oldest_date}
-                 NEWEST: {newest_date}""" + "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries + vis_tasks)])}
+                 OLDEST: {start_default}
+                 NEWEST: {end_default}""" + "\n".join([f"Q{i+1}: {query}" for i, query in enumerate(queries)])}
             ]
             answers = self._call_api_2(prompt, model=Model.GPT4)
             # parse the answers
             answers = self.parser.parse_sql_2(answers[0])
+            return answers
+        else:
+            # use spacy dependency parsing
+            for idx, query in enumerate(queries):
+                if query.endswith(('.', '?')): # remove the period at the end
+                    query, end_ = query[:-1], query[-1]
+                else: 
+                    end_ = '' 
+                    
+                doc, dates = self.nlp(query), []
+                # count the number of dates within the query
+                for ind, token in enumerate(doc):
+                    if token.ent_type_ == 'DATE' and token.head.pos_ in ['ADP', 'SCONJ']:
+                        dates.append(ind)
+                
+                if len(dates) == 0: # add the most recent date
+                    query += f" in {end_default}"
+                elif len(dates) == 1: # rules
+                    ind = dates[0]-1
+                    if doc[ind].text.lower() in ['since', 'from']:
+                        query = f"{doc[:ind]} from {doc[ind+1]} to {end_default} {doc[ind+2:]}"
+                    elif doc[ind].text.lower() in ['til', 'until']:
+                        query = f"{doc[:ind]} from {start_default} {doc[ind:]}"
+                
+                queries[idx] = query + end_
+
+            return queries
+                    
+
+    def _suggest_queries(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
+        """
+            Suggest queries given a claim (and a table)
+            Input: @claim, @table
+            Output: 
+                @query: list of suggested queries
+                @vis: a list of vis tasks
+                @explain: a list of exlanation for why the queries are suggested
+                @attributes: list of attribute used in the queries
+        """
+        # suggest different queries in form of "[{query: ...}, {query: ...}}]"
+        template = TemplateKey.QUERY_GENERATION_2 if table is None \
+                                                else TemplateKey.QUERY_GENERATION_3
+        _, suggestions = self._call_api_1(
+            question=claim,
+            template_key=template,
+            table=table,
+            model=Model.GPT3 # 4
+        )
+        queries, vis_tasks, reasons, attributes = self.parser.parse_gen_query(suggestions[0])
+
+        attributes, col_set = set(attributes + more_attrs), set(table.columns)
+        # add datefield if exist and infer datetime from the queries if needed
+        time_batch = self.datamatcher.encode(["time", "date", "year"])
+        col_embeds = self.datamatcher.attrs_embeddings[self.datamatcher.datasets.index(table.name)]
+        datefields, start_index = [], 1 if table.columns[0] == "row_id" else 0 # row_id added to table so index starts at 1
+        for col, embed in zip(table.columns[start_index:], col_embeds): 
+            score = self.datamatcher.attr_score_batch(embed, time_batch)
+            if score > .5: datefields.append((col, score))
+        best_datefield = max(datefields, key=lambda x: x[1])[0] if datefields else None   
+
+        if best_datefield: # infer datetime
+            oldest_date, newest_date = table[best_datefield].min(), 2020 # 2020 has the most data
+            answers = self._infer_datetime(queries + vis_tasks, oldest_date, newest_date, use_llm=False)
             # chop to queries and vis tasks
             queries, vis_tasks = answers[:len(queries)], answers[len(queries):]
 
+        attributes.add(best_datefield)
+        attributes = list(attributes)
         # further process the attributes
         for idx, attr in reversed(list(enumerate(attributes))):
             # fuzzy match when GPT hallucinating attributes
@@ -259,7 +301,6 @@ class TableReasoner(object):
             psqls = [self.parser.parse_sql_2(sql) for sql in sqls]
             # transpose psqls, pad with "SELECT" if needed
             psqls = list(map(list, zip_longest(*psqls, fillvalue="SELECT")))
-        # print("pikachuuuuu")
         
         if fuzzy_match:
             # bottle neck due to fuzzy matching on big tables
@@ -340,7 +381,6 @@ class TableReasoner(object):
                 nsqls=sqls,
                 pred_answer_list=preds
             )
-            # print("SIpuuuuuuuuuuu")
             top_ans = process_ans(top_ans)
             unit = self.parser.parse_sql_unit(pred_sqls[0][0])
             if verbose: print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")
@@ -444,7 +484,7 @@ class TableReasoner(object):
                             )[0]
 
             # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
-            justification = self._evaluate_soundness(justification)
+            # justification = self._evaluate_soundness(justification)
             reason_map.append({
                 "query": query,
                 "visualization": vis_tasks[idx],
