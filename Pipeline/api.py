@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from main import Pipeline
 from AutomatedViz import AutomatedViz
 from fastapi.responses import PlainTextResponse
+import openai
 
 
 import log_crud, models, ORMModels
@@ -164,18 +165,35 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test=False
         new_claim, table, attributes, value_map, reasoning, viz_task = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
         # if verbose: print(table, attributes)
 
-    # given a table and its attributes, return the data points
-    AutoViz = AutomatedViz(
-                table=table, 
-                attributes=attributes, 
-                matcher=pipeline.data_matcher if not test else None
+    try:
+        # given a table and its attributes, return the data points
+        AutoViz = AutomatedViz(
+                    table=table, 
+                    attributes=attributes, 
+                    matcher=pipeline.data_matcher if not test else None
+                )
+        return AutoViz.retrieve_data_points(
+                            text=viz_task, 
+                            value_map=value_map, 
+                            reasoning=reasoning, 
+                            verbose=verbose
+                        )
+    except openai.error:
+        msg = "OpenAI Service Unavailable"
+    except Exception as e:
+        msg = f"Error: {e}"
+    return DataPointSet(
+                statement=user_claim,
+                dataPoints=[],
+                fields=[],
+                ranges=Ranges(
+                    fields={},
+                    values=[]
+                ),
+                tableName="",
+                reasoning=msg
             )
-    return AutoViz.retrieve_data_points(
-                        text=viz_task, 
-                        value_map=value_map, 
-                        reasoning=reasoning, 
-                        verbose=verbose
-                    )
+
 
 @app.post("/get_viz_spec")
 def get_viz_spec(body: GetVizSpecBody): # needs update
