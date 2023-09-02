@@ -5,6 +5,8 @@ import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 from main import Pipeline
 from AutomatedViz import AutomatedViz
+from fastapi.responses import PlainTextResponse
+
 
 import log_crud, models, ORMModels
 from database import SessionLocal, engine
@@ -129,7 +131,7 @@ app.add_middleware(
 """
 
 @app.post("/potential_data_point_sets")
-def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=False) -> list[DataPointSet]:
+def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test=False) -> list[DataPointSet]:
     user_claim = body.userClaim
 
     if test: # for testing purposes
@@ -239,16 +241,27 @@ def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), use
 @app.get('/dataset_explanation') 
 def get_dataset_explanation(dataset: str, column_name: str):
     df = pd.read_csv(f"../Datasets/info/{dataset}")
-    df = df[df['title'] == column_name]
-    df.fillna(0, inplace=True)
-
-    return df.to_dict(orient='records')
+    if 'value' in df.columns:
+        df = df[df['value'] == column_name]
+        return df['Longdefinition'].iloc[0]
+    elif 'title' in df.columns:
+        df = df[df['title'] == column_name]
+        return df['description'].iloc[0]
+    else:
+        return ''
+        
 
 @app.get('/reasoning_evaluation')
 def get_reasoning_evaluation(reasoning: str):
     # activate evaluation only when users click on the reasoning dropdown or call it right after the pipeline returned the data points
     reasoner = TableReasoner()
     return reasoner.evaluate_reasoning(reasoning)
+
+
+@app.get('/robots.txt', response_class=PlainTextResponse)
+def robots():
+    data = """User-agent: *\nDisallow: /"""
+    return data
 
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
