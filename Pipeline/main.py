@@ -42,8 +42,19 @@ class Pipeline(object):
         with open("viz_trials/index.txt", "w") as f:
             f.write(str(self.trials))
 
-    def detect_claim(self, claim:str, verbose: bool = True):
-        return self.claim_detector.detect(claim, verbose=verbose)
+    def detect_claim(
+            self, claim:str, 
+            llm_classify:bool = False, 
+            verbose: bool = True, 
+            boundary_extract:bool=False,
+            score_threshold: float = 0.5
+        ):
+        return self.claim_detector.detect(
+                    claim, verbose=verbose, 
+                    llm_classify=llm_classify,
+                    boundary_extract=boundary_extract,
+                    score_threshold=score_threshold
+                )
     
     def find_top_k_datasets(
             self, 
@@ -76,8 +87,7 @@ class Pipeline(object):
         return json.loads(match.group(1)) if match else []
     
     def reason(
-            self, 
-            claim: str,
+            self, claim: str,
             dataset: str, 
             relevant_attrs:list=[], 
             fuzzy_match: str=True, 
@@ -95,7 +105,11 @@ class Pipeline(object):
         reason_map["sub_table"]["name"] = dataset
         return reason_map
     
-    def run_on_text(self, text: str or UserClaimBody, THRE_SHOLD: float = .5, verbose: bool = True):
+    def run_on_text(
+            self, text: str or UserClaimBody, 
+            THRE_SHOLD: float = .5, 
+            verbose: bool = True
+        ):
         """
         This function runs the pipeline on the given text (multiple sentences) or UserClaimBody (paragraph and sentence).
 
@@ -110,7 +124,7 @@ class Pipeline(object):
 
         claim_map, claims = defaultdict(list), []
         for sentence in self.extract_claims(text):
-            claim, score = self.detect_claim(sentence, verbose=verbose)
+            claim, score = self.detect_claim(sentence, verbose=verbose, llm_classify=True, score_threshold=THRE_SHOLD)
             if score > THRE_SHOLD:
                 if verbose: print(f"claim: {claim}")
                 # find top k datasets

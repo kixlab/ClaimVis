@@ -145,6 +145,18 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=False, test=Fals
         # claim_map, claims = pipeline.run_on_text(user_claim)
         claim_map, claims = pipeline.run_on_text(body, verbose=verbose)
         # if verbose: print(claim_map)
+        if not claim_map[claims[0]]:
+            return DataPointSet(
+                statement=user_claim,
+                dataPoints=[],
+                fields=[],
+                ranges=Ranges(
+                    fields={},
+                    values=[]
+                ),
+                tableName="",
+                reasoning=claims[0]
+            )
 
         reason = claim_map[claims[0]][0]
         new_claim, table, attributes, value_map, reasoning, viz_task = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
@@ -254,7 +266,7 @@ def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
     # paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
     paragraph = ""
-    userClaim = "Which country is the largest carbon emitter in 2020?"
+    userClaim = "The President addressed great recession in his short public speech at Hawaii yesterday."
     # A significant amount of New Zealand's GDP comes from tourism
     claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
     l = potential_data_point_sets(claim, verbose=True, test=False)
