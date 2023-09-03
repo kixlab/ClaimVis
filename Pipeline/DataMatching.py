@@ -14,7 +14,7 @@ import json
 import os
 
 class DataMatcher(object):
-    def __init__(self, datasrc: str=None, summarize: bool=False):
+    def __init__(self, datasrc: str=None, summarize: bool=True):
         self.summarizer = Summarizer(datasrc=datasrc)
         self.embedder = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') # prepare sentence embedder
         
