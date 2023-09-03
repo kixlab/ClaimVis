@@ -180,10 +180,22 @@ def main():
     matcher = DataMatcher(datasrc="../Datasets")
     # claim = "The energy consumption level of the US was super bad last year."
     # matcher.find_top_k_datasets(claim, k=2)
-    phrase1 = "20% of US young are are literate."
+    phrase1 = "Population"
     phrase2 = "2 billion people don't have fresh water to drink everyday."
     # print(matcher.similarity_score("US' economy is larger than China's", "population"))
-    matcher.find_top_k_datasets(phrase2, k=10, method="gpt")
+    with open("../Datasets/description/owid-energ_column_embeddings.json") as f:
+        embeds = json.load(f)
+        #
+        # Delete the 3rd element from the list
+        del embeds[3]
+        
+        # Write the modified list back to the file
+        with open("../Datasets/description/owid-energ_column_embeddings.json", 'w') as f:
+            json.dump(embeds, f)
+        
+    print(len(embeds))
+    print(matcher.similarity_score(phrase1, embeds[3]))
+    # matcher.find_top_k_datasets(phrase2, k=10, method="gpt")
     # x = matcher.similarity_batch("People using at least basic sanitation services, urban (% of urban population)", ["clean drinking water"])
     # print(x)
 
