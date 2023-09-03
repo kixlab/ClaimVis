@@ -186,7 +186,7 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test=False
         except HTTPException as e:
             raise e
         except Exception as e:
-            msg = f"Error: {e}"
+            msg = f""
             raise HTTPException(status_code=500, detail=msg)
 
 
