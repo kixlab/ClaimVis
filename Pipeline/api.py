@@ -190,7 +190,7 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test=False
             raise HTTPException(status_code=500, detail=msg)
 
 
-    # try:
+    try:
         # given a table and its attributes, return the data points
         AutoViz = AutomatedViz(
                     table=table, 
@@ -203,37 +203,37 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test=False
                             reasoning=reasoning, 
                             verbose=verbose
                         )
-    # except openai.error.Timeout as e:
-    #     #Handle timeout error, e.g. retry or log
-    #     msg = (f"OpenAI API request timed out: {e}")
-    #     raise HTTPException(status_code=408, detail=msg)
-    # except openai.error.APIError as e:
-    #     #Handle API error, e.g. retry or log
-    #     msg = (f"OpenAI API returned an API Error: {e}")
-    #     raise HTTPException(status_code=500, detail=msg)
-    # except openai.error.APIConnectionError as e:
-    #     #Handle connection error, e.g. check network or log
-    #     msg = (f"OpenAI API request failed to connect: {e}")
-    #     raise HTTPException(status_code=500, detail=msg)
-    # except openai.error.InvalidRequestError as e:
-    #     #Handle invalid request error, e.g. validate parameters or log
-    #     msg = (f"OpenAI API request was invalid: {e}")
-    #     raise HTTPException(status_code=500, detail=msg)
-    # except openai.error.AuthenticationError as e:
-    #     #Handle authentication error, e.g. check credentials or log
-    #     msg = (f"OpenAI API request was not authorized: {e}")
-    #     raise HTTPException(status_code=500, detail=msg)
-    # except openai.error.PermissionError as e:
-    #     #Handle permission error, e.g. check scope or log
-    #     msg = (f"OpenAI API request was not permitted: {e}")
-    #     raise HTTPException(status_code=500, detail=msg)
-    # except openai.error.RateLimitError as e:
-    #     #Handle rate limit error, e.g. wait or log
-    #     msg = (f"OpenAI API request exceeded rate limit: {e}")
-    #     raise HTTPException(status_code=500, detail=msg)
-    # except Exception as e:
-    #     msg = f"Error: {e}"
-    #     raise HTTPException(status_code=500, detail=msg)
+    except openai.error.Timeout as e:
+        #Handle timeout error, e.g. retry or log
+        msg = (f"OpenAI API request timed out: {e}")
+        raise HTTPException(status_code=408, detail=msg)
+    except openai.error.APIError as e:
+        #Handle API error, e.g. retry or log
+        msg = (f"OpenAI API returned an API Error: {e}")
+        raise HTTPException(status_code=500, detail=msg)
+    except openai.error.APIConnectionError as e:
+        #Handle connection error, e.g. check network or log
+        msg = (f"OpenAI API request failed to connect: {e}")
+        raise HTTPException(status_code=500, detail=msg)
+    except openai.error.InvalidRequestError as e:
+        #Handle invalid request error, e.g. validate parameters or log
+        msg = (f"OpenAI API request was invalid: {e}")
+        raise HTTPException(status_code=500, detail=msg)
+    except openai.error.AuthenticationError as e:
+        #Handle authentication error, e.g. check credentials or log
+        msg = (f"OpenAI API request was not authorized: {e}")
+        raise HTTPException(status_code=500, detail=msg)
+    except openai.error.PermissionError as e:
+        #Handle permission error, e.g. check scope or log
+        msg = (f"OpenAI API request was not permitted: {e}")
+        raise HTTPException(status_code=500, detail=msg)
+    except openai.error.RateLimitError as e:
+        #Handle rate limit error, e.g. wait or log
+        msg = (f"OpenAI API request exceeded rate limit: {e}")
+        raise HTTPException(status_code=500, detail=msg)
+    except Exception as e:
+        msg = f"Error: {e}"
+        raise HTTPException(status_code=500, detail=msg)
 
 
 @app.post("/get_viz_spec")
@@ -337,8 +337,8 @@ def robots():
 def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
     # paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
-    paragraph = "Progress had in fact begun to stall by as early as 2012. Between 2008 and 2012 the share of children in work fell by three percentage points. Between 2012 and 2016 it dropped by only one. But these global figures obscure regional differences. Although most parts of the world continue to see a decline, the number of children working in sub-Saharan Africa began to increase in 2012. That rise is mostly explained by the number of people in poverty, the main determinant of child labour. Although the percentage of sub-Saharan Africans living below the World Bank’s global poverty threshold of $1.90 per day dropped from 56% in 1990 to 40% in 2018, the continent's population increased, swelling the absolute number of Africans below that line and pushing more children to take up tools. Fully 24% of children in sub-Saharan Africa work—four times the proportion in Latin America and the Caribbean. The continent now has more child labourers than the rest of the world combined."
-    userClaim = "Between 2015 and 2016 it dropped by only one in the world."
+    paragraph = ""
+    userClaim = "By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
     # A significant amount of New Zealand's GDP comes from tourism
     claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
     l = potential_data_point_sets(claim, verbose=True, test=False)
