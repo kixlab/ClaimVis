@@ -216,9 +216,12 @@ class AutomatedViz(object):
                 filtered_table = filtered_table[filtered_table[field.name].isin(value_map[field.name])]
             elif field.type == "temporal":
                 # filter noisy value for temporal data
+                print(f"temporal value map: {value_map[field.name]}")
                 for val in value_map[field.name].copy():
-                    if not val.isdigit() or int(val) < 1500 or int(val) > 2100:
+                    if isinstance(val, str) and not val.isdigit()\
+                          or int(val) < 1500 or int(val) > 2100:
                         value_map[field.name].remove(val)
+                print(f"temporal value map: {value_map[field.name]}")
 
                 if len(value_map[field.name]) == 1:
                     value = value_map[field.name].pop()
