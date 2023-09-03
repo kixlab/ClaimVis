@@ -179,14 +179,14 @@ class DataMatcher(object):
 def main():
     matcher = DataMatcher(datasrc="../Datasets")
     # Recalculate embeddings of owid-co2.csv columns
-    dataset = "owid-co2.csv"
-    table = pd.read_csv(f"{matcher.datasrc}/{dataset}")
-    column_embeddings = [matcher.encode(col_name).tolist() for col_name in table.columns]
-    
-    # Write them back to owid-co_column_embeddings.json
-    embed_name = f"{dataset[:-5]}_column_embeddings.json"
-    with open(f"{matcher.datasrc}/description/{embed_name}", 'w') as f:
-        json.dump(column_embeddings, f)
+    for dataset in ["owid-co2.csv", "owid-energy.csv"]:
+        table = pd.read_csv(f"{matcher.datasrc}/{dataset}")
+        column_embeddings = [matcher.encode(col_name).tolist() for col_name in table.columns]
+        
+        # Write them back to owid-co_column_embeddings.json
+        embed_name = f"{dataset[:-5]}_column_embeddings.json"
+        with open(f"{matcher.datasrc}/description/{embed_name}", 'w') as f:
+            json.dump(column_embeddings, f)
 
 
 if __name__ == "__main__":
