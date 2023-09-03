@@ -156,6 +156,19 @@ class AutomatedViz(object):
             else:
                 provenance = ""
             return provenance
+        
+        def get_unit(attr: str):
+            if 'unit' in info_table.columns:
+                provenance = info_table[info_table['value'] == attr]['unit'].iloc[0] 
+                provenance = provenance if str(provenance) != 'nan' else None
+            elif 'units' in info_table.columns:
+                provenance = info_table[info_table['title'] == attr]['units'].iloc[0]
+                provenance = provenance if str(provenance) != 'nan' else None
+
+            else:
+                provenance = None
+            return provenance
+
 
         def isAny(attr, func: callable):
             return any(func(val) for val in self.table[attr].to_list())
@@ -181,7 +194,7 @@ class AutomatedViz(object):
                     'table_name': self.table_name,
                     'label': attr,
                     'value': attr,
-                    'unit': self.parser.parse_unit(attr) or ('number' if self.table[attr].dtype.name in ['int64', 'float64'] else self.table[attr].dtype.name),
+                    'unit': get_unit(attr) or self.parser.parse_unit(attr) or ('number' if self.table[attr].dtype.name in ['int64', 'float64'] else self.table[attr].dtype.name),
                     'provenance': get_provenance(attr)
                 })
             else: # nominal
