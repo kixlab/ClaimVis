@@ -195,6 +195,7 @@ class TableReasoner(object):
             score = self.datamatcher.attr_score_batch(embed, time_batch)
             if score > .5: datefields.append((col, score))
         best_datefield = max(datefields, key=lambda x: x[1])[0] if datefields else None   
+        # print("best datefield: ", best_datefield)
 
         if best_datefield: # infer datetime
             oldest_date, newest_date = table[best_datefield].min(), 2020 # 2020 has the most data
@@ -479,7 +480,7 @@ class TableReasoner(object):
                             )[0]
 
             # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
-            # justification = self._evaluate_soundness(justification)
+            justification = self._evaluate_soundness(justification)
             reason_map.append({
                 "query": query,
                 "visualization": vis_tasks[idx],

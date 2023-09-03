@@ -116,7 +116,8 @@ class AutomatedViz(object):
                 }
             }
             DO NOT CHANGE or ADD any word within the wrap text except for curly braces.
-            DO NOT CREATE new attributes that are not in the list of attributes."""},
+            DO NOT CREATE new attributes that are not in the list of attributes.
+            NEVER INCLUDE country name inside a long wrap with another attribute. E.g: {population of China} is wrong, {population} of {China} is correct."""},
             {"role": "user", "content": f"claim: {text}\nattributes: {self.attributes}"},
         ]
         response = call_model(

@@ -338,7 +338,7 @@ def main():
     # uvicorn.run(app, host="0.0.0.0", port=9889)
     # paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
     paragraph = ""
-    userClaim = "2 billion people don’t have access to clean drinking water in the world."
+    userClaim = "China’s population is 4 times that of the USA."
     # A significant amount of New Zealand's GDP comes from tourism
     claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
     l = potential_data_point_sets(claim, verbose=True, test=False)

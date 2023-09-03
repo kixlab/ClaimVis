@@ -7,6 +7,7 @@ import pandas as pd
 from Pipeline.DataMatching import DataMatcher
 from Gloc.nsql.database import NeuralDB
 from Gloc.processor.ans_parser import AnsParser
+from AutomatedViz import AutomatedViz
 import os
 
 class Tester():
@@ -88,8 +89,15 @@ class Tester():
                 query = f"{doc[:ind]} from {start_default} {doc[ind:]}"
         
         print(query)
+    
+    def test_tag_attr_gpt(self):
+        datasrc = "../Datasets/owid-co2.csv"
+        autoviz = AutomatedViz(attributes=['year', 'Population of each country or region', 'country'], datasrc=datasrc)
+        tag_map = autoviz.tag_attribute_gpt("Show the population of China and the USA in 2020.")
+        print(tag_map)
+
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_parse_ans()
+    tester.test_tag_attr_gpt()
     # pass
