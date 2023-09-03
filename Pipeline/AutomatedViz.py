@@ -215,6 +215,11 @@ class AutomatedViz(object):
             if field.type == "nominal":
                 filtered_table = filtered_table[filtered_table[field.name].isin(value_map[field.name])]
             elif field.type == "temporal":
+                # filter noisy value for temporal data
+                for val in value_map[field.name].copy():
+                    if not val.isdigit() or int(val) < 1500 or int(val) > 2100:
+                        value_map[field.name].remove(val)
+
                 if len(value_map[field.name]) == 1:
                     value = value_map[field.name].pop()
                     # Convert the value to the same type as the values in the table

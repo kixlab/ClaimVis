@@ -15,8 +15,9 @@ class Tester():
         self.datasrc = datasrc
 
     def test_post_process_sql(self):
-        sql = """SELECT case when ( "Fertility rate, total (births per woman)" < ( "Wanted fertility rate (births per woman)" ) / 3 ) then \'Yes\' else \'No\' end AS is_less FROM w WHERE "country_name" = \'Republic of Korea\' and "date" = extract ( year FROM current_date ) """
-        table = pd.read_csv(os.path.join(self.datasrc, "Gender.csv"))
+        sql = """No, we cannot determine if the share of children in work dropped by one percentage point between 2012 and 2016 as the 
+data provided does not include the necessary information """
+        table = pd.read_csv(os.path.join(self.datasrc, "Social Development.csv"))
         # table.columns = table.columns.str.lower()
         # table = table.applymap(lambda x: x.lower() if isinstance(x, str) else x)
         table.reset_index(inplace=True)
@@ -48,7 +49,7 @@ class Tester():
             normalize=False,
             lower_case=True
         )
-        sql = """SELECT "date" , "Merchandise exports (current US$)" FROM w WHERE ( "country_name" = \'China\' or "country_name" = \'United States\' ) and "date" BETWEEN 2011 and 2022 GROUP by "date" having MAX ( "Merchandise exports (current US$)" ) = "Merchandise exports (current US$)" """
+        sql = """SELECT case when ( "Children in employment, total (% of children ages 7-14)" - lag ( "Children in employment, total (% of children ages 7-14)" ) over ( ORDER by "date" ) ) = -1 then \'Yes\' else \'No\' end FROM w WHERE "date" IN ( 2012 , 2016 ) """
         print(db.execute_query(sql))
 
     def test_parse_ans(self):
@@ -99,5 +100,5 @@ class Tester():
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_tag_attr_gpt()
+    tester.test_post_process_sql()
     # pass

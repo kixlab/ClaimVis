@@ -563,6 +563,10 @@ def post_process_sql(
             matched_cells = _get_matched_cells(value_str=value_str, matcher=matcher, df=df, attr=attr)
             if verbose: print(f"matched cells: {matched_cells}")
 
+            def fill_value_map(attr: str, value_str: str):
+                if is_string or any(time in attr.lower() for time in ["date", "year"]):
+                    value_map[attr].add(value_str)
+
             new_value_str = value_str
             if matched_cells:
                 # new_value_str = matched_cells[0][0]
@@ -570,14 +574,13 @@ def post_process_sql(
                     if _check_valid_fuzzy_match(value_str, matched_cell):
                         new_value_str = matched_cell
                         # fill the value map if is_string or is_date (simple ver)
-                        if is_string or any(time in attr.lower() for time in ["date", "year"]):
-                            value_map[attr].add(new_value_str)
+                        fill_value_map(attr, new_value_str)
 
                         if verbose and new_value_str != value_str:
                             print("\tfuzzy match replacing!", value_str, '->', matched_cell, f'fuzz_score:{fuzz_score}')
                         break
-            elif is_string or any(time in attr.lower() for time in ["date", "year"]):
-                value_map[attr].add(value_str)
+            else:
+                fill_value_map(attr, value_str)
 
             if is_string:
                 new_value_str = f"{STRQs[0]}{new_value_str}{STRQs[0]}"
@@ -587,6 +590,7 @@ def post_process_sql(
 
         # Fix '<>' when composing the new sql
         new_sql_str = new_sql_str.replace('< >', '<>')
+
         return new_sql_str, value_map
 
     sql_str = basic_fix(sql_str, list(df.columns), table_title)
