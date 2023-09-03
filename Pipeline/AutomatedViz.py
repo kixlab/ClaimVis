@@ -162,8 +162,9 @@ class AutomatedViz(object):
 
         # infer nominal, temporal, and quantitative attributes
         dates, fields, categories = None, set(), []
+        time_batch = self.datamatcher.encode(['time', 'year', 'date'])
         for ref, attr in tag_map['map'].items():
-            if helpers.isdate(ref)[0] and self.datamatcher.attr_score_batch(attr, ['time', 'year', 'date']) > 0.5:
+            if helpers.isdate(ref)[0] and self.datamatcher.attr_score_batch(attr, time_batch) > 0.5:
                 dates = {
                     "value": attr,
                     "range": self.table[attr].to_list()
@@ -173,7 +174,7 @@ class AutomatedViz(object):
                                 type="temporal",
                                 timeUnit= self.parser.parse_unit(ref) or "year"
                             ))  
-            elif not helpers.isdate(ref)[0] and self.datamatcher.attr_score_batch(attr, ['time', 'year', 'date']) > 0.5:
+            elif not helpers.isdate(ref)[0] and self.datamatcher.attr_score_batch(attr, time_batch) > 0.5:
                 continue
             elif helpers.isint(ref) or helpers.isfloat(ref) or isAny(attr, helpers.isint) or isAny(attr, helpers.isfloat):
                 categories.append({

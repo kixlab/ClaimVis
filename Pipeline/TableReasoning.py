@@ -198,7 +198,7 @@ class TableReasoner(object):
 
         if best_datefield: # infer datetime
             oldest_date, newest_date = table[best_datefield].min(), 2020 # 2020 has the most data
-            answers = self._infer_datetime(queries + vis_tasks, oldest_date, newest_date, use_llm=False)
+            answers = self._infer_datetime(queries + vis_tasks, oldest_date, newest_date, use_llm=True)
             # chop to queries and vis tasks
             queries, vis_tasks = answers[:len(queries)], answers[len(queries):]
 

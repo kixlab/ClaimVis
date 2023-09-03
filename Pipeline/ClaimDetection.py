@@ -36,6 +36,9 @@ class ClaimDetector():
         if verbose: print("check result: ", api_response)
 
         # if the score is > .5 --> checkworthy
+        if len(api_response['results']) == 0:
+            if verbose: print("non-checkworthy: 0")
+            return "The claim is not check-worthy", 0
         score = api_response['results'][0]['score']
         if score > score_threshold:
             if llm_classify:

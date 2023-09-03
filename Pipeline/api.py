@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from models import *
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
@@ -146,26 +146,51 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test=False
     else:
         pipeline = Pipeline(datasrc="../Datasets")
         # claim_map, claims = pipeline.run_on_text(user_claim)
-        claim_map, claims = pipeline.run_on_text(body, verbose=verbose)
-        # if verbose: print(claim_map)
-        if not claim_map[claims[0]]:
-            return DataPointSet(
-                statement=user_claim,
-                dataPoints=[],
-                fields=[],
-                ranges=Ranges(
-                    fields={},
-                    values=[]
-                ),
-                tableName="",
-                reasoning=claims[0]
-            )
+        try:
+            claim_map, claims = pipeline.run_on_text(body, verbose=verbose)
+            # if verbose: print(claim_map)
+            if not claim_map[claims[0]]:
+                raise HTTPException(status_code=404, detail="The pipeline cannot find valid statistical claim from the input. Please rephrase your claim.")
 
-        reason = claim_map[claims[0]][0]
-        new_claim, table, attributes, value_map, reasoning, viz_task = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
+            reason = claim_map[claims[0]][0]
+            new_claim, table, attributes, value_map, reasoning, viz_task = reason["suggestions"][0]["query"], reason["sub_table"], reason["attributes"], reason["suggestions"][0]["value_map"], reason["suggestions"][0]["justification"], reason["suggestions"][0]["visualization"]
         # if verbose: print(table, attributes)
+        except openai.error.Timeout as e:
+            #Handle timeout error, e.g. retry or log
+            msg = (f"OpenAI API request timed out: {e}")
+            raise HTTPException(status_code=408, detail=msg)
+        except openai.error.APIError as e:
+            #Handle API error, e.g. retry or log
+            msg = (f"OpenAI API returned an API Error: {e}")
+            raise HTTPException(status_code=500, detail=msg)
+        except openai.error.APIConnectionError as e:
+            #Handle connection error, e.g. check network or log
+            msg = (f"OpenAI API request failed to connect: {e}")
+            raise HTTPException(status_code=500, detail=msg)
+        except openai.error.InvalidRequestError as e:
+            #Handle invalid request error, e.g. validate parameters or log
+            msg = (f"OpenAI API request was invalid: {e}")
+            raise HTTPException(status_code=500, detail=msg)
+        except openai.error.AuthenticationError as e:
+            #Handle authentication error, e.g. check credentials or log
+            msg = (f"OpenAI API request was not authorized: {e}")
+            raise HTTPException(status_code=500, detail=msg)
+        except openai.error.PermissionError as e:
+            #Handle permission error, e.g. check scope or log
+            msg = (f"OpenAI API request was not permitted: {e}")
+            raise HTTPException(status_code=500, detail=msg)
+        except openai.error.RateLimitError as e:
+            #Handle rate limit error, e.g. wait or log
+            msg = (f"OpenAI API request exceeded rate limit: {e}")
+            raise HTTPException(status_code=500, detail=msg)
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            msg = f""
+            raise HTTPException(status_code=500, detail=msg)
 
-    try:
+
+    # try:
         # given a table and its attributes, return the data points
         AutoViz = AutomatedViz(
                     table=table, 
@@ -178,18 +203,37 @@ def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test=False
                             reasoning=reasoning, 
                             verbose=verbose
                         )
-    except Exception as e:
-        return DataPointSet(
-                    statement=user_claim,
-                    dataPoints=[],
-                    fields=[],
-                    ranges=Ranges(
-                        fields={},
-                        values=[]
-                    ),
-                    tableName="",
-                    reasoning=f"Error: {e}"
-                )
+    # except openai.error.Timeout as e:
+    #     #Handle timeout error, e.g. retry or log
+    #     msg = (f"OpenAI API request timed out: {e}")
+    #     raise HTTPException(status_code=408, detail=msg)
+    # except openai.error.APIError as e:
+    #     #Handle API error, e.g. retry or log
+    #     msg = (f"OpenAI API returned an API Error: {e}")
+    #     raise HTTPException(status_code=500, detail=msg)
+    # except openai.error.APIConnectionError as e:
+    #     #Handle connection error, e.g. check network or log
+    #     msg = (f"OpenAI API request failed to connect: {e}")
+    #     raise HTTPException(status_code=500, detail=msg)
+    # except openai.error.InvalidRequestError as e:
+    #     #Handle invalid request error, e.g. validate parameters or log
+    #     msg = (f"OpenAI API request was invalid: {e}")
+    #     raise HTTPException(status_code=500, detail=msg)
+    # except openai.error.AuthenticationError as e:
+    #     #Handle authentication error, e.g. check credentials or log
+    #     msg = (f"OpenAI API request was not authorized: {e}")
+    #     raise HTTPException(status_code=500, detail=msg)
+    # except openai.error.PermissionError as e:
+    #     #Handle permission error, e.g. check scope or log
+    #     msg = (f"OpenAI API request was not permitted: {e}")
+    #     raise HTTPException(status_code=500, detail=msg)
+    # except openai.error.RateLimitError as e:
+    #     #Handle rate limit error, e.g. wait or log
+    #     msg = (f"OpenAI API request exceeded rate limit: {e}")
+    #     raise HTTPException(status_code=500, detail=msg)
+    # except Exception as e:
+    #     msg = f"Error: {e}"
+    #     raise HTTPException(status_code=500, detail=msg)
 
 
 @app.post("/get_viz_spec")
