@@ -991,7 +991,85 @@ claim_tagging = [
 
 ]
 
+sentence_tagging = [
+    {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include: country, value attribute, and datetime. 
+    1. Prepend @ to country value if it is not a country name but a country range, e.g. @(US-UK).
+    2. Infer if any of the critical parts are ambiguous. Use default variables 'X' and 'Y' for the oldest and newest datetime, respectively. 
+    3. Rephrase the sentence into a visualization task.
+    4. Think step by step using the 'explain' field. Fill in the other fields using user-specified format."""},
+
+    {"role": "user", "content": """SENTENCE: The US had had a bad downwards trend of fertility since the 70s of the 20th century."""},
+    {"role": "assistant", "content": """{
+        "explain": "'US' refers to a country, so it is tagged as a country. \
+            'fertility' is a value attribute but requiring quantifier to be measurable; rephrase to 'fertility rate' for better clarification. \
+            The sentence use '70s of the 19th century' to refer to a time range, so dates are inferred to 1970, and also use 'since' to imply that the trend is still going on uptil now, which is the default 'Y' variable. In total, the dates are inferred to be between 1970 and 'Y'.",
+        "country": ["US"],
+        "value": {
+            "raw": "fertility",
+            "rephrase": "fertility rate"
+        },
+        "datetime": ["1970 - @(Y)"]
+        "vis": "Show the {fertility rate} of the {US} from {1970} to {@(Y)}."
+    }"""},
+
+    {"role": "user", "content": """SENTENCE: In 2010, Asian countries suffered a plunge of more than 30% in wheat yield due to a large invasion of grasshopper."""},
+    {"role": "assistant", "content": """{
+        "explain": "'Asian countries' refers to a group of countries, so it is tagged as a country range.\
+            'wheat yield' is a value attribute that can be measured; no need to rephrase.\
+            The sentence implicitly compares the wheat yield of Asian countries in 2010 with that in other years, most appropriately 2009, so dates are inferred to be 2010 and 2009.",
+        "country": ["@(Asian countries?)"],
+        "value": {
+            "raw": "wheat yield",
+            "rephrase": "wheat yield"
+        },
+        "datetime": ["2009", "2010"],
+        "vis": "Show the {wheat yield} of {@(Asian countries)} in {2009} and {2010}."
+    }"""},
+
+    {"role": "user", "content": """SENTENCE: Over the last 2 decades, China has seen more people becoming obese, in detail an increase of 10%."""},
+    {"role": "assistant", "content": """{
+        "explain": "'China' refers to a country, so it is tagged as a country.\
+            'people becoming obese' is a value attribute but requiring quantifier to be measurable; rephrase to 'obesity rate' for better clarification.\
+            The sentence compares the obesity rate of China in the last 2 decades vs now, with stress on 10% increase. Using the default newest date variable - 'Y', the dates are inferred to be 'Y - 20' and 'Y'.",
+        "country": ["China"],
+        "value": {
+            "name": "people becoming obese",
+            "rephrase": "obesity rate"
+        },
+        "datetime": ["@(Y-20)", "@(Y)"],
+        "vis": "Show the {obesity rate} of {China} in {@(Y - 20)} and {@(Y)}."
+    }"""},
+
+    {"role": "user", "content": """SENTENCE: 2 billion people had not received clean water every year uptil the year the plumbing system was invented, which was 2004."""},
+    {"role": "assistant", "content": """{
+        "explain": "No country is provided, take default as the world.\
+            'clean water' is a value attribute but lack quantifier to be measurable; need to rephrase as 'number of people who receive clean water'.\
+            The sentence compares the number of people who had not received clean water uptil 2004, lacking start date. Uing default oldest date variable 'X', the dates are inferred to be between 'X' and 2004.",
+        "country": ["World"],
+        "value": {
+            "raw": "clean water",
+            "rephrase": "number of people who receive clean water"
+        },
+        "datetime": ["@(X) - 2004"],
+        "vis": "Show the {number of people who receive clean water} every year in the {World}, from {@(X)} to {2004}."
+    }"""},
+
+    {"role": "user", "content": """Russia exports more than any other countries."""},
+    {"role": "assistant", "content": """{
+        "explain": "'any other countries' refers to every country except Russia, and 'Russia' refers to Russia, so in total country is tagged as a country range including all.\
+            'exports' is a verb refering to a value attribute; rephrase as a measurable noun phrase 'total amount of export' for better clarification.\
+            The sentence does not specify the time of comparison, so default should be the most recent year, which is the default 'Y' variable.",
+        "country": ["@(All countries?)"],
+        "value": {
+            "raw": "exports",
+            "rephrase": "total amount of export"
+        },
+        "datetime": ["@(Y)"],
+        "vis": "Show the {total amount of export} of {@(All countries?)} in {@(Y)}."
+    }"""}
+]
+
 import json
 # save pro to query_generation_2.json
-with open("fewshots/claim_extraction.json", "w") as f:
-    json.dump(claims_extraction_with_context, f, indent=4)
+with open("fewshots/claim_tagging.json", "w") as f:
+    json.dump(sentence_tagging, f, indent=4)

@@ -1,0 +1,4 @@
+{
+    "claim": "No movies have higher Imdb rating than From Dusk Til Dawn.",
+    "vis_task": "Show a bar chart representing the IMDB rating of each movie."
+}

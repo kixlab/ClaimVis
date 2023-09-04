@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 from Gloc.utils.llm import *
 from Summarizer import Summarizer
 from rapidfuzz import fuzz
+from nltk.corpus import wordnet as wn
 import numpy as np
 import pandas as pd
 import json
@@ -105,6 +106,7 @@ class DataMatcher(object):
                             samples=1
                         )[0]
             answer = json.loads(answer)
+            print(answer)
             answer["Keywords"].append(claim) # add claim into keywords also
 
             WEIGHT = 1/3
@@ -185,15 +187,14 @@ class DataMatcher(object):
 
 def main():
     matcher = DataMatcher(datasrc="../Datasets")
-    # Recalculate embeddings of owid-co2.csv columns
-    # for dataset in ["owid-co2.csv", "owid-energy.csv"]:
-    #     table = pd.read_csv(f"{matcher.datasrc}/{dataset}")
-    #     column_embeddings = [matcher.encode(col_name).tolist() for col_name in table.columns]
-        
-    #     # Write them back to owid-co_column_embeddings.json
-    #     embed_name = f"{dataset[:-5]}_column_embeddings.json"
-    #     with open(f"{matcher.datasrc}/description/{embed_name}", 'w') as f:
-    #         json.dump(column_embeddings, f)
+    # input = "The US' export has been increasing since over the past 2 decades."
+    # matcher.find_top_k_datasets(
+    #     claim=input,
+    #     k=10,
+    #     method="gpt",
+    #     verbose=True
+    # )
+    print(matcher.similarity_batch('Asia', ['Korea', 'India', 'China', 'Brunei', 'Indonesia', 'America']))
 
 
 if __name__ == "__main__":

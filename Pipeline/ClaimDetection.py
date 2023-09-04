@@ -59,7 +59,7 @@ class ClaimDetector():
                 )["choices"][0]['message']['content']
 
                 verdict = re.search(r'"verdict": "(Y|N)"', res).group(1)
-                explain = re.search(r'"explain": "(.+)"', res, re.DOTALL).group(1)
+                explain = re.search(r'"explain": "(.*?)"', res, re.DOTALL).group(1)
                 if verdict == 'Y':
                     if verbose: 
                         print(f"statistically interesting: {api_response['results'][0]['score']}")

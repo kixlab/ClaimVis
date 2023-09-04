@@ -13,6 +13,7 @@ from common.functionlog import *
 import asyncio
 import logging
 
+
 # openai.api_key = openai_api
 # Configure logging to write to a file
 logging.basicConfig(filename='../Gloc/log.txt', level=logging.INFO)

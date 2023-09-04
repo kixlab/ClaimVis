@@ -1,0 +1,4 @@
+{
+    "claim": "All movies that have more than 4.2 imdb rating has a budget of at least 5000000.",
+    "vis_task": "Show a scatter plot of IMDB rating and production budget for all movies."
+}

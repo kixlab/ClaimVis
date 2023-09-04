@@ -33,6 +33,7 @@ class TemplateKey(str, enum.Enum):
     SQL_GENERATION_2 = 'sql2'
 
     CLAIM_EXTRACTION = 'ext'
+    CLAIM_TAGGING = 'tag'
 
 class Prompter(object):
     def __init__(self) -> None:
@@ -129,6 +130,11 @@ class Prompter(object):
             template.append({
                 "role": "user",
                 "content": f"""PARAGRAPH: {kwargs['paragraph']}\n   SENTENCE: {kwargs['userClaim']}"""
+            })
+        elif template_key == TemplateKey.CLAIM_TAGGING:
+            template.append({
+                "role": "user",
+                "content": f"""SENTENCE: {question}"""
             })
 
         return template

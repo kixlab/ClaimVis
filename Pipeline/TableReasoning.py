@@ -40,7 +40,6 @@ class TableReasoner(object):
         self.max_decode_steps = max_decode_steps # fixed
         self.samples = samples # to change
         self.model = model # fixed
-        self.nlp = spacy.load("en_core_web_sm")
         
     def _call_api_1(
         self: object, 
@@ -144,6 +143,7 @@ class TableReasoner(object):
             return answers
         else:
             # use spacy dependency parsing
+            self.nlp = spacy.load("en_core_web_sm")
             for idx, query in enumerate(queries):                    
                 doc, dates = self.nlp(query), []
                 # count the number of dates within the query

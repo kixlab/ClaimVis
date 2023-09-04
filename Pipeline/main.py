@@ -235,7 +235,7 @@ def profile_func(func):
     stats.sort_stats('cumulative')
 
     # Print the profiling data
-    stats.print_stats(50)
+    stats.print_stats(70)
 
 
 if __name__ == "__main__":

@@ -46,3 +46,26 @@ class TokenCount(object):
     @staticmethod
     def add_token_count(tokens):
         TokenCount.token_count += tokens
+
+class AsyncTokenCount(object):
+    token_count = 0
+    
+    def __init__(self, func) -> None:
+        self.func = func
+
+    async def __call__(self, *args: Any, **kwds: Any) -> Any:
+        contents, tokens = await self.func(*args, **kwds)
+        AsyncTokenCount.add_token_count(tokens)
+        return contents
+    
+    @staticmethod
+    def reset():
+        AsyncTokenCount.token_count = 0
+    
+    @staticmethod
+    def get_token_count():
+        return AsyncTokenCount.token_count
+    
+    @staticmethod
+    def add_token_count(tokens):
+        AsyncTokenCount.token_count += tokens
