@@ -14,6 +14,7 @@ import log_crud, models, ORMModels
 from database import SessionLocal, engine
 from sqlalchemy.orm import Session
 from TableReasoning import TableReasoner
+from DataMatching import DataMatcher
 
 def get_db():
 	db = SessionLocal()
@@ -190,7 +191,6 @@ async def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test
 			msg = f""
 			raise HTTPException(status_code=500, detail=msg)
 
-
 	try:
 		# given a table and its attributes, return the data points
 		AutoViz = AutomatedViz(
@@ -236,6 +236,17 @@ async def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test
 		msg = f"Error: {e}"
 		raise HTTPException(status_code=500, detail=msg)
 
+@app.post("/potential_data_point_sets_2")
+async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True, test=False) -> list[DataPointSet]:
+	pass
+
+@app.post("/get_datasets")
+async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
+	keywords = claim_map.suggestion.value + [p.rephrase for p in claim_map.value]
+	dm = DataMatcher(datasrc="../Datasets")
+	top_k_datasets = await dm.find_top_k_datasets(claim_map.rephrase, k=5, method="gpt", verbose=verbose, keywords=keywords)
+	return [Dataset(name=name, description=description, score=score, fields=fields) 
+        for name, description, score, fields in top_k_datasets]
 
 @app.post("/get_viz_spec")
 def get_viz_spec(body: GetVizSpecBody): # needs update
@@ -321,7 +332,6 @@ def get_dataset_explanation(dataset: str, column_name: str):
 		return df['description'].iloc[0]
 	else:
 		return ''
-		
 
 @app.get('/reasoning_evaluation')
 def get_reasoning_evaluation(reasoning: str):
@@ -330,9 +340,9 @@ def get_reasoning_evaluation(reasoning: str):
 	return reasoner._evaluate_soundness(reasoning)
 
 @app.get('/suggest_queries')
-def get_suggested_queries(claim: UserClaimBody):
-	reasoner = TableReasoner()
-	return reasoner._suggest_queries_2(claim)
+async def get_suggested_queries(claim: UserClaimBody):
+	tagged_claim = await TableReasoner()._suggest_queries_2(claim)
+	return ClaimMap(**tagged_claim)
 
 @app.get('/robots.txt', response_class=PlainTextResponse)
 def robots():
@@ -343,14 +353,15 @@ async def main():
 	openai.aiosession.set(ClientSession())
 	# uvicorn.run(app, host="0.0.0.0", port=9889)
 	# paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
-	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
-	paragraph = ""
-	userClaim = "Uptil 1999, China had less than 1 billion citizens."
+	paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
+	# paragraph = ""
+	userClaim = "The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
-	l = await get_suggested_queries(claim)
-	print(l)
+	claim_map = await get_suggested_queries(claim)
+	top_k_datasets = await get_relevant_datasets(claim_map)
+	
 	await openai.aiosession.get().close()
 
 if __name__ == "__main__":
-	main()
+	asyncio.run(main())

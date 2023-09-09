@@ -26,7 +26,7 @@ class DataMatcher(object):
             self.description = json.load(openfile)
 
             # prepare dataset embeddings and descriptions
-            writeflag, self.dataset_embeddings, self.attrs_embeddings = False, [], []
+            writeflag, self.dataset_embeddings, self.attrs_embeddings = False, [], dict()
             for dataset in self.datasets:
                 if dataset not in self.description:
                     if summarize:
@@ -46,13 +46,13 @@ class DataMatcher(object):
 
                 embed_name = f"{dataset[:-5]}_column_embeddings.json"
                 if embed_name not in os.listdir(f"{self.datasrc}/description/"):
-                    column_embeddings = [self.encode(col_name).tolist() for col_name in self.description[dataset]["columns"]]
+                    column_embeddings = {col_name: self.encode(col_name).tolist() for col_name in self.description[dataset]["columns"]}
                     with open(f"{self.datasrc}/description/{embed_name}", 'w') as f:
                         json.dump(column_embeddings, f)    
-                    self.attrs_embeddings.append(column_embeddings)                    
+                    self.attrs_embeddings[dataset] = column_embeddings     
                 else:
                     with open(f"{self.datasrc}/description/{embed_name}", 'r') as f:
-                        self.attrs_embeddings.append(json.load(f))
+                        self.attrs_embeddings[dataset] = json.load(f)
 
             # write summaries back to file
             if writeflag:
@@ -61,7 +61,13 @@ class DataMatcher(object):
                 json.dump(self.description, openfile)
             openfile.close()
 
-    async def find_top_k_datasets(self, claim: str, k: int = 2, method: str = "attr", verbose: bool = True):
+    async def find_top_k_datasets(
+            self, claim: str, 
+            k: int = 2, 
+            method: str = "attr", 
+            verbose: bool = True,
+            keywords: list = None
+        ):
         assert self.datasrc, "Datasrc not specified."
 
         relevant_attrs = []
@@ -72,44 +78,47 @@ class DataMatcher(object):
             similarities = [self.idf_score(claim, self.description[dataset]['description']) for dataset in self.datasets]
         elif method == "attr": # the most accurate match
             embed = self.encode(claim)
-            score_batches = [self.similarity_batch(embed, self.attrs_embeddings[i])\
-                                                             for i, dataset in enumerate(self.datasets)]
+            score_batches = [self.similarity_batch(embed, list(self.attrs_embeddings[dataset].values()))\
+                                                             for dataset in self.datasets]
             similarities = [max(batch) for batch in score_batches]
         elif method == "gpt": # semantic relatedness 
-            prompt = [
-                {"role": "system", "content": "You are an amazing extractor. Given a claim, your task is to extract keywords from it and generate more relevant keywords. Also please rate the relevance of each keyword to the claim on a scale of 0 to 1, with all scores summed to 1. Think step by step in the 'Reason' field."},
+            if not keywords:
+                prompt = [
+                    {"role": "system", "content": "You are an amazing extractor. Given a claim, your task is to extract keywords from it and generate more relevant keywords. Also please rate the relevance of each keyword to the claim on a scale of 0 to 1, with all scores summed to 1. Think step by step in the 'Reason' field."},
 
-                {"role": "user", "content": "The US economy is larger than China's."},
-                {"role": "assistant", "content": """{
-                    "Reason": " The claim is about the economy of the US and China. Some relevant keywords are 'economy', 'US', 'China'. 'economy' is related to 'GDP', 'Trade Volume', 'GDP per capita'. 'US' and 'China' are related to 'country'.",
-                    "Keywords": ["economy", "GDP", "Trade Volume", "GDP per capita", "US", "China", "country"],
-                    "Scores": [0.2, 0.1, 0.1, 0.1, 0.2, 0.2, 0.1]
-                }"""},
+                    {"role": "user", "content": "The US economy is larger than China's."},
+                    {"role": "assistant", "content": """{
+                        "Reason": " The claim is about the economy of the US and China. Some relevant keywords are 'economy', 'US', 'China'. 'economy' is related to 'GDP', 'Trade Volume', 'GDP per capita'. 'US' and 'China' are related to 'country'.",
+                        "Keywords": ["economy", "GDP", "Trade Volume", "GDP per capita", "US", "China", "country"],
+                        "Scores": [0.2, 0.1, 0.1, 0.1, 0.2, 0.2, 0.1]
+                    }"""},
 
-                {"role": "user", "content": "After hitting an all time high of 445$ in July 2021, TSLA price drops to 355$ and stays there for a few month."},
-                {"role": "assistant", "content": """{
-                    "Reason": "The claim is about the price of TSLA. Some relevant keywords are 'price', 'TSLA', 'July', '2021'. 'TSLA price' is related to 'stock price', 'price change', 'stock market'. 'TSLA' is related to 'company', 'stock'. '2021' and 'July' are related to 'year', 'time', 'month'.",
-                    "Keywords": ["price", "TSLA", "July", "2021", "stock price", "price change", "stock market", "company", "stock", "year", "time", "month"],
-                    "Scores": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.1, 0.1, 0.05]
-                }"""},
+                    {"role": "user", "content": "After hitting an all time high of 445$ in July 2021, TSLA price drops to 355$ and stays there for a few month."},
+                    {"role": "assistant", "content": """{
+                        "Reason": "The claim is about the price of TSLA. Some relevant keywords are 'price', 'TSLA', 'July', '2021'. 'TSLA price' is related to 'stock price', 'price change', 'stock market'. 'TSLA' is related to 'company', 'stock'. '2021' and 'July' are related to 'year', 'time', 'month'.",
+                        "Keywords": ["price", "TSLA", "July", "2021", "stock price", "price change", "stock market", "company", "stock", "year", "time", "month"],
+                        "Scores": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.1, 0.1, 0.05]
+                    }"""},
 
-                {"role": "user", "content": claim},
-            ]
-            response = await call_model(
-                            model=Model.GPT3,
-                            prompt=prompt,
-                            temperature=0.0,
-                            max_decode_steps=500,
-                            samples=1
-                        )
-            answer = json.loads(response[0])
-            if verbose: print(answer)
-            answer["Keywords"].append(claim) # add claim into keywords also
+                    {"role": "user", "content": claim},
+                ]
+                response = await call_model(
+                                model=Model.GPT3,
+                                prompt=prompt,
+                                temperature=0.0,
+                                max_decode_steps=500,
+                                samples=1
+                            )
+                answer = json.loads(response[0])
+                answer["Keywords"].append(claim) # add claim into keywords also
+                WEIGHT = 1/2
+                seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*(1-WEIGHT) for score in answer["Scores"]], WEIGHT]
+            else:
+                seed_embeds, weights = self.encode(keywords + [claim]), self.similarity_batch(claim, keywords + [claim])
+                weights = [score/sum(weights) for score in weights]
 
-            WEIGHT = 1/2
-            seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*(1-WEIGHT) for score in answer["Scores"]], WEIGHT]
-            score_batches = [cosine_similarity(seed_embeds, self.attrs_embeddings[i]) \
-                                                                for i, _ in enumerate(self.datasets)]
+            score_batches = [cosine_similarity(seed_embeds, list(self.attrs_embeddings[dataset].values())) \
+                                                                for dataset in self.datasets]
             similarities = [np.average(np.max(batch, axis=1), weights=weights) \
                                                                 for batch in score_batches]
         
@@ -129,7 +138,7 @@ class DataMatcher(object):
                 ind, name = dataset_map[3], dataset_map[0]
                 attr_scores = np.max(score_batches[ind], axis=0)
                 max_score = max(attr_scores)
-                dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], attr_scores) if score > max_score * .8]
+                dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], attr_scores) if score > max_score * .9]
         else:
             # reset dataset_map[3] to empty list
             for dataset_map in top_k_datasets:
@@ -178,7 +187,7 @@ class DataMatcher(object):
     
     def recompute_col_embeddings(self):
         for dataset in self.datasets:
-            embed = self.encode(self.description[dataset]['columns']).tolist()
+            embed = {col_name: self.encode(col_name).tolist() for col_name in self.description[dataset]["columns"]}
             with open(f"{self.datasrc}/description/{dataset[:-5]}_column_embeddings.json", 'w') as f:
                 json.dump(embed, f)
     
@@ -188,12 +197,15 @@ class DataMatcher(object):
 async def main():
     matcher = DataMatcher(datasrc="../Datasets")
     input = "the percentage of sub-Saharan Africans living below the World Bank’s global poverty threshold of $1.90 per day dropped from 56% in 1990 to 40% in 2018."
-    await matcher.find_top_k_datasets(
-        claim=input,
-        k=10,
-        method="gpt",
-        verbose=True
-    )
+    keywords = ["sub-Saharan Africans", "World Bank", "global poverty threshold", "1990", "2018"]
+    # await matcher.find_top_k_datasets(
+    #     claim=input,
+    #     k=10,
+    #     method="gpt",
+    #     verbose=True,
+    #     keywords=keywords
+    # )
+    matcher.recompute_col_embeddings()
 
 if __name__ == "__main__":
     asyncio.run(main())

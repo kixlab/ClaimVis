@@ -1,7 +1,7 @@
 # from pydantic import BaseModel, create_model
 import datetime
 from enum import Enum
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Any
 from pydantic import BaseModel as PydanticBaseModel
 
 class BaseModel(PydanticBaseModel):
@@ -9,8 +9,8 @@ class BaseModel(PydanticBaseModel):
         arbitrary_types_allowed = True
 
 class DataTableEnum(str, Enum):
-    fixed: str = "fixed"
-    variable: str = "variable"
+    fixee = "fixed"
+    variable = "variable"
 
 class OptionProps(BaseModel):
     label: str
@@ -21,7 +21,7 @@ class OptionProps(BaseModel):
 class Field(BaseModel):
     name: str
     type: str
-    timeUnit: str = None
+    timeUnit: Optional[str] = None
 
     def __hash__(self):
         return hash(self.name)
@@ -42,11 +42,11 @@ class Ranges(BaseModel):
 class DataPoint(BaseModel):
     tableName: str
     valueName: str ## Now valueName is the name of the field
-    fields: Dict[str, any] # Date is now moved to here
+    fields: Dict[str, Any] # Date is now moved to here
 
 class DataPointValue(DataPoint):
     value: float
-    unit: str = None
+    unit: Optional[str] = None
 
 class DataPointSet(BaseModel):
     statement: str
@@ -56,9 +56,31 @@ class DataPointSet(BaseModel):
     ranges: Ranges
     reasoning: Optional[str] = None
 
+class ClaimMap(BaseModel):
+    class ValueAttr(BaseModel):
+        raw: str
+        rephrase: str
+    class Suggestions(BaseModel):
+        country: list[str]
+        value: list[str]
+        datetime: list[str]
+
+    country: list[str]
+    value: list[ValueAttr]
+    datetime: list[str]
+    vis: str 
+    rephrase: str 
+    suggestion: Suggestions
+
+class Dataset(BaseModel):
+    name: str
+    description: str
+    score: float
+    fields: list[str]
+
 class UserClaimBody(BaseModel):
     userClaim: str
-    paragraph: str = None
+    paragraph: Optional[str] = None
 
 class GetVizSpecBody(BaseModel):
     userClaim: str
@@ -70,10 +92,9 @@ class GetVizDataBodyNew(BaseModel):
     values: list[OptionProps]
     fields: Dict[str, Union[list[OptionProps], DateRange]]
 
-
 class LogBase(BaseModel):
     event: str
-    payload: str = None
+    payload: Optional[str] = None
     environment: str
     client_timestamp: str
     url: str

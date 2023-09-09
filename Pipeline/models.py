@@ -70,6 +70,27 @@ class GetVizDataBodyNew(BaseModel):
     values: list[OptionProps]
     fields: Dict[str, Union[list[OptionProps], DateRange]]
 
+class ClaimMap(BaseModel):
+    class ValueAttr(BaseModel):
+        raw: str
+        rephrase: str
+    class Suggestions(BaseModel):
+        country: list[str]
+        value: list[str]
+        datetime: list[str]
+
+    country: list[str]
+    value: list[ValueAttr]
+    datetime: list[str]
+    vis: str 
+    rephrase: str 
+    suggestion: Suggestions
+
+class Dataset(BaseModel):
+    name: str
+    description: str
+    score: float
+    fields: list[str]
 
 class LogBase(BaseModel):
     event: str
