@@ -99,13 +99,14 @@ class DataMatcher(object):
                             model=Model.GPT3,
                             prompt=prompt,
                             temperature=0.0,
-                            max_decode_steps=300,
+                            max_decode_steps=500,
                             samples=1
                         )
             answer = json.loads(response[0])
+            if verbose: print(answer)
             answer["Keywords"].append(claim) # add claim into keywords also
 
-            WEIGHT = 1/3
+            WEIGHT = 1/2
             seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*(1-WEIGHT) for score in answer["Scores"]], WEIGHT]
             score_batches = [cosine_similarity(seed_embeds, self.attrs_embeddings[i]) \
                                                                 for i, _ in enumerate(self.datasets)]
@@ -134,9 +135,10 @@ class DataMatcher(object):
             for dataset_map in top_k_datasets:
                 dataset_map[3] = []
 
-        if verbose: print(f"Most relevant datasets using {method}")
-        for dataset_name, _, similarity, relevant_attrs in top_k_datasets:
-            if verbose: print(f"Dataset: {dataset_name}, Similarity: {similarity:.2f}, Relevant Attributes: {relevant_attrs}")
+        if verbose: 
+            print(f"Most relevant datasets using {method}")
+            for dataset_name, _, similarity, relevant_attrs in top_k_datasets:
+                print(f"Dataset: {dataset_name}, Similarity: {similarity:.2f}, Relevant Attributes: {relevant_attrs}")
 
         return top_k_datasets
 
@@ -179,12 +181,14 @@ class DataMatcher(object):
             embed = self.encode(self.description[dataset]['columns']).tolist()
             with open(f"{self.datasrc}/description/{dataset[:-5]}_column_embeddings.json", 'w') as f:
                 json.dump(embed, f)
-        
+    
+    def load_table(self, dataset: str):
+        return pd.read_csv(f"{self.datasrc}/{dataset}")
 
-def main():
+async def main():
     matcher = DataMatcher(datasrc="../Datasets")
-    input = "The US' export has been increasing since over the past 2 decades."
-    matcher.find_top_k_datasets(
+    input = "the percentage of sub-Saharan Africans living below the World Bank’s global poverty threshold of $1.90 per day dropped from 56% in 1990 to 40% in 2018."
+    await matcher.find_top_k_datasets(
         claim=input,
         k=10,
         method="gpt",
@@ -192,4 +196,4 @@ def main():
     )
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

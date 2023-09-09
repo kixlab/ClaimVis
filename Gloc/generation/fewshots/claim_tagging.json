@@ -1,7 +1,7 @@
 [
     {
         "role": "system",
-        "content": "Tag critical parts of the sentence. Critical parts include: country, value attribute, and datetime. \n    1. Prepend @ to country value if it is not a country name but a country range, e.g. @(US-UK).\n    2. Infer if any of the critical parts are ambiguous. Use default variables 'X' and 'Y' for the oldest and newest datetime, respectively. \n    3. Rephrase the sentence into a visualization task.\n    4. Think step by step using the 'explain' field. Fill in the other fields using user-specified format."
+        "content": "Tag critical parts of the sentence. Critical parts include: country, value attribute, and datetime. \n    1. Prepend @ to country value if it is not a country name but a country range, e.g. @(US-UK?).\n    2. Infer if any of the critical parts are ambiguous. Use default variables 'X' and 'Y' for the oldest and newest datetime, respectively. \n    3. Rephrase the sentence into a visualization task and a clarified statement using extremal logic if possible (take default 5 top or bottom countries).\n    4. Think step by step using the 'explain' field. Fill in the other fields using user-specified format."
     },
     {
         "role": "user",
@@ -9,7 +9,7 @@
     },
     {
         "role": "assistant",
-        "content": "{\n        \"explain\": \"'US' refers to a country, so it is tagged as a country.             'fertility' is a value attribute but requiring quantifier to be measurable; rephrase to 'fertility rate' for better clarification.             The sentence use '70s of the 19th century' to refer to a time range, so dates are inferred to 1970, and also use 'since' to imply that the trend is still going on uptil now, which is the default 'Y' variable. In total, the dates are inferred to be between 1970 and 'Y'.\",\n        \"country\": [\"US\"],\n        \"value\": {\n            \"raw\": \"fertility\",\n            \"rephrase\": \"fertility rate\"\n        },\n        \"datetime\": [\"1970 - @(Y)\"]\n        \"vis\": \"Show the {fertility rate} of the {US} from {1970} to {@(Y)}.\"\n    }"
+        "content": "{\n        \"explain\": \"'US' refers to a country, so it is tagged as a country.             'fertility' is a value attribute but requiring quantifier to be measurable; rephrase to 'fertility rate' for better clarification.             The sentence use '70s of the 19th century' to refer to a time range, so dates are inferred to 1970, and also use 'since' to imply that the trend is still going on uptil now, which is the default 'Y' variable. In total, the dates are inferred to be between 1970 and 'Y'.\",\n        \"country\": [\"US\"],\n        \"value\": {\n            \"raw\": \"fertility\",\n            \"rephrase\": \"fertility rate\"\n        },\n        \"datetime\": [\"1970 - @(Y)\"]\n        \"vis\": \"Show the {fertility rate} of the {US} from {1970} to {@(Y)}.\",\n        \"statement\": \"The {fertility rate} of the {US} has a bad downwards trend from {1970} to {@(Y)}.\"\n    }"
     },
     {
         "role": "user",
@@ -17,7 +17,7 @@
     },
     {
         "role": "assistant",
-        "content": "{\n        \"explain\": \"'Asian countries' refers to a group of countries, so it is tagged as a country range.            'wheat yield' is a value attribute that can be measured; no need to rephrase.            The sentence implicitly compares the wheat yield of Asian countries in 2010 with that in other years, most appropriately 2009, so dates are inferred to be 2010 and 2009.\",\n        \"country\": [\"@(Asian countries?)\"],\n        \"value\": {\n            \"raw\": \"wheat yield\",\n            \"rephrase\": \"wheat yield\"\n        },\n        \"datetime\": [\"2009\", \"2010\"],\n        \"vis\": \"Show the {wheat yield} of {@(Asian countries)} in {2009} and {2010}.\"\n    }"
+        "content": "{\n        \"explain\": \"'Asian countries' refers to a group of countries, so it is tagged as a country range.            'wheat yield' is a value attribute that can be measured; no need to rephrase.            The sentence implicitly compares the wheat yield of Asian countries in 2010 with that in other years, most appropriately 2009, so dates are inferred to be 2010 and 2009.\",\n        \"country\": [\"@(Asian countries?)\"],\n        \"value\": {\n            \"raw\": \"wheat yield\",\n            \"rephrase\": \"wheat yield\"\n        },\n        \"datetime\": [\"2009\", \"2010\"],\n        \"vis\": \"Show the {wheat yield} of {@(Asian countries)} in {2009} and {2010}.\",\n        \"statement\": \"The {wheat yield} of {@(Asian countries)} suffered a plunge of more than 30% in {2010} compared to {2009}.\"\n    }"
     },
     {
         "role": "user",
@@ -25,7 +25,7 @@
     },
     {
         "role": "assistant",
-        "content": "{\n        \"explain\": \"'China' refers to a country, so it is tagged as a country.            'people becoming obese' is a value attribute but requiring quantifier to be measurable; rephrase to 'obesity rate' for better clarification.            The sentence compares the obesity rate of China in the last 2 decades vs now, with stress on 10% increase. Using the default newest date variable - 'Y', the dates are inferred to be 'Y - 20' and 'Y'.\",\n        \"country\": [\"China\"],\n        \"value\": {\n            \"name\": \"people becoming obese\",\n            \"rephrase\": \"obesity rate\"\n        },\n        \"datetime\": [\"@(Y-20)\", \"@(Y)\"],\n        \"vis\": \"Show the {obesity rate} of {China} in {@(Y - 20)} and {@(Y)}.\"\n    }"
+        "content": "{\n        \"explain\": \"'China' refers to a country, so it is tagged as a country.            'people becoming obese' is a value attribute but requiring quantifier to be measurable; rephrase to 'obesity rate' for better clarification.            The sentence compares the obesity rate of China in the last 2 decades vs now, with stress on 10% increase. Using the default newest date variable - 'Y', the dates are inferred to be 'Y - 20' and 'Y'.\",\n        \"country\": [\"China\"],\n        \"value\": {\n            \"name\": \"people becoming obese\",\n            \"rephrase\": \"obesity rate\"\n        },\n        \"datetime\": [\"@(Y-20)\", \"@(Y)\"],\n        \"vis\": \"Show the {obesity rate} of {China} in {@(Y - 20)} and {@(Y)}.\",\n        \"statement\": \"The {obesity rate} of {China} has increased by 10% in {@(Y - 20)} compared to {@(Y)}.\"\n    }"
     },
     {
         "role": "user",
@@ -33,14 +33,30 @@
     },
     {
         "role": "assistant",
-        "content": "{\n        \"explain\": \"No country is provided, take default as the world.            'clean water' is a value attribute but lack quantifier to be measurable; need to rephrase as 'number of people who receive clean water'.            The sentence compares the number of people who had not received clean water uptil 2004, lacking start date. Uing default oldest date variable 'X', the dates are inferred to be between 'X' and 2004.\",\n        \"country\": [\"World\"],\n        \"value\": {\n            \"raw\": \"clean water\",\n            \"rephrase\": \"number of people who receive clean water\"\n        },\n        \"datetime\": [\"@(X) - 2004\"],\n        \"vis\": \"Show the {number of people who receive clean water} every year in the {World}, from {@(X)} to {2004}.\"\n    }"
+        "content": "{\n        \"explain\": \"No country is provided, take default as the world.            'clean water' is a value attribute but lack quantifier to be measurable; need to rephrase as 'number of people who receive clean water'.            The sentence specifies the number of people who had not received clean water every year uptil 2004, lacking start date. Uing default oldest date variable 'X', the dates are inferred to be between 'X' and 2004.\",\n        \"country\": [\"World\"],\n        \"value\": {\n            \"raw\": \"clean water\",\n            \"rephrase\": \"number of people who receive clean water\"\n        },\n        \"datetime\": [\"@(X) - 2004\"],\n        \"vis\": \"Show the {number of people who receive clean water} every year in the {World}, from {@(X)} to {2004}.\",\n        \"statement\": \"The {number of people who receive clean water} every year in the {World} is 2 billion, from {@(X)} to {2004}.\"\n    }"
     },
     {
         "role": "user",
-        "content": "Russia exports more than any other countries."
+        "content": "Russia exports the most."
     },
     {
         "role": "assistant",
-        "content": "{\n        \"explain\": \"'any other countries' refers to every country except Russia, and 'Russia' refers to Russia, so in total country is tagged as a country range including all.            'exports' is a verb refering to a value attribute; rephrase as a measurable noun phrase 'total amount of export' for better clarification.            The sentence does not specify the time of comparison, so default should be the most recent year, which is the default 'Y' variable.\",\n        \"country\": [\"@(All countries?)\"],\n        \"value\": {\n            \"raw\": \"exports\",\n            \"rephrase\": \"total amount of export\"\n        },\n        \"datetime\": [\"@(Y)\"],\n        \"vis\": \"Show the {total amount of export} of {@(All countries?)} in {@(Y)}.\"\n    }"
+        "content": "{\n        \"explain\": \"'Russia' refers to a country, so it is tagged as a country. Russia is also compared implicitly against other high countries, so we should tag 'other high countries' as countries. However, using extremal logic, we should only take 'Top 5 countries'.            'exports' is a verb refering to a value attribute; rephrase as a measurable noun phrase 'total amount of export' for better clarification.            The sentence does not specify the time of comparison, so default should be the most recent year, which is the default 'Y' variable.\",\n        \"country\": [\"Russia\", \"@(Top 5 countries?)\"],\n        \"value\": {\n            \"raw\": \"exports\",\n            \"rephrase\": \"total amount of export\"\n        },\n        \"datetime\": [\"@(Y)\"],\n        \"vis\": \"Show the {total amount of export} of {Russia} and {@(Top 5 countries?)} in {@(Y)}.\",\n        \"statement\": \"The {total amount of export} of {Russia} is the highest among {@(Top 5 countries?)} in {@(Y)}.\"\n    }"
+    },
+    {
+        "role": "user",
+        "content": "SENTENCE: For a very long time, Albania has had the same unemployment rate as Newzealand every year."
+    },
+    {
+        "role": "assistant",
+        "content": "{\n        \"explain\": \"'Albania' and 'Newzealand refer to a country, so they are tagged as a countries.            'unemployment rate' is a value attribute that is measureable and comparable; no need to rephrase.            The sentence does not specify the time of comparison, and it refers to 'a very long time', so it is inferred to be the whole default time range, from 'X' to 'Y'.\", \n        \"country\": [\"Albania\", \"New Zealand\"],\n        \"value\": {\n            \"raw\": \"unemployment rate\",\n            \"rephrase\": \"unemployment rate\"\n        },\n        \"datetime\": [\"@(X) - @(Y)\"],\n        \"vis\": \"Show the {unemployment rate} of {Albania} and {New Zealand} from {@(X)} to {@(Y)}.\",\n        \"statement\": \"The {unemployment rate} of {Albania} is the same as that of {New Zealand} from {@(X)} to {@(Y)}.\"\n    }"
+    },
+    {
+        "role": "user",
+        "content": "SENTENCE: Brunei has hold the record of the smallest coal consumer in 2010."
+    },
+    {
+        "role": "assistant",
+        "content": "{\n        \"explain\": \"'Brunei' refers to a country, so it is tagged as a country. Brunei also is compared implicitly against other low countries, meaning we should tag 'other low countries' as countries. However, using extremal logic, we should only take 'Bottom 5 countries'.            'coal consumer' is a value attribute but requiring quantifier to be measurable; rephrase to 'total amount of coal consumption' for better clarification.            The sentence specifies the time of comparison, which is 2010.\",\n        \"country\": [\"Brunei\", \"@(Bottom 5 countries?)\"],\n        \"value\": {\n            \"raw\": \"coal consumer\",\n            \"rephrase\": \"total amount of coal consumption\"\n        },\n        \"datetime\": [\"2010\"],\n        \"vis\": \"Show the {total amount of coal consumption} of {Brunei} and {@(Bottom 5 countries?)} in {2010}.\",\n        \"statement\": \"The {total amount of coal consumption} of {Brunei} is the smallest among {@(Bottom 5 countries?)} in {2010}.\"\n    }"
     }
 ]

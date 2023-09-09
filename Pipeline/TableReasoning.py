@@ -22,6 +22,7 @@ from nl4dv.utils import helpers
 from DataMatching import DataMatcher
 import spacy
 import math
+from pyinstrument import Profiler
 
 class TableReasoner(object):
     def __init__(
@@ -441,7 +442,7 @@ class TableReasoner(object):
                                                         table=db.get_table_df(), 
                                                         more_attrs=more_attrs
                                                     )
-                    
+        
         # update table with relevant attributes
         if attributes: 
             db.update_table(attributes) 
@@ -480,7 +481,7 @@ class TableReasoner(object):
                             )[0]
 
             # use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
-            justification = self._evaluate_soundness(justification)
+            # justification = self._evaluate_soundness(justification)
             reason_map.append({
                 "query": query,
                 "visualization": vis_tasks[idx],
@@ -502,7 +503,7 @@ class TableReasoner(object):
 
 def main():
     table_reasoner = TableReasoner()
-    query = " The USA has the highest cumulative emissions of any country."
+    query = "Uptil 1999, China had less than 1 billion citizens"
     # query = ["What is the total energy consumption of the US in 2012?", "What is the total energy consumption of China in 2012?", "What is the total energy consumption of the world in 2012?"]
     df = pd.read_csv("../Datasets/owid-energy-data.csv")
     table_reasoner.reason(query, df, verbose=True, fuzzy_match=True)

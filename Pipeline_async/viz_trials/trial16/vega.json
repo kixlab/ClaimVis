@@ -1,1 +1,0 @@
-{"claim": "All movies with higher budget than 50,000,000 have imdb rating higher than 60.", "vis_task": "Show a scatter plot representing the production budget and IMDB rating of each movie."}

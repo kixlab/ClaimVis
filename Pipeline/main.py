@@ -124,7 +124,7 @@ class Pipeline(object):
 
         claim_map, claims = defaultdict(list), []
         for sentence in self.extract_claims(text):
-            claim, score = self.detect_claim(sentence, verbose=verbose, llm_classify=True, score_threshold=THRE_SHOLD)
+            claim, score = self.detect_claim(sentence, verbose=verbose, llm_classify=False, score_threshold=THRE_SHOLD)
             if score > THRE_SHOLD:
                 if verbose: print(f"claim: {claim}")
                 # find top k datasets

@@ -3,11 +3,13 @@ sys.path.append("../Gloc")
 sys.path.append("..")
 
 from Gloc.utils.normalizer import post_process_sql
-import pandas as pd
 from Pipeline.DataMatching import DataMatcher
 from Gloc.nsql.database import NeuralDB
 from Gloc.processor.ans_parser import AnsParser
 from AutomatedViz import AutomatedViz
+from llama_index.query_engine import PandasQueryEngine
+import openai
+import pandas as pd
 import os
 
 class Tester():
@@ -97,8 +99,36 @@ data provided does not include the necessary information """
         tag_map = autoviz.tag_attribute_gpt("Show the population of China and the USA in 2020.")
         print(tag_map)
 
+    def test_llama_index(self):
+        table = pd.read_csv(os.path.join(self.datasrc, "Private Sector.csv"))
+        engine = PandasQueryEngine(table)
+        response = engine.query("China has the highest Import value index (2000= 100).")
+        print(response)
+
+    def test_open_finetune_gpt(self):
+        file_path = "../Gloc/generation/finetune/claim_tagging.jsonl"
+        t = openai.File.create(
+            file = open(file_path, 'rb'),
+            purpose = 'fine-tune',
+            user_provided_filename= "claim_tagging_fine_tune_2"
+        )
+        print(t)
+
+    def test_list_files(self):
+        files = openai.File.list()
+        print(files)
+    
+    def test_create_fine_tune(self):
+        # t = openai.FineTuningJob.create(
+        #     training_file="file-QB3dm9RtoIwykKuLJrjLwVP2",
+        #     model = 'gpt-3.5-turbo'
+        # )
+        # print(t)
+        t = openai.FineTuningJob.list()
+        print(t)
+    
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_post_process_sql()
+    tester.test_create_fine_tune()
     # pass

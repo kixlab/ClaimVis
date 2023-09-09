@@ -34,6 +34,7 @@ class TemplateKey(str, enum.Enum):
 
     CLAIM_EXTRACTION = 'ext'
     CLAIM_TAGGING = 'tag'
+    CLAIM_TAGGING_2 = 'tag2'
 
 class Prompter(object):
     def __init__(self) -> None:
@@ -131,11 +132,13 @@ class Prompter(object):
                 "role": "user",
                 "content": f"""PARAGRAPH: {kwargs['paragraph']}\n   SENTENCE: {kwargs['userClaim']}"""
             })
-        elif template_key == TemplateKey.CLAIM_TAGGING:
+        elif template_key in [TemplateKey.CLAIM_TAGGING, TemplateKey.CLAIM_TAGGING_2]:
             template.append({
                 "role": "user",
                 "content": f"""SENTENCE: {question}"""
             })
+        else:
+            template = []
 
         return template
                

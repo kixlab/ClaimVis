@@ -3,6 +3,8 @@ from collections import defaultdict
 from functools import cache
 from itertools import zip_longest
 import json
+import random
+import re
 import sys
 sys.path.append("../Gloc")
 sys.path.append("..")
@@ -18,10 +20,15 @@ from Gloc.nsql.database import NeuralDB
 from Gloc.utils.utils import majority_vote
 from rapidfuzz import fuzz
 from DataMatching import DataMatcher
+from pyinstrument import Profiler
+from models import UserClaimBody
 import spacy
 import math
 
 class TableReasoner(object):
+	MIN_DATE = 1960
+	MAX_DATE = 2020
+	
 	def __init__(
 			self, 
 			temperature=0.0, 
@@ -38,7 +45,8 @@ class TableReasoner(object):
 		self.max_decode_steps = max_decode_steps # fixed
 		self.samples = samples # to change
 		self.model = model # fixed
-		self.nlp = spacy.load("en_core_web_sm")
+
+		self.date_pattern = r"(@\(.*?\)|\d{4})(\s*-\s*(@\(.*?\)|\d{4}))?"
 		
 	async def _call_api_1(
 		self: object, 
@@ -94,16 +102,48 @@ class TableReasoner(object):
 
 		return response
 
-	async def _tag_claim(self, claim: str):
+	async def _tag_claim(
+			self, claim: str, 
+			template_key: TemplateKey = TemplateKey.CLAIM_TAGGING,
+			model: Model = Model.GPT3,
+			verbose: bool = False,
+			samples: int = 6
+		):
 		"""
 			Tag claim with claim type
 			Input: claim
 			Output: claim type
 		"""
-		_, claim_tag = await self._call_api_1(
+		if model in [Model.GPT_TAG_2, Model.GPT_TAG_3]:
+			msg = [
+				{"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+			]
+			filedir = "../Gloc/generation/finetune/claim_tagging.jsonl"
+			with open(filedir, 'r') as file:
+				data = [json.loads(line) for line in file]
+				data = [item for sublist in data for item in sublist["messages"][1:]]
+
+				even_indices = list(range(0, len(data), 2))
+				sampled_even_indices = random.sample(even_indices, samples)
+				sampled_pairs = [(i, i+1) for i in sampled_even_indices]
+				random_sample = [data[i] for pair in sampled_pairs for i in pair]
+
+				msg.extend(random_sample)
+				
+			msg.append({"role": "user", "content": claim})
+			claim_tag = await self._call_api_2(msg, model=model, max_decode_steps=400)
+		else:
+			_, claim_tag = await self._call_api_1(
 								question=claim,
-								template_key=TemplateKey.CLAIM_TAGGING
+								template_key=template_key,
+								model=model
 							)
+
+		# if verbose: print(f"model: {model}\nclaim tag: {claim_tag}")
 		return json.loads(claim_tag[0])
 		
 	async def _infer_datetime(
@@ -150,6 +190,7 @@ class TableReasoner(object):
 			answers = self.parser.parse_sql_2(answers[0])
 			return answers
 		else:
+			self.nlp = spacy.load("en_core_web_sm")
 			# use spacy dependency parsing
 			for idx, query in enumerate(queries):                    
 				doc, dates = self.nlp(query), []
@@ -171,7 +212,6 @@ class TableReasoner(object):
 
 			return queries
 					
-
 	async def _suggest_queries(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
 		"""
 			Suggest queries given a claim (and a table)
@@ -227,14 +267,51 @@ class TableReasoner(object):
 		assert len(attributes) == len(set(attributes)), "Column names in attributes are not unique"     
 		return queries, vis_tasks, reasons, attributes
 
-	async def _suggest_queries_2(self, claim: str):
-		res = await asyncio.gather(
-							self._tag_claim(claim),
-							self.datamatcher.find_top_k_datasets(claim, k=1, method='gpt')
-						)
-		datasets, claim_type = res[0], res[1]
-		# print(f"datasets: {datasets},\n claim_type: {claim_type}")
+	async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
+		prompt = [
+			{"role": "system", "content": """Given a given statement, a context paragraph, and an indicator, please suggest a list of values for the indicator that could explore the context of the statement. Provide a one-sentence explanation and respond as JSON in following format:
+    {
+		"values": ["<value 1>", "<value 2>", ...],
+		"explain": "<explanation>"
+	}"""},
+			{"role": "user", "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}"\nIndicator: "{variable}" """}
+		]
+		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8)
+		# if verbose: print(f"response: {response}")
+		return json.loads(response[0])["values"]
 	
+	async def _suggest_queries_2(self, body: UserClaimBody, verbose: bool=True):
+		tasks = [self._suggest_variable(body, ind, verbose=verbose) \
+	   						for ind in ["statistical attribute", "year", "countries"]] \
+				+ [self._tag_claim(
+					body.userClaim, TemplateKey.CLAIM_TAGGING_2, 
+		      		model=Model.GPT_TAG_3, verbose=verbose
+				)]
+		attributes, years, countries, claim_tag = await asyncio.gather(*tasks)
+
+		variables, claim_tag['cloze_vis'] = { "X": self.MIN_DATE, "Y": self.MAX_DATE }, claim_tag["vis"]
+		for idx, tagged_date in enumerate(claim_tag["datetime"]):
+			match = re.match(self.date_pattern, tagged_date)
+			start_end = [match.group(1), match.group(3)] if match.group(3) else [match.group(1)]
+			for date in start_end:
+				if date.startswith("@("):
+					val = eval(date[2:-1], variables)
+					claim_tag["vis"] = claim_tag["vis"].replace(f"{{{date}}}", f"{{{str(val)}}}")
+					claim_tag["datetime"][idx] = claim_tag["datetime"][idx].replace(f"{date}", f"{str(val)}")
+				else:
+					val = date
+
+				claim_tag["rephrase"] = claim_tag["rephrase"].replace(f"{{{date}}}", f"{{{str(val)}}}")
+				claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{date}}}", "{date}")
+		for tagged_country in claim_tag["country"]:
+			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_country}}}", "{country}")
+		for tagged_attr in claim_tag["value"]:
+			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
+
+		claim_tag["suggestion"] = {"datetime": years, "country": countries, "value": attributes}
+		# if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
+		return claim_tag
+
 	async def _decompose_query(self, query: str):
 		"""
 			Decompose query into subqueries
@@ -264,8 +341,7 @@ class TableReasoner(object):
 		return table.loc[:, cols]
 
 	async def _generate_sql(
-			self, 
-			query: str, 
+			self, query: str, 
 			table: pd.DataFrame,
 			template_key: TemplateKey,
 			samples: int = 15,
@@ -418,8 +494,7 @@ class TableReasoner(object):
 	
 	# @log_decorator
 	async def reason(
-			self, 
-			claim: str, 
+			self, claim: str, 
 			table: pd.DataFrame, 
 			verbose=False, 
 			fuzzy_match=False,
@@ -455,8 +530,7 @@ class TableReasoner(object):
 														claim=claim, 
 														table=db.get_table_df(), 
 														more_attrs=more_attrs
-													)
-					
+														)
 		# update table with relevant attributes
 		if attributes: 
 			db.update_table(attributes) 
@@ -495,7 +569,7 @@ class TableReasoner(object):
 			justification = response[0]
 
 			# use GPT4 to evaluate whether the reasoning is sound or not, then revise the reasoning if needed
-			justification = await self._evaluate_soundness(justification)
+			# justification = await self._evaluate_soundness(justification)
 			reason_map.append({
 				"query": query,
 				"visualization": vis_tasks[idx],
@@ -513,15 +587,41 @@ class TableReasoner(object):
 			},
 			"attributes": attributes
 		}
+	
+	# async def reason_2(
+	# 			self, claim: str, 
+	# 			verbose=False, 
+	# 			fuzzy_match=True,
+	# 		):
+	# 	table, claim_tag, relevant_attrs = await self._suggest_queries_2(claim, verbose=verbose)
+	# 	if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
+
+	# 	db = NeuralDB(
+	# 		tables=[table], add_row_id=False, normalize=False, lower_case=False
+	# 	)
+	# 	# update table with relevant attributes
+	# 	db.update_table(relevant_attrs)
 
 
 async def main():
 	data_matcher = DataMatcher(datasrc="../Datasets")
 	table_reasoner = TableReasoner(datamatcher=data_matcher)
-	query = "Uptil 1999, China had less than 1 billion citizens."
-	await table_reasoner._suggest_queries_2(query)
+	query = "Vietnam has topped the coffee production contest against China and other big manufacturers recently."
+	# query = "2 billion people don't have access to clean water."
+	# await table_reasoner._suggest_queries_2(query, verbose=True)
+	await table_reasoner._suggest_queries_2(query, verbose=True)
+	# tasks = [
+	# 		table_reasoner._tag_claim(
+	# 				query, TemplateKey.CLAIM_TAGGING_2, 
+	# 				model=Model.GPT4, verbose=True, samples=0
+	# 			), 
+	# 		table_reasoner._tag_claim(
+	# 				query, TemplateKey.CLAIM_TAGGING_2, 
+	# 				model=Model.GPT_TAG_3, verbose=True, samples=6
+	# 			)]
+	# await asyncio.gather(*tasks)
 	# print(x)
 
 if __name__ == "__main__":
-	main()
+	asyncio.run(main())
 	

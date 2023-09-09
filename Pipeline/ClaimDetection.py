@@ -46,7 +46,7 @@ class ClaimDetector():
                     create prompt chat to detect if the claim is check-worthy and data related.
                 """
                 res = openai.ChatCompletion.create(
-                    model=Model.GPT4,
+                    model=Model.GPT3,
                     messages=[
                         {"role": "system", "content": """Label the following claims as 'Y' if they are related to datasets about social issues like Climate Change, Economy, etc.; otherwise 'N' according to the following format.
                         \{

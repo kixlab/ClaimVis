@@ -327,8 +327,12 @@ def get_dataset_explanation(dataset: str, column_name: str):
 def get_reasoning_evaluation(reasoning: str):
 	# activate evaluation only when users click on the reasoning dropdown or call it right after the pipeline returned the data points
 	reasoner = TableReasoner()
-	return reasoner.evaluate_reasoning(reasoning)
+	return reasoner._evaluate_soundness(reasoning)
 
+@app.get('/suggest_queries')
+def get_suggested_queries(claim: UserClaimBody):
+	reasoner = TableReasoner()
+	return reasoner._suggest_queries_2(claim)
 
 @app.get('/robots.txt', response_class=PlainTextResponse)
 def robots():
@@ -341,10 +345,10 @@ async def main():
 	# paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
 	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
 	paragraph = ""
-	userClaim = "The current fertility rate of Korea is near one third of the replacement rate."
+	userClaim = "Uptil 1999, China had less than 1 billion citizens."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
-	l = await potential_data_point_sets(claim, verbose=True, test=False)
+	l = await get_suggested_queries(claim)
 	print(l)
 	await openai.aiosession.get().close()
 

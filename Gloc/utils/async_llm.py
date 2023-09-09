@@ -13,6 +13,9 @@ class Model(str, enum.Enum):
     GPT3_4k = 'gpt-3.5-turbo'
     GPT3_16k = 'gpt-3.5-turbo-16k'
     GPT4 = 'gpt-4'
+    GPT_TAG = 'ft:gpt-3.5-turbo-0613:kixlab::7w7fWPZW'
+    GPT_TAG_2 = "ft:gpt-3.5-turbo-0613:kixlab::7wCCe09Q"
+    GPT_TAG_3 = "ft:gpt-3.5-turbo-0613:kixlab::7wQQiDqC"
 
 def retry(try_count=3, sleep_seconds=2):
     """Retry decorator for async functions."""
@@ -86,6 +89,7 @@ async def _call_openai(
         logging.info(f"Super long prompt: {'@'*100}\n{prompt}\n{'@'*100}")
         raise RuntimeError('InvalidRequestError') from e
     except openai.error.ServiceUnavailableError as e:
+        print('Sleeping 10 secs.')
         await asyncio.sleep(10)
         raise KeyError('ServiceUnavailableError') from e
 
@@ -99,7 +103,8 @@ async def call_model(
     """Calls model given a prompt."""
     results = []
     while len(results) < samples:
-        if model in [Model.GPT3, Model.GPT3_16k, Model.GPT4, Model.GPT3_4k]:
+        if model in [Model.GPT3, Model.GPT3_16k, Model.GPT4, Model.GPT3_4k, \
+                     Model.GPT_TAG, Model.GPT_TAG_2, Model.GPT_TAG_3]:
             result = await _call_openai(
                 prompt=prompt,
                 engine=model,

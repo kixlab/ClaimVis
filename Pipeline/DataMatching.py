@@ -194,7 +194,7 @@ def main():
     #     method="gpt",
     #     verbose=True
     # )
-    print(matcher.similarity_batch('Asia', ['Korea', 'India', 'China', 'Brunei', 'Indonesia', 'America']))
+    print(matcher.similarity_batch('Oil production (kilo tonnes)', ["Oil production"]))
 
 
 if __name__ == "__main__":

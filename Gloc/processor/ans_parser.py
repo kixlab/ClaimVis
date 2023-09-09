@@ -109,4 +109,7 @@ class AnsParser(object):
         except:
             return "Unit: None. Aggregation: None"
 
-        
+    def parse_gpt_list(self, message: str):
+        # gpt list has form of: 1. <item1> 2. <item2> ...
+        matches = re.findall(r'\d+\.\s*(.*?)\s*\n', message)
+        return matches
