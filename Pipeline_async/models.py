@@ -60,13 +60,12 @@ class ClaimMap(BaseModel):
     class ValueAttr(BaseModel):
         raw: str
         rephrase: str
-    class Suggestions(BaseModel):
-        class SuggestValue(BaseModel):
-            values: list[str]
-            explain: str
-        country: list[SuggestValue]
-        value: list[SuggestValue]
-        datetime: list[SuggestValue]
+        
+    class SuggestValue(BaseModel):
+        field: str
+        values: list[str]
+        explain: str
+
     
 
     country: list[str]
@@ -75,7 +74,7 @@ class ClaimMap(BaseModel):
     vis: str 
     cloze_vis: str
     rephrase: str 
-    suggestion: Suggestions
+    suggestion: list[SuggestValue]
 
 class Dataset(BaseModel):
     name: str

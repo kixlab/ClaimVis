@@ -311,7 +311,9 @@ class TableReasoner(object):
 		]
 		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8, max_decode_steps=500)
 		# if verbose: print(f"response: {response}")
-		return json.loads(response[0])
+		res = json.loads(response[0])
+		new_res = list(map(lambda x: {"field": 'values' if variable == 'alternative + complementary metrics' else variable, "values": x["values"], "explain": x["explain"]}, res))
+		return new_res
 	
 	async def _suggest_exploration(self, claim: UserClaimBody, verbose: bool=True):
 		prompt = [
@@ -357,7 +359,7 @@ class TableReasoner(object):
 		for tagged_attr in claim_tag["value"]:
 			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
 
-		claim_tag["suggestion"] = {"datetime": years, "country": countries, "value": attributes}
+		claim_tag["suggestion"] = attributes + years + countries
 		if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
 		return claim_tag
 

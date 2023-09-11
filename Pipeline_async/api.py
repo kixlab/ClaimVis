@@ -374,13 +374,13 @@ def get_dataset_explanation(dataset: str, column_name: str):
 	else:
 		return ''
 
-@app.get('/reasoning_evaluation')
+@app.post('/reasoning_evaluation')
 def get_reasoning_evaluation(reasoning: str):
 	# activate evaluation only when users click on the reasoning dropdown or call it right after the pipeline returned the data points
 	reasoner = TableReasoner()
 	return reasoner._evaluate_soundness(reasoning)
 
-@app.get('/suggest_queries')
+@app.post('/suggest_queries')
 async def get_suggested_queries(claim: UserClaimBody):
 	tagged_claim = await TableReasoner()._suggest_queries_2(claim)
 	return ClaimMap(**tagged_claim)
