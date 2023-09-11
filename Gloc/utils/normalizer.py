@@ -99,7 +99,8 @@ def process_raw_table(
     if isinstance(table, pd.DataFrame):
         title = table.name if hasattr(table, 'name') else 'table'
     else:
-        title = table['title'] if 'title' in table else 'table'
+        namefield = 'name' if 'name' in table else 'title' if 'title' in table else None
+        title = table[namefield] if namefield else 'table'
     if isinstance(table, pd.DataFrame) and not add_row_id:
         return {
             "title": title,

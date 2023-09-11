@@ -1,4 +1,5 @@
 import uvicorn
+from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import Depends, FastAPI, HTTPException
 from models import *
 import pandas as pd
@@ -237,12 +238,52 @@ async def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test
 		raise HTTPException(status_code=500, detail=msg)
 
 @app.post("/potential_data_point_sets_2")
-async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True, test=False) -> list[DataPointSet]:
-	pass
+async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True) -> list[DataPointSet]:
+	dm = DataMatcher(datasrc="../Datasets")
+	tb = TableReasoner(datamatcher=dm)
+
+	# 1. Infer the most related attributes
+	dataset = datasets[0] # take the first one for now
+	embed_dict = dm.attrs_embeddings[dataset.name]
+	embeddings = [embed_dict[attr] for attr in dataset.fields]
+	attributes = [val.rephrase for val in claim_map.value]
+	scores = cosine_similarity(dm.encode(attributes), embeddings)
+	argmax_indices = scores.argmax(axis=1)
+	attributes = [dataset.fields[i] for i in argmax_indices]
+	if verbose: print("Attributes:", attributes)
+
+	# 2. Infer the @() countries
+	table = dm.load_table(dataset.name)
+	distinct_fields = dataset.fields + [p for p in ["country_name", "date"] if p not in dataset.fields]
+	table = {"data": table[distinct_fields], "name": dataset.name}
+
+	countries, infer_country_tasks = set(claim_map.country), []
+	for country in countries.copy():
+		if country.startswith('@('):
+			if any(p in country for p in ["Bottom", "Top", "with"]):
+				infer_country_tasks.append(
+					tb._infer_country(
+						country[2:-1], claim_map.datetime, 
+						attributes, table["data"] 
+					)
+				)
+			else: # query like @(Asian countries?) have been handled by the _suggest_variable module
+				countries.update(claim_map.suggestion.country)
+
+	inferred_countries = await asyncio.gather(*infer_country_tasks)
+	[countries.update(country_list) for country_list in inferred_countries]
+	claim_map.country = list(countries)
+	if verbose: print("Countries:", countries)
+
+	# 3. return DataPointSet
+	av = AutomatedViz(table=table, attributes=distinct_fields, matcher=dm)
+	return await av.retrieve_data_points_2(claim_map, attributes, verbose=verbose)
+
 
 @app.post("/get_datasets")
 async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
-	keywords = claim_map.suggestion.value + [p.rephrase for p in claim_map.value]
+	suggest_keywords = [keyword for sublist in claim_map.suggestion.value for keyword in sublist.values]
+	keywords = suggest_keywords + [p.rephrase for p in claim_map.value]
 	dm = DataMatcher(datasrc="../Datasets")
 	top_k_datasets = await dm.find_top_k_datasets(claim_map.rephrase, k=5, method="gpt", verbose=verbose, keywords=keywords)
 	return [Dataset(name=name, description=description, score=score, fields=fields) 
@@ -353,13 +394,14 @@ async def main():
 	openai.aiosession.set(ClientSession())
 	# uvicorn.run(app, host="0.0.0.0", port=9889)
 	# paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
-	paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
-	# paragraph = ""
-	userClaim = "The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030."
+	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
+	paragraph = ""
+	userClaim = "Vietnam used to have a fertility rate twice the global average."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim)
 	top_k_datasets = await get_relevant_datasets(claim_map)
+	await potential_data_point_sets_2(claim_map, top_k_datasets)
 	
 	await openai.aiosession.get().close()
 

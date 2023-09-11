@@ -63,7 +63,7 @@ data provided does not include the necessary information """
 
     def test_tag_date_time(self):
         import spacy
-        query = "The current fertility rate of Korea is near one third of the replacement rate."
+        query = "China had the best coal production against VAL_1 in 2011."
         if query.endswith(('.', '?')): # remove the period at the end
             query = query[:-1]
         # Load the spacy model
@@ -75,21 +75,21 @@ data provided does not include the necessary information """
             print(token.text, token.pos_, token.ent_type_, token.dep_, token.head.text, token.head.pos_,
                 [child for child in token.children])
             
-        start_default, end_default = 2010, 2020
-        dates = []
-        for ind, token in enumerate(doc):
-            if token.ent_type_ == 'DATE' and token.head.pos_ in ['ADP', 'SCONJ']:
-                dates.append(ind)
-        print(dates)
+        # start_default, end_default = 2010, 2020
+        # dates = []
+        # for ind, token in enumerate(doc):
+        #     if token.ent_type_ == 'DATE' and token.head.pos_ in ['ADP', 'SCONJ']:
+        #         dates.append(ind)
+        # print(dates)
         
-        if len(dates) == 0: # add the most recent date
-            query += f" in {end_default}"
-        elif len(dates) == 1: # rules
-            ind = dates[0]-1
-            if doc[ind].text.lower() in ['since', 'from']:
-                query = f"{doc[:ind]} from {doc[ind+1]} to {end_default} {doc[ind+2:]}"
-            elif doc[ind].text.lower() in ['til', 'until']:
-                query = f"{doc[:ind]} from {start_default} {doc[ind:]}"
+        # if len(dates) == 0: # add the most recent date
+        #     query += f" in {end_default}"
+        # elif len(dates) == 1: # rules
+        #     ind = dates[0]-1
+        #     if doc[ind].text.lower() in ['since', 'from']:
+        #         query = f"{doc[:ind]} from {doc[ind+1]} to {end_default} {doc[ind+2:]}"
+        #     elif doc[ind].text.lower() in ['til', 'until']:
+        #         query = f"{doc[:ind]} from {start_default} {doc[ind:]}"
         
         print(query)
     
@@ -127,8 +127,14 @@ data provided does not include the necessary information """
         t = openai.FineTuningJob.list()
         print(t)
     
+    def test_infer_country(self):
+        from TableReasoning import TableReasoner
+        dm = DataMatcher(datasrc="../Datasets")
+        tb = TableReasoner(datamatcher=dm)
+        pass
+    
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_create_fine_tune()
+    tester.test_tag_date_time()
     # pass

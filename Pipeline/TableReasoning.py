@@ -165,7 +165,6 @@ class TableReasoner(object):
 
             return queries
                     
-
     def _suggest_queries(self, claim: str, table: pd.DataFrame=None, more_attrs: list=None):
         """
             Suggest queries given a claim (and a table)

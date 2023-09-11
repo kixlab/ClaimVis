@@ -61,14 +61,19 @@ class ClaimMap(BaseModel):
         raw: str
         rephrase: str
     class Suggestions(BaseModel):
-        country: list[str]
-        value: list[str]
-        datetime: list[str]
+        class SuggestValue(BaseModel):
+            values: list[str]
+            explain: str
+        country: list[SuggestValue]
+        value: list[SuggestValue]
+        datetime: list[SuggestValue]
+    
 
     country: list[str]
     value: list[ValueAttr]
     datetime: list[str]
     vis: str 
+    cloze_vis: str
     rephrase: str 
     suggestion: Suggestions
 

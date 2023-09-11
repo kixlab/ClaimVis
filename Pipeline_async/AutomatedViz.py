@@ -16,19 +16,20 @@ import asyncio
 class AutomatedViz(object):
 	def __init__(
 			self, 
-			matcher: DataMatcher = None,
-			datasrc: str = None, 
-			table: dict or pd.DataFrame = None, 
-			attributes: str = None
+			matcher: Optional[DataMatcher] = None,
+			datasrc: Optional[str] = None, 
+			table: Optional[dict or pd.DataFrame] = None, 
+			attributes: Optional[list[str]] = None
 		):
 		self.datasrc = datasrc
 
 		if isinstance(table, dict):
 			self.table = table["data"]  
-			self.table_name = table["name"] 
+			name_field = "title" if "title" in table else "name" if "name" in table else None
+			self.table_name = table[name_field] if name_field else "table"
 		elif isinstance(table, pd.DataFrame):
 			self.table = table
-			self.table_name = "table"
+			self.table_name = table.name if hasattr(table, "name") else "table"
 		else: # load from csv
 			self.table = pd.read_csv(self.datasrc)
 			self.table_name = "table"
@@ -299,6 +300,93 @@ class AutomatedViz(object):
 		) if dates else None
 		
 		return [newSet]
+
+	async def retrieve_data_points_2(self, claim_map: ClaimMap, categories: list[str], verbose: bool = False):
+		info_table = pd.read_csv(f'../Datasets/info/{self.table_name}')
+		info_table.columns = info_table.columns.str.lower()
+		
+		def get_provenance(attr: str):
+			if 'value' in info_table.columns:
+				provenance = info_table[info_table['value'] == attr]['source'].iloc[0]
+			elif 'title' in info_table.columns:
+				provenance = info_table[info_table['title'] == attr]['source'].iloc[0]
+			else:
+				provenance = ""
+			return provenance
+		
+		def get_unit(attr: str):
+			if 'unit' in info_table.columns:
+				provenance = info_table[info_table['value'] == attr]['unit'].iloc[0] 
+				provenance = provenance if str(provenance) != 'nan' else None
+			elif 'units' in info_table.columns:
+				provenance = info_table[info_table['title'] == attr]['units'].iloc[0]
+				provenance = provenance if str(provenance) != 'nan' else None
+
+			else:
+				provenance = None
+			return provenance
+
+		# tailored specifically for country-date-value model / might need to generalize later
+		fields = [Field(name="country_name", type="nominal"), Field(name="date", type="temporal")]
+		value_attrs = [{
+				'table_name': self.table_name,
+				'label': attr,
+				'value': attr,
+				'unit': get_unit(attr) or self.parser.parse_unit(attr) or ('number' if self.table[attr].dtype.name in ['int64', 'float64'] else self.table[attr].dtype.name),
+				'provenance': get_provenance(attr)
+			} for attr in categories
+		]
+		field_ranges = {
+			"country_name": list(set(self.table["country_name"].to_list())),
+			"date": DateRange(
+				date_start={ 'label': '1960', 'value': '1960' },
+				date_end={ 'label': '2020', 'value': '2020' }
+			)
+		}
+
+		dataPoints, filtered_table, field_names = [], self.table, ["country_name", "date"]
+		for field in fields:
+			if field.type == "nominal":
+				filtered_table = filtered_table[filtered_table[field.name].isin(claim_map.country)]
+			elif field.type == "temporal":
+				dates = []
+				for val in claim_map.datetime.copy():
+					if '-' in val:
+						start, end = val.split('-')
+						start, end = int(start), int(end)
+						dates.extend(list(range(start, end+1)))
+					else:
+						dates.append(int(val))
+				filtered_table = filtered_table[filtered_table[field.name].isin(dates)]
+		for category in value_attrs:
+			for _, row in filtered_table[field_names + [category['value']]].iterrows():
+				val = row[category['value']]
+				dataPoint = DataPointValue(
+                    tableName=self.table_name,
+                    valueName=category['value'],
+                    fields={
+						"country_name": row["country_name"],
+						"date": int(row["date"])
+					},
+                    unit=category['unit'],
+                    value=round(val, 3) if isinstance(val, float) else val
+                )
+				
+				dataPoints.append(dataPoint)
+
+		newSet = DataPointSet(
+				statement=claim_map.cloze_vis,
+				dataPoints=dataPoints,
+				fields=fields,
+				ranges=Ranges(
+					values = value_attrs,
+					fields = field_ranges
+				),
+				tableName=self.table_name,
+				reasoning=None
+			)
+		return [newSet]
+		
 
 if __name__ == "__main__":
 	# tag_date_time("Some people are crazy enough to get out in the winter, especially november and december where it's freezing code outside.")

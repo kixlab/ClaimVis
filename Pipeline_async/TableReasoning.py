@@ -35,7 +35,7 @@ class TableReasoner(object):
 			max_decode_steps=300, 
 			samples=1, 
 			model=Model.GPT3,
-			datamatcher: DataMatcher = None
+			datamatcher: DataMatcher = None 
 		):
 		self.prompter = Prompter()
 		self.parser = AnsParser()
@@ -107,7 +107,7 @@ class TableReasoner(object):
 			template_key: TemplateKey = TemplateKey.CLAIM_TAGGING,
 			model: Model = Model.GPT3,
 			verbose: bool = False,
-			samples: int = 6
+			samples: int = 10
 		):
 		"""
 			Tag claim with claim type
@@ -146,6 +146,36 @@ class TableReasoner(object):
 		# if verbose: print(f"model: {model}\nclaim tag: {claim_tag}")
 		return json.loads(claim_tag[0])
 		
+	async def _infer_country(
+			self, claim: str, 
+			dates: list[str], 
+			values: list[str], 
+			table: pd.DataFrame, 
+			verbose: bool=True
+		):
+		queries, db = [], NeuralDB([table], add_row_id=False, normalize=False, lower_case=False)
+
+		from itertools import product
+		combos = list(product(dates, values))
+		for date, value in combos:
+			if '-' in date:
+				start, end = date.split('-')
+				date = "from {} to {}".format(start, end)
+			else:
+				date = "in {}".format(date)
+			
+			if "with" in claim: # no need to add value
+				queries.append("Whare are the {} {}?".format(claim[:-1], date))
+			else:
+				queries.append("What are the {} of {} {}?".format(claim[:-1], value, date))
+		
+		if verbose: print(f"queries: {queries}")
+		response = await self._exec_sqls_from_sub_queries(db, queries, fuzzy_match=True, verbose=verbose)
+
+		countries = [item for sublist in response[0] for item in eval(sublist[0])\
+	       				if isinstance(item, str) ]
+		return countries
+
 	async def _infer_datetime(
 			self, 
 			queries: list, 
@@ -269,20 +299,39 @@ class TableReasoner(object):
 
 	async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
 		prompt = [
-			{"role": "system", "content": """Given a given statement, a context paragraph, and an indicator, please suggest a list of values for the indicator that could explore the context of the statement. Provide a one-sentence explanation and respond as JSON in following format:
-    {
-		"values": ["<value 1>", "<value 2>", ...],
-		"explain": "<explanation>"
-	}"""},
+			{"role": "system", "content": """Given a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator that could explore the context of the statement. Provide a one-sentence explanation for each set of values. Respond as JSON in following format:
+    [{
+		"values": ["<value 11>", "<value 12>", ...],
+		"explain": "<explanation1>"
+		}, {
+		"values": ["<value 21>", "<value 22>", ...],
+		"explain": "<explanation2>"
+	}]"""},
 			{"role": "user", "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}"\nIndicator: "{variable}" """}
+		]
+		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8, max_decode_steps=500)
+		# if verbose: print(f"response: {response}")
+		return json.loads(response[0])
+	
+	async def _suggest_exploration(self, claim: UserClaimBody, verbose: bool=True):
+		prompt = [
+			{"role": "system", "content": """You are a keen learner. You are given a statement, and a context paragraph. Please suggest a list of questions that could explore the context of the statement. Provide a one-sentence explanation for each question and respond as JSON in following format:
+			[{
+				"question": "<question 1>",
+				"explain": "<explanation>"
+				},{
+				"question": "<question 2>",
+				"explain": "<explanation>"
+			}]"""},
+			{"role": "user", "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}" """}
 		]
 		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8)
 		# if verbose: print(f"response: {response}")
-		return json.loads(response[0])["values"]
+		return json.loads(response[0])
 	
 	async def _suggest_queries_2(self, body: UserClaimBody, verbose: bool=True):
 		tasks = [self._suggest_variable(body, ind, verbose=verbose) \
-	   						for ind in ["statistical attribute", "year", "countries"]] \
+	   						for ind in ["alternative + complementary metrics", "year", "countries"]] \
 				+ [self._tag_claim(
 					body.userClaim, TemplateKey.CLAIM_TAGGING_2, 
 		      		model=Model.GPT_TAG_3, verbose=verbose
@@ -309,7 +358,7 @@ class TableReasoner(object):
 			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
 
 		claim_tag["suggestion"] = {"datetime": years, "country": countries, "value": attributes}
-		# if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
+		if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
 		return claim_tag
 
 	async def _decompose_query(self, query: str):
@@ -419,7 +468,7 @@ class TableReasoner(object):
 			self,
 			db: NeuralDB,
 			queries: list,
-			is_sequential: bool=True, 
+			is_sequential: bool=False, 
 			verbose: bool=False,
 			fuzzy_match: bool=False
 		):
@@ -438,7 +487,7 @@ class TableReasoner(object):
 										template_key=TemplateKey.SQL_GENERATION_2,
 										fuzzy_match=fuzzy_match
 									)
-			# if verbose: print(f"SQLs: {sqlss}")
+			if verbose: print(f"SQLs: {sqlss}")
 		
 		def process_ans(ans: list):
 			try:

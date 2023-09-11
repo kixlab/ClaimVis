@@ -132,3 +132,20 @@ class NeuralDB(object):
         if verbose:
             print("Insert column(s) {} (dtypes: {}) into table.\n".format(', '.join([_ for _ in sub_table['header']]),
                                                                           sub_table_df_normed.dtypes))
+            
+
+class MultiNeuralDB(object):
+    def __init__(
+            self, 
+            tables: list[dict or pd.DataFrame],
+            add_row_id=False, 
+            normalize=False, 
+            lower_case=False
+        ):
+        self.tables = [process_raw_table(
+                            table,
+                            add_row_id=add_row_id,
+                            normalize=normalize,
+                            lower_case=lower_case
+                        ) for table in tables]
+        
