@@ -312,7 +312,7 @@ class TableReasoner(object):
 		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8, max_decode_steps=500)
 		# if verbose: print(f"response: {response}")
 		res = json.loads(response[0])
-		new_res = list(map(lambda x: {"field": 'values' if variable == 'alternative + complementary metrics' else variable, "values": x["values"], "explain": x["explain"]}, res))
+		new_res = list(map(lambda x: {"field": 'value' if variable == 'alternative + complementary metrics' else variable, "values": x["values"], "explain": x["explain"]}, res))
 		return new_res
 	
 	async def _suggest_exploration(self, claim: UserClaimBody, verbose: bool=True):

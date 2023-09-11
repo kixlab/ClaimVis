@@ -282,7 +282,7 @@ async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Datase
 
 @app.post("/get_datasets")
 async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
-	suggest_keywords = [keyword for sublist in claim_map.suggestion.value for keyword in sublist.values]
+	suggest_keywords = [keyword for sublist in claim_map.suggestion for keyword in sublist.values if sublist.field == "value"]
 	keywords = suggest_keywords + [p.rephrase for p in claim_map.value]
 	dm = DataMatcher(datasrc="../Datasets")
 	top_k_datasets = await dm.find_top_k_datasets(claim_map.rephrase, k=5, method="gpt", verbose=verbose, keywords=keywords)
