@@ -9,12 +9,13 @@ from Summarizer import Summarizer
 import numpy as np
 import pandas as pd
 import json
+from pathlib import Path
 import os
 
 class DataMatcher(object):
+    embedder = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     def __init__(self, datasrc: str=None, summarize: bool=True):
         self.summarizer = Summarizer(datasrc=datasrc)
-        self.embedder = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2') # prepare sentence embedder
         
         if not datasrc:
             return 
@@ -25,6 +26,9 @@ class DataMatcher(object):
         with open(f'{self.datasrc}/description/desc.json', 'r+') as openfile:
             self.description = json.load(openfile)
 
+            # Get the list of files in the directory once
+            description_dir = Path(self.datasrc) / 'description'
+            existing_files = set(os.listdir(description_dir))
             # prepare dataset embeddings and descriptions
             writeflag, self.dataset_embeddings, self.attrs_embeddings = False, [], dict()
             for dataset in self.datasets:
@@ -45,13 +49,13 @@ class DataMatcher(object):
                         self.dataset_embeddings.append(self.description[dataset]["embedding"])
 
                 embed_name = f"{dataset[:-5]}_column_embeddings.json"
-                if embed_name not in os.listdir(f"{self.datasrc}/description/"):
+                if embed_name not in existing_files:
                     column_embeddings = {col_name: self.encode(col_name).tolist() for col_name in self.description[dataset]["columns"]}
-                    with open(f"{self.datasrc}/description/{embed_name}", 'w') as f:
+                    with open(description_dir / embed_name, 'w') as f:
                         json.dump(column_embeddings, f)    
                     self.attrs_embeddings[dataset] = column_embeddings     
                 else:
-                    with open(f"{self.datasrc}/description/{embed_name}", 'r') as f:
+                    with open(description_dir / embed_name, 'r') as f:
                         self.attrs_embeddings[dataset] = json.load(f)
 
             # write summaries back to file
@@ -191,8 +195,17 @@ class DataMatcher(object):
             with open(f"{self.datasrc}/description/{dataset[:-5]}_column_embeddings.json", 'w') as f:
                 json.dump(embed, f)
     
-    def load_table(self, dataset: str):
-        return pd.read_csv(f"{self.datasrc}/{dataset}")
+    def load_table(self, dataset: str, attributes: list=None, return_dict: bool=False):
+        table = pd.read_csv(f"{self.datasrc}/{dataset}")
+        if attributes:
+            table = table[attributes]
+        table.name = dataset
+        if not return_dict:
+            return table
+        return {
+            "name": dataset,
+            "data": table
+        }
 
 async def main():
     matcher = DataMatcher(datasrc="../Datasets")

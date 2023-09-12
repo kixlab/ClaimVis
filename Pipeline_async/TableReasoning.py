@@ -1,10 +1,4 @@
 # CoT few-shot prompting 
-from collections import defaultdict
-from functools import cache
-from itertools import zip_longest
-import json
-import random
-import re
 import sys
 sys.path.append("../Gloc")
 sys.path.append("..")
@@ -21,7 +15,13 @@ from Gloc.utils.utils import majority_vote
 from rapidfuzz import fuzz
 from DataMatching import DataMatcher
 from pyinstrument import Profiler
-from models import UserClaimBody
+from models import UserClaimBody, ClaimMap, Dataset
+from collections import defaultdict
+from functools import cache
+from itertools import zip_longest
+import json
+import random
+import re
 import spacy
 import math
 
@@ -266,7 +266,7 @@ class TableReasoner(object):
 		attributes, col_set = set(attributes + more_attrs), set(table.columns)
 		# add datefield if exist and infer datetime from the queries if needed
 		time_batch = self.datamatcher.encode(["time", "date", "year"])
-		col_embeds = self.datamatcher.attrs_embeddings[self.datamatcher.datasets.index(table.name)]
+		col_embeds = list(self.datamatcher.attrs_embeddings[table.name].values())
 		datefields, start_index = [], 1 if table.columns[0] == "row_id" else 0 # row_id added to table so index starts at 1
 		for col, embed in zip(table.columns[start_index:], col_embeds): 
 			score = self.datamatcher.attr_score_batch(embed, time_batch)
@@ -301,15 +301,13 @@ class TableReasoner(object):
 		prompt = [
 			{"role": "system", "content": """Given a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator that could explore the context of the statement. Provide a one-sentence explanation for each set of values. Respond as JSON in following format:
     [{
-		"values": ["<value 11>", "<value 12>", ...],
+		"value": ["<value 11>", "<value 12>", ...],
 		"explain": "<explanation1>"
-		}, {
-		"values": ["<value 21>", "<value 22>", ...],
-		"explain": "<explanation2>"
-	}]"""},
+		}, 
+	...]"""},
 			{"role": "user", "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}"\nIndicator: "{variable}" """}
 		]
-		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8, max_decode_steps=500)
+		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8, max_decode_steps=600)
 		# if verbose: print(f"response: {response}")
 		return json.loads(response[0])
 	
@@ -322,7 +320,7 @@ class TableReasoner(object):
 				},{
 				"question": "<question 2>",
 				"explain": "<explanation>"
-			}]"""},
+			},...]"""},
 			{"role": "user", "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}" """}
 		]
 		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8)
@@ -357,7 +355,13 @@ class TableReasoner(object):
 		for tagged_attr in claim_tag["value"]:
 			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
 
-		claim_tag["suggestion"] = {"datetime": years, "country": countries, "value": attributes}
+		field_tag = ["values"]*len(attributes) + ["datetime"]*len(years) + ["country"]*len(countries)
+		values = zip(attributes+years+countries, field_tag)
+		claim_tag["suggestion"] = [{
+									"field": tag,
+									**val_dict,
+								} for val_dict, tag in values]
+		claim_tag["mapping"] = dict()
 		if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
 		return claim_tag
 
@@ -595,7 +599,7 @@ class TableReasoner(object):
 
 			# execute sql corresponding to each subquery (up to the second last one)
 			answers, value_map = await self._exec_sqls_from_sub_queries(
-										db=db, queries=sub_queries[:-1], 
+										db=db, queries=sub_queries, 
 										is_sequential=False,
 										verbose=verbose,
 										fuzzy_match=fuzzy_match
@@ -603,9 +607,9 @@ class TableReasoner(object):
 			sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
 			answers = [f"A{i+1}: {ans}. {unit}" for i, (ans, unit) in enumerate(answers)]
 			# generate prompt for decomposed reasoning
-			dec_prompt = build_dec_prompt(sub_queries, answers)
+			# dec_prompt = build_dec_prompt(sub_queries, answers)
 			# if verbose: print(f"full prompt:\n{dec_prompt}")
-			answers.extend(await self._call_api_2(dec_prompt))
+			# answers.extend(await self._call_api_2(dec_prompt))
 
 			response = await self._call_api_2(
 								prompt = [
@@ -637,20 +641,13 @@ class TableReasoner(object):
 			"attributes": attributes
 		}
 	
-	# async def reason_2(
-	# 			self, claim: str, 
-	# 			verbose=False, 
-	# 			fuzzy_match=True,
-	# 		):
-	# 	table, claim_tag, relevant_attrs = await self._suggest_queries_2(claim, verbose=verbose)
-	# 	if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
-
-	# 	db = NeuralDB(
-	# 		tables=[table], add_row_id=False, normalize=False, lower_case=False
-	# 	)
-	# 	# update table with relevant attributes
-	# 	db.update_table(relevant_attrs)
-
+	async def reason_2(
+				self, claim_map: ClaimMap, 
+				datasets: list[Dataset],
+				verbose=False, 
+				fuzzy_match=True,
+			):
+		pass
 
 async def main():
 	data_matcher = DataMatcher(datasrc="../Datasets")

@@ -347,7 +347,13 @@ class AutomatedViz(object):
 		dataPoints, filtered_table, field_names = [], self.table, ["country_name", "date"]
 		for field in fields:
 			if field.type == "nominal":
-				filtered_table = filtered_table[filtered_table[field.name].isin(claim_map.country)]
+				countries = []
+				for country in claim_map.country:
+					if country.startswith("@("):
+						countries.extend(claim_map.mapping[country])
+					else:
+						countries.append(country)
+				filtered_table = filtered_table[filtered_table[field.name].isin(countries)]
 			elif field.type == "temporal":
 				dates = []
 				for val in claim_map.datetime.copy():

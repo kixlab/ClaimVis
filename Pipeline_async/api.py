@@ -1,3 +1,4 @@
+import random
 import uvicorn
 from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import Depends, FastAPI, HTTPException
@@ -16,6 +17,8 @@ from database import SessionLocal, engine
 from sqlalchemy.orm import Session
 from TableReasoning import TableReasoner
 from DataMatching import DataMatcher
+from Gloc.utils.normalizer import _get_matched_cells
+from pyinstrument import Profiler
 
 def get_db():
 	db = SessionLocal()
@@ -240,7 +243,35 @@ async def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test
 @app.post("/potential_data_point_sets_2")
 async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True) -> list[DataPointSet]:
 	dm = DataMatcher(datasrc="../Datasets")
+	dataset = datasets[0] # take the first one
+	table = dm.load_table(dataset.name, attributes=dataset.fields)
+	new_attributes = [claim_map.mapping[attr.rephrase] for attr in claim_map.value]	
+
+	# 3. return DataPointSet
+	av = AutomatedViz(table=table, attributes=dataset.fields, matcher=dm)
+	return await av.retrieve_data_points_2(claim_map, new_attributes, verbose=verbose)
+
+@app.post("/get_reason")
+async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True):
+	dm = DataMatcher(datasrc="../Datasets")
+	claim = claim_map.rephrase
+	dataset = datasets[0]
+	distinct_fields = dataset.fields + [p for p in ["country_name", "date"] if p not in dataset.fields]
+	table = dm.load_table(dataset.name, attributes=distinct_fields)
 	tb = TableReasoner(datamatcher=dm)
+	reason = await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
+	return reason
+
+@app.post("/get_datasets")
+async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
+	# suggest_keywords = [keyword for sublist in claim_map.suggestion.value for keyword in sublist.values]
+	suggest_keywords = []
+	keywords = suggest_keywords + [p.rephrase for p in claim_map.value]
+	dm = DataMatcher(datasrc="../Datasets")
+	tb = TableReasoner(datamatcher=dm)
+	top_k_datasets = await dm.find_top_k_datasets(claim_map.rephrase, k=5, method="gpt", verbose=verbose, keywords=keywords)
+	datasets = [Dataset(name=name, description=description, score=score, fields=fields) 
+        for name, description, score, fields in top_k_datasets]
 
 	# 1. Infer the most related attributes
 	dataset = datasets[0] # take the first one for now
@@ -249,45 +280,47 @@ async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Datase
 	attributes = [val.rephrase for val in claim_map.value]
 	scores = cosine_similarity(dm.encode(attributes), embeddings)
 	argmax_indices = scores.argmax(axis=1)
-	attributes = [dataset.fields[i] for i in argmax_indices]
-	if verbose: print("Attributes:", attributes)
+	if any(score[argmax_indices[i]] < 0.5 for i, score in enumerate(scores)):
+		try:
+			msg = "The pipeline cannot find valid statistical attribute from the database. Scores = {}".format(scores.max(axis=1))
+			raise HTTPException(status_code=500, detail=msg)
+		except HTTPException as e:
+			print("@"*100+"\n", msg)
+	new_attributes = [dataset.fields[i] for i in argmax_indices]
+	claim_map.mapping.update({attr: new_attributes[i] for i, attr in enumerate(attributes)})
+	if verbose: print("Attributes:", new_attributes)
 
 	# 2. Infer the @() countries
-	table = dm.load_table(dataset.name)
-	distinct_fields = dataset.fields + [p for p in ["country_name", "date"] if p not in dataset.fields]
-	table = {"data": table[distinct_fields], "name": dataset.name}
+	dataset.fields = list(set(dataset.fields + ["country_name", "date"]))
+	table = dm.load_table(dataset.name, attributes=dataset.fields, return_dict=True)
 
-	countries, infer_country_tasks = set(claim_map.country), []
-	for country in countries.copy():
+	infer_country_tasks, country_to_infer = [], []
+	for idx, country in enumerate(claim_map.country):
 		if country.startswith('@('):
 			if any(p in country for p in ["Bottom", "Top", "with"]):
 				infer_country_tasks.append(
 					tb._infer_country(
 						country[2:-1], claim_map.datetime, 
-						attributes, table["data"] 
+						new_attributes, table["data"] 
 					)
-				)
+				)	
+				country_to_infer.append(country)
 			else: # query like @(Asian countries?) have been handled by the _suggest_variable module
-				countries.update(claim_map.suggestion.country)
-
+				cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == "country_name"]
+				suggest_countries = [cntry for sublist in cntry_sets for cntry in sublist.values]
+				suggest_countries =  [_get_matched_cells(cntry, dm, table["data"], attr="country_name")[0][0] for cntry in suggest_countries]
+				# suggest_countries = random.sample(suggest_countries, 5)
+				claim_map.mapping[country] = suggest_countries[:5] # take the top 5 suggested
+		else:
+			claim_map.country[idx] = _get_matched_cells(country, dm, table["data"], attr="country_name")[0][0]
+	
 	inferred_countries = await asyncio.gather(*infer_country_tasks)
-	[countries.update(country_list) for country_list in inferred_countries]
-	claim_map.country = list(countries)
-	if verbose: print("Countries:", countries)
+	claim_map.mapping.update({country_to_infer[idx]: country_list for idx, country_list in enumerate(inferred_countries)})
 
-	# 3. return DataPointSet
-	av = AutomatedViz(table=table, attributes=distinct_fields, matcher=dm)
-	return await av.retrieve_data_points_2(claim_map, attributes, verbose=verbose)
-
-
-@app.post("/get_datasets")
-async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
-	suggest_keywords = [keyword for sublist in claim_map.suggestion.value for keyword in sublist.values]
-	keywords = suggest_keywords + [p.rephrase for p in claim_map.value]
-	dm = DataMatcher(datasrc="../Datasets")
-	top_k_datasets = await dm.find_top_k_datasets(claim_map.rephrase, k=5, method="gpt", verbose=verbose, keywords=keywords)
-	return [Dataset(name=name, description=description, score=score, fields=fields) 
-        for name, description, score, fields in top_k_datasets]
+	return {
+		"datasets": datasets,
+		"claim_map": claim_map
+	}
 
 @app.post("/get_viz_spec")
 def get_viz_spec(body: GetVizSpecBody): # needs update
@@ -395,13 +428,22 @@ async def main():
 	# uvicorn.run(app, host="0.0.0.0", port=9889)
 	# paragraph = "Since 1960, the number of deaths of children under the age of 5 has decreased by 60%. This is thanks to the efforts of the United Nations and the World Health Organization, which have been working to improve the health of children in developing countries. They have donated 5 billion USD worth of food and clothes to Africa since 1999. As a result, African literacy increased by 20% in the last 10 years. "
 	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
+	# p = Profiler()
+	# p.start()
 	paragraph = ""
-	userClaim = "Vietnam used to have a fertility rate twice the global average."
+	userClaim = "Vietnam has higher gdp than China in 2019 since 2007."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim)
-	top_k_datasets = await get_relevant_datasets(claim_map)
-	await potential_data_point_sets_2(claim_map, top_k_datasets)
+
+	dic = await get_relevant_datasets(claim_map)
+	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
+
+	dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
+	print(dtps)
+	# p = Profiler()
+	# with p:
+	# reason = await get_reason(claim_map, top_k_datasets)
 	
 	await openai.aiosession.get().close()
 

@@ -1953,6 +1953,25 @@ train_data = [
             "vis": "Show the {GDP per capita} and {oil production} of {@(Top 5 countries?)} and {@(Bottom 5 countries?)} in {@(Y)}.",
             "rephrase": "The {GDP per capita} of the best oil producer is 90% higher than that of the worst oil producer among {@(Top 5 countries?)} and {@(Bottom 5 countries?)} in {@(Y)}."
         }"""}]},
+
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "For a decade long before 2015, famine had been a serious problem in Africa, with its victims increasing 10% every year."},
+        {"role": "assistant", "content": """{
+            "country": ["Africa"], 
+            "value": [{
+                "raw": "victims",
+                "rephrase": "number of people who died of famine"
+            }],
+            "datetime": ["2005 - 2015"],
+            "vis": "Show the {number of people who died of famine} of {Africa} from {2005} to {2015}.",
+            "rephrase": "The {number of people who died of famine} of {Africa} had been increasing 10% every year from {2005} to {2015}."
+        }"""}]},
+
 ]
 
 import json
