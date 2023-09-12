@@ -56,19 +56,15 @@ class DataPointSet(BaseModel):
     ranges: Ranges
     reasoning: Optional[str] = None
 
-class ClaimMap(BaseModel):
-    class ValueAttr(BaseModel):
-        raw: str
-        rephrase: str
-        
+class ClaimMap(BaseModel):        
     class SuggestValue(BaseModel):
         field: str
         values: list[str]
         explain: str
 
     country: list[str]
-    value: list[ValueAttr]
-    datetime: list[str]
+    value: list[str]
+    date: list[str]
     vis: str 
     cloze_vis: str
     rephrase: str 

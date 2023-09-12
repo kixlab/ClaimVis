@@ -326,9 +326,9 @@ class AutomatedViz(object):
 				provenance = None
 			return provenance
 
-		country_attr, date_attr = claim_map.mapping['country'], claim_map.mapping['datetime']
+		country_attr, date_attr = claim_map.mapping['country'], claim_map.mapping['date']
 		# tailored specifically for country-date-value model / might need to generalize later
-		fields = [Field(name=country_attr, type="nominal"), Field(name=date_attr, type="temporal")]
+		fields = [Field(name=country_attr, type="nominal"), Field(name=date_attr, type="temporal", timeUnit="year")]
 		value_attrs = [{
 				'table_name': self.table_name,
 				'label': attr,
@@ -357,7 +357,7 @@ class AutomatedViz(object):
 				filtered_table = filtered_table[filtered_table[field.name].isin(countries)]
 			elif field.type == "temporal":
 				dates = []
-				for val in claim_map.datetime.copy():
+				for val in claim_map.date.copy():
 					if '-' in val:
 						start, end = val.split('-')
 						start, end = int(start), int(end)

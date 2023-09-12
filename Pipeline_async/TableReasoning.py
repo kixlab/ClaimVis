@@ -28,6 +28,11 @@ import math
 class TableReasoner(object):
 	MIN_DATE = 1960
 	MAX_DATE = 2020
+	INDICATOR = {
+		"alternative + complementary metrics": "value",
+		"years": "datetime",
+		"countries": "country"
+	}
 	
 	def __init__(
 			self, 
@@ -312,7 +317,7 @@ class TableReasoner(object):
 		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8, max_decode_steps=600)
 		# if verbose: print(f"response: {response}")
 		res = json.loads(response[0])
-		new_res = list(map(lambda x: {"field": 'value' if variable == 'alternative + complementary metrics' else variable,\
+		new_res = list(map(lambda x: {"field": self.INDICATOR[variable],\
 									  "values": [str(val) for val in x["values"]], \
 									  "explain": x["explain"]}, res))
 		return new_res
@@ -335,7 +340,7 @@ class TableReasoner(object):
 	
 	async def _suggest_queries_2(self, body: UserClaimBody, verbose: bool=True):
 		tasks = [self._suggest_variable(body, ind, verbose=verbose) \
-	   						for ind in ["alternative + complementary metrics", "years", "countries"]] \
+	   						for ind in self.INDICATOR] \
 				+ [self._tag_claim(
 					body.userClaim, TemplateKey.CLAIM_TAGGING_2, 
 		      		model=Model.GPT_TAG_3, verbose=verbose
@@ -363,6 +368,9 @@ class TableReasoner(object):
 
 		claim_tag["suggestion"] = attributes + years + countries
 		claim_tag["mapping"] = dict()
+		claim_tag["value"] = [attr["rephrase"] for attr in claim_tag["value"]]
+		claim_tag["date"] = claim_tag["datetime"]
+		del claim_tag["datetime"]
 		if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
 		return claim_tag
 
