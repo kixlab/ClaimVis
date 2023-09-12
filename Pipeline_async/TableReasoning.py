@@ -313,7 +313,7 @@ class TableReasoner(object):
 		# if verbose: print(f"response: {response}")
 		res = json.loads(response[0])
 		new_res = list(map(lambda x: {"field": 'value' if variable == 'alternative + complementary metrics' else variable,\
-									  "values": x["values"] if variable != 'years' else [str(val) for val in x["values"]], \
+									  "values": [str(val) for val in x["values"]], \
 									  "explain": x["explain"]}, res))
 		return new_res
 	
@@ -546,6 +546,19 @@ class TableReasoner(object):
 
 		return self.parser.parse_evaluation(evaluation[0])
 	
+	def _build_dec_prompt(self, sub_queries: list, answers: list, table: pd.DataFrame, question: str):
+		dec_prompt = self.prompter.build_prompt(
+						template_key=TemplateKey.DEC_REASONING_2,
+						table=table,
+						question=question,
+					)
+		dec_prompt.extend([
+			{ "role": "user", "content": "\n".join(sub_queries[:-1]) },
+			{ "role": "assistant", "content": "\n".join(answers) },
+			{ "role": "user", "content": sub_queries[-1] }
+		])
+		return dec_prompt
+
 	# @log_decorator
 	async def reason(
 			self, claim: str, 
@@ -567,7 +580,7 @@ class TableReasoner(object):
 							question=query,
 						)
 			dec_prompt.extend([
-				{ "role": "user", "content": "\n".join(sub_queries) },
+				{ "role": "user", "content": "\n".join(sub_queries[:-1]) },
 				{ "role": "assistant", "content": "\n".join(answers) },
 				{ "role": "user", "content": sub_queries[-1] }
 			])
@@ -600,7 +613,7 @@ class TableReasoner(object):
 
 			# execute sql corresponding to each subquery (up to the second last one)
 			answers, value_map = await self._exec_sqls_from_sub_queries(
-										db=db, queries=sub_queries, 
+										db=db, queries=sub_queries[:-1], 
 										is_sequential=False,
 										verbose=verbose,
 										fuzzy_match=fuzzy_match
@@ -608,9 +621,9 @@ class TableReasoner(object):
 			sub_queries = [f"Q{i+1}: {query}" for i, query in enumerate(sub_queries)]
 			answers = [f"A{i+1}: {ans}. {unit}" for i, (ans, unit) in enumerate(answers)]
 			# generate prompt for decomposed reasoning
-			# dec_prompt = build_dec_prompt(sub_queries, answers)
+			dec_prompt = build_dec_prompt(sub_queries, answers)
 			# if verbose: print(f"full prompt:\n{dec_prompt}")
-			# answers.extend(await self._call_api_2(dec_prompt))
+			answers.extend(await self._call_api_2(dec_prompt))
 
 			response = await self._call_api_2(
 								prompt = [
@@ -644,11 +657,69 @@ class TableReasoner(object):
 	
 	async def reason_2(
 				self, claim_map: ClaimMap, 
-				datasets: list[Dataset],
+				df: pd.DataFrame,
 				verbose=False, 
 				fuzzy_match=True,
 			):
-		pass
+		def build_dec_prompt(sub_queries: list, answers: list):
+			dec_prompt = self.prompter.build_prompt(
+							template_key=TemplateKey.DEC_REASONING_2,
+							table=df,
+							question=claim_map.rephrase,
+						)
+			dec_prompt.extend([
+				{ "role": "user", "content": "\n".join(sub_queries[:-1]) },
+				{ "role": "assistant", "content": "\n".join(answers) },
+				{ "role": "user", "content": sub_queries[-1] }
+			])
+			return dec_prompt
+		country_attr, date_attr = claim_map.mapping["country"], claim_map.mapping["datetime"]
+		# claim_map already contains the elements constituting the queries
+		queries, answers = [], []
+		for country in claim_map.country:
+			for datetime in claim_map.datetime:
+				for category in [p.rephrase for p in claim_map.value]:
+					if '-' in datetime:
+						start, end = datetime.split('-')
+						date_mask = (df[date_attr] >= int(start)) & (df[date_attr] <= int(end))
+						date_name = f"from {start} to {end}"
+					else:
+						date_mask = df[date_attr] == int(datetime)
+						date_name = f"in {datetime}"
+					
+					if country.startswith("@("):
+						country_name = claim_map.mapping[country]
+						country_mask = df[country_attr].isin(country_name)
+					else:
+						country_mask = df[country_attr] == country
+						country_name = country
+					
+					category_name = claim_map.mapping[category] 
+
+					val = df[date_mask & country_mask][category_name].values
+					query = f"Q{len(queries)+1}: What is the {category_name} of {country_name} {date_name}?"
+					queries.append(query)
+					answer = f"A{len(answers)+1}: {str(val)}"
+					answers.append(answer)
+		queries.append(f"Q{len(queries)+1}: {claim_map.rephrase}")
+		# if verbose: print(f"queries: {queries}\nanswers: {answers}")
+		dec_prompt = build_dec_prompt(queries, answers)
+		# if verbose: print(f"full prompt:\n{dec_prompt}")
+		answers.extend(await self._call_api_2(dec_prompt, model=Model.GPT3))
+
+		response = await self._call_api_2(
+								prompt = [
+									{"role": "system", "content": """You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
+									You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
+									{"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(queries, answers))},
+								],
+								model=Model.GPT3 # 4
+							)
+		justification = response[0]
+		# justification = await self._evaluate_soundness(justification)
+		if verbose: print(f"justification: {justification}")
+		return justification
+						
 
 async def main():
 	data_matcher = DataMatcher(datasrc="../Datasets")

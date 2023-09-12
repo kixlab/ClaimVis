@@ -256,10 +256,10 @@ async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=
 	dm = DataMatcher(datasrc="../Datasets")
 	claim = claim_map.rephrase
 	dataset = datasets[0]
-	distinct_fields = dataset.fields + [p for p in ["country_name", "date"] if p not in dataset.fields]
-	table = dm.load_table(dataset.name, attributes=distinct_fields)
+	table = dm.load_table(dataset.name, attributes=dataset.fields)
 	tb = TableReasoner(datamatcher=dm)
-	reason = await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
+	# reason = await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
+	reason = await tb.reason_2(claim_map, table, verbose=verbose, fuzzy_match=True)
 	return reason
 
 @app.post("/get_datasets")
@@ -326,9 +326,13 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 			else: # query like @(Asian countries?) have been handled by the _suggest_variable module
 				cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == "countries"]
 				suggest_countries = set(cntry for sublist in cntry_sets for cntry in sublist.values)
-				suggest_countries =  [_get_matched_cells(cntry, dm, table, attr=country_attr)[0][0] for cntry in suggest_countries]
+				actual_suggest_countries = []
+				for cntry in suggest_countries:
+					matched_cells = _get_matched_cells(cntry, dm, table, attr=country_attr)
+					if matched_cells:
+						actual_suggest_countries.append(matched_cells[0][0])
 				# suggest_countries = random.sample(suggest_countries, 5)
-				claim_map.mapping[country] = suggest_countries[:5] # take the top 5 suggested
+				claim_map.mapping[country] = actual_suggest_countries[:5] # take the top 5 suggested
 		else:
 			claim_map.country[idx] = _get_matched_cells(country, dm, table, attr=country_attr)[0][0]
 	
@@ -449,7 +453,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "North America countries all observed a decrease of 10% in fertility rates in 2015."
+	userClaim = "Korea has the smallest nuclear energy consumption among Asian countries."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim)
@@ -457,11 +461,11 @@ async def main():
 	dic = await get_relevant_datasets(claim_map)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
 
-	dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
-	print(dtps)
+	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
+	# print(dtps)
 	# p = Profiler()
 	# with p:
-	# reason = await get_reason(claim_map, top_k_datasets)
+	reason = await get_reason(claim_map, top_k_datasets, verbose=True)
 	
 	await openai.aiosession.get().close()
 
