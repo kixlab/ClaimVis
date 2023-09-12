@@ -705,7 +705,7 @@ class TableReasoner(object):
 		# if verbose: print(f"queries: {queries}\nanswers: {answers}")
 		dec_prompt = build_dec_prompt(queries, answers)
 		# if verbose: print(f"full prompt:\n{dec_prompt}")
-		answers.extend(await self._call_api_2(dec_prompt, model=Model.GPT3))
+		answers.extend(await self._call_api_2(dec_prompt))
 
 		response = await self._call_api_2(
 								prompt = [
@@ -713,7 +713,7 @@ class TableReasoner(object):
 									You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
 									{"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(queries, answers))},
 								],
-								model=Model.GPT3 # 4
+								model=Model.GPT4 # 4
 							)
 		justification = response[0]
 		# justification = await self._evaluate_soundness(justification)
