@@ -357,17 +357,7 @@ class TableReasoner(object):
 		for tagged_attr in claim_tag["value"]:
 			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
 
-<<<<<<< HEAD
-		field_tag = ["values"]*len(attributes) + ["datetime"]*len(years) + ["country"]*len(countries)
-		values = zip(attributes+years+countries, field_tag)
-		claim_tag["suggestion"] = [{
-									"field": tag,
-									**val_dict,
-								} for val_dict, tag in values]
-		claim_tag["mapping"] = dict()
-=======
 		claim_tag["suggestion"] = attributes + years + countries
->>>>>>> 6d58447ce87f6dfb10c27e24cc8d8e3db1e806f9
 		if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
 		return claim_tag
 
