@@ -324,13 +324,13 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 				)	
 				country_to_infer.append(country)
 			else: # query like @(Asian countries?) have been handled by the _suggest_variable module
-				cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == "country_name"]
-				suggest_countries = [cntry for sublist in cntry_sets for cntry in sublist.values]
-				suggest_countries =  [_get_matched_cells(cntry, dm, table, attr="country_name")[0][0] for cntry in suggest_countries]
+				cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == "countries"]
+				suggest_countries = set(cntry for sublist in cntry_sets for cntry in sublist.values)
+				suggest_countries =  [_get_matched_cells(cntry, dm, table, attr=country_attr)[0][0] for cntry in suggest_countries]
 				# suggest_countries = random.sample(suggest_countries, 5)
 				claim_map.mapping[country] = suggest_countries[:5] # take the top 5 suggested
 		else:
-			claim_map.country[idx] = _get_matched_cells(country, dm, table, attr="country_name")[0][0]
+			claim_map.country[idx] = _get_matched_cells(country, dm, table, attr=country_attr)[0][0]
 	
 	inferred_countries = await asyncio.gather(*infer_country_tasks)
 	claim_map.mapping.update({country_to_infer[idx]: country_list for idx, country_list in enumerate(inferred_countries)})
@@ -449,7 +449,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Vietnam has the highest coal production in 2013."
+	userClaim = "North America countries all observed a decrease of 10% in fertility rates in 2015."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim)

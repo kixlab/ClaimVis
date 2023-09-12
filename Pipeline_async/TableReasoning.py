@@ -301,16 +301,20 @@ class TableReasoner(object):
 		prompt = [
 			{"role": "system", "content": """Given a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator that could explore the context of the statement. Provide a one-sentence explanation for each set of values. Respond as JSON in following format:
     [{
-		"values": ["<value 11>", "<value 12>", ...],
-		"explain": "<explanation1>"
+		"values": [<TODO: list of values>],
+		"explain": "<TODO: explanation>"
 		}, 
-	...]"""},
+	...]
+	
+	Each suggested set of value must be CONSISTENT with the indicator!"""},
 			{"role": "user", "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}"\nIndicator: "{variable}" """}
 		]
 		response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8, max_decode_steps=600)
 		# if verbose: print(f"response: {response}")
 		res = json.loads(response[0])
-		new_res = list(map(lambda x: {"field": 'value' if variable == 'alternative + complementary metrics' else variable, "values": x["values"], "explain": x["explain"]}, res))
+		new_res = list(map(lambda x: {"field": 'value' if variable == 'alternative + complementary metrics' else variable,\
+									  "values": x["values"] if variable != 'years' else [str(val) for val in x["values"]], \
+									  "explain": x["explain"]}, res))
 		return new_res
 	
 	async def _suggest_exploration(self, claim: UserClaimBody, verbose: bool=True):
@@ -331,7 +335,7 @@ class TableReasoner(object):
 	
 	async def _suggest_queries_2(self, body: UserClaimBody, verbose: bool=True):
 		tasks = [self._suggest_variable(body, ind, verbose=verbose) \
-	   						for ind in ["alternative + complementary metrics", "year", "countries"]] \
+	   						for ind in ["alternative + complementary metrics", "years", "countries"]] \
 				+ [self._tag_claim(
 					body.userClaim, TemplateKey.CLAIM_TAGGING_2, 
 		      		model=Model.GPT_TAG_3, verbose=verbose
