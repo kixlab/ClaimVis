@@ -66,8 +66,6 @@ class ClaimMap(BaseModel):
         values: list[str]
         explain: str
 
-    
-
     country: list[str]
     value: list[ValueAttr]
     datetime: list[str]

@@ -301,7 +301,7 @@ class TableReasoner(object):
 		prompt = [
 			{"role": "system", "content": """Given a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator that could explore the context of the statement. Provide a one-sentence explanation for each set of values. Respond as JSON in following format:
     [{
-		"value": ["<value 11>", "<value 12>", ...],
+		"values": ["<value 11>", "<value 12>", ...],
 		"explain": "<explanation1>"
 		}, 
 	...]"""},
@@ -358,6 +358,7 @@ class TableReasoner(object):
 			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
 
 		claim_tag["suggestion"] = attributes + years + countries
+		claim_tag["mapping"] = dict()
 		if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
 		return claim_tag
 
