@@ -547,11 +547,11 @@ async def main():
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
 	print(claim_map)
 
-	dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
-	print(dtps)
+	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
+	# print(dtps)
 	# p = Profiler()
 	# with p:
-	# reason = await get_reason(claim_map, top_k_datasets, verbose=True)
+	reason = await get_reason(claim_map, top_k_datasets, verbose=True)
 	
 	await openai.aiosession.get().close()
 

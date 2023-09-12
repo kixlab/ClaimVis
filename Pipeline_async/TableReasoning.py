@@ -681,12 +681,12 @@ class TableReasoner(object):
 				{ "role": "user", "content": sub_queries[-1] }
 			])
 			return dec_prompt
-		country_attr, date_attr = claim_map.mapping["country"], claim_map.mapping["datetime"]
+		country_attr, date_attr = claim_map.mapping["country"], claim_map.mapping["date"]
 		# claim_map already contains the elements constituting the queries
 		queries, answers = [], []
 		for country in claim_map.country:
-			for datetime in claim_map.datetime:
-				for category in [p.rephrase for p in claim_map.value]:
+			for datetime in claim_map.date:
+				for category in claim_map.value:
 					if '-' in datetime:
 						start, end = datetime.split('-')
 						date_mask = (df[date_attr] >= int(start)) & (df[date_attr] <= int(end))
