@@ -168,6 +168,12 @@ class DataMatcher(object):
         similarities = cosine_similarity([phrase_embedding], batch_of_embeddings)[0]
         return similarities
 
+    def batch2batch(self, batch1, batch2):
+        batch1_embeddings = self.encode(batch1) if isinstance(batch1[0], str) else batch1
+        batch2_embeddings = self.encode(batch2) if isinstance(batch2[0], str) else batch2
+        similarities = cosine_similarity(batch1_embeddings, batch2_embeddings)
+        return similarities
+
     def idf_score(self, phrase1: str, phrase2: str):
         from sklearn.feature_extraction.text import TfidfVectorizer
         

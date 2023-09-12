@@ -326,8 +326,9 @@ class AutomatedViz(object):
 				provenance = None
 			return provenance
 
+		country_attr, date_attr = claim_map.mapping['country'], claim_map.mapping['datetime']
 		# tailored specifically for country-date-value model / might need to generalize later
-		fields = [Field(name="country_name", type="nominal"), Field(name="date", type="temporal")]
+		fields = [Field(name=country_attr, type="nominal"), Field(name=date_attr, type="temporal")]
 		value_attrs = [{
 				'table_name': self.table_name,
 				'label': attr,
@@ -337,14 +338,14 @@ class AutomatedViz(object):
 			} for attr in categories
 		]
 		field_ranges = {
-			"country_name": list(set(self.table["country_name"].to_list())),
-			"date": DateRange(
+			country_attr: list(set(self.table[country_attr].to_list())),
+			date_attr: DateRange(
 				date_start={ 'label': '1960', 'value': '1960' },
 				date_end={ 'label': '2020', 'value': '2020' }
 			)
 		}
 
-		dataPoints, filtered_table, field_names = [], self.table, ["country_name", "date"]
+		dataPoints, filtered_table, field_names = [], self.table, [country_attr, date_attr]
 		for field in fields:
 			if field.type == "nominal":
 				countries = []
@@ -364,6 +365,7 @@ class AutomatedViz(object):
 					else:
 						dates.append(int(val))
 				filtered_table = filtered_table[filtered_table[field.name].isin(dates)]
+
 		for category in value_attrs:
 			for _, row in filtered_table[field_names + [category['value']]].iterrows():
 				val = row[category['value']]
@@ -371,14 +373,24 @@ class AutomatedViz(object):
                     tableName=self.table_name,
                     valueName=category['value'],
                     fields={
-						"country_name": row["country_name"],
-						"date": int(row["date"])
+						country_attr: row[country_attr],
+						date_attr: int(row[date_attr])
 					},
                     unit=category['unit'],
                     value=round(val, 3) if isinstance(val, float) else val
                 )
 				
 				dataPoints.append(dataPoint)
+		# update categories with more potential attributes
+		for attr in set(self.attributes) - set(categories) - set(field_names):
+			value_attrs.append({
+				'table_name': self.table_name,
+				'label': attr,
+				'value': attr,
+				'unit': self.parser.parse_unit(attr) or self.table[attr].dtype.name,
+				'provenance': get_provenance(attr)
+			})
+			
 
 		newSet = DataPointSet(
 				statement=claim_map.cloze_vis,

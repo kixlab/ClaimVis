@@ -290,10 +290,28 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 	claim_map.mapping.update({attr: new_attributes[i] for i, attr in enumerate(attributes)})
 	if verbose: print("Attributes:", new_attributes)
 
-	# 2. Infer the @() countries
-	dataset.fields = list(set(dataset.fields + ["country_name", "date"]))
-	table = dm.load_table(dataset.name, attributes=dataset.fields, return_dict=True)
+	# update date and country real attribute name
+	table = dm.load_table(dataset.name)
+	if "country_name" in table.columns:
+		country_attr = "country_name"
+	elif "country" in table.columns:
+		country_attr = "country"
+	else: # calculate similarity to get country
+		scores = dm.similarity_batch("country", table.columns)
+		country_attr = table.columns[scores.argmax()]
+	if "date" in table.columns:
+		date_attr = "date"
+	elif "year" in table.columns:
+		date_attr = "year"
+	else:
+		scores = dm.batch2batch(["date", "year", "time"], table.columns)
+		scores = scores.max(axis=0)
+		date_attr = table.columns[scores.argmax()]
+	claim_map.mapping.update({"datetime": date_attr, "country": country_attr})
+	dataset.fields = list(set(dataset.fields + [country_attr, date_attr]))
+	table = table[dataset.fields]
 
+	# 2. Infer the @() countries
 	infer_country_tasks, country_to_infer = [], []
 	for idx, country in enumerate(claim_map.country):
 		if country.startswith('@('):
@@ -301,18 +319,18 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 				infer_country_tasks.append(
 					tb._infer_country(
 						country[2:-1], claim_map.datetime, 
-						new_attributes, table["data"] 
+						new_attributes, table
 					)
 				)	
 				country_to_infer.append(country)
 			else: # query like @(Asian countries?) have been handled by the _suggest_variable module
 				cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == "country_name"]
 				suggest_countries = [cntry for sublist in cntry_sets for cntry in sublist.values]
-				suggest_countries =  [_get_matched_cells(cntry, dm, table["data"], attr="country_name")[0][0] for cntry in suggest_countries]
+				suggest_countries =  [_get_matched_cells(cntry, dm, table, attr="country_name")[0][0] for cntry in suggest_countries]
 				# suggest_countries = random.sample(suggest_countries, 5)
 				claim_map.mapping[country] = suggest_countries[:5] # take the top 5 suggested
 		else:
-			claim_map.country[idx] = _get_matched_cells(country, dm, table["data"], attr="country_name")[0][0]
+			claim_map.country[idx] = _get_matched_cells(country, dm, table, attr="country_name")[0][0]
 	
 	inferred_countries = await asyncio.gather(*infer_country_tasks)
 	claim_map.mapping.update({country_to_infer[idx]: country_list for idx, country_list in enumerate(inferred_countries)})
@@ -431,7 +449,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Vietnam has higher gdp than China in 2019 since 2007."
+	userClaim = "Vietnam has the highest coal production in 2013."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim)
