@@ -308,6 +308,7 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 		scores = scores.max(axis=0)
 		date_attr = table.columns[scores.argmax()]
 	claim_map.mapping.update({"datetime": date_attr, "country": country_attr})
+	claim_map.cloze_vis = claim_map.cloze_vis.replace("{date}", f'{{{date_attr}}}').replace("{country}", f'{{{country_attr}}}')
 	dataset.fields = list(set(dataset.fields + [country_attr, date_attr]))
 	table = table[dataset.fields]
 
@@ -452,20 +453,104 @@ async def main():
 	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
 	# p = Profiler()
 	# p.start()
-	paragraph = ""
-	userClaim = "Korea has the smallest nuclear energy consumption among Asian countries."
-	# A significant amount of New Zealand's GDP comes from tourism
-	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
-	claim_map = await get_suggested_queries(claim)
+	# paragraph = ""
+	# userClaim = "The labor force participation rate of China is higher than that of the United States in 2014."
+	# # A significant amount of New Zealand's GDP comes from tourism
+	# claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
+	# claim_map = await get_suggested_queries(claim)
+	claim_map = {
+    "country": [
+        "South Korea",
+        "World"
+    ],
+    "value": [
+        {
+            "raw": "total fertility rate",
+            "rephrase": "total fertility rate"
+        }
+    ],
+    "datetime": [
+        "2019"
+    ],
+    "vis": "Show the {total fertility rate} of {South Korea} and {World} in {2019}.",
+    "cloze_vis": "Show the {value} of {country} and {country} in {date}.",
+    "rephrase": "{South Korea} broke its own record for the world's lowest {total fertility rate} in {2019}.",
+    "suggestion": [
+        {
+            "field": "value",
+            "values": [
+                "birth rate",
+                "population growth rate"
+            ],
+            "explain": "Alternative metrics to explore the declining fertility rate in South Korea."
+        },
+        {
+            "field": "value",
+            "values": [
+                "average age",
+                "dependency ratio"
+            ],
+            "explain": "Complementary metrics to understand the impact of the shrinking and aging population in South Korea."
+        },
+        {
+            "field": "years",
+            "values": [
+                "2018",
+                "2017",
+                "2016"
+            ],
+            "explain": "These values explore the trend of South Korea's total fertility rate over the past few years."
+        },
+        {
+            "field": "years",
+            "values": [
+                "2019",
+                "2020",
+                "2021"
+            ],
+            "explain": "These values explore the projected total fertility rate for South Korea in the coming years."
+        },
+        {
+            "field": "countries",
+            "values": [
+                "Japan",
+                "Italy",
+                "Germany"
+            ],
+            "explain": "These countries have also been experiencing low fertility rates and could be compared to South Korea."
+        },
+        {
+            "field": "countries",
+            "values": [
+                "Niger",
+                "Somalia",
+                "Congo"
+            ],
+            "explain": "These countries have higher fertility rates compared to South Korea and could provide a contrast."
+        },
+        {
+            "field": "countries",
+            "values": [
+                "China",
+                "India",
+                "United States"
+            ],
+            "explain": "These countries have large populations and could be compared to South Korea in terms of the impact of low fertility rates on population size."
+        }
+    ],
+    "mapping": {}
+}
+	claim_map = ClaimMap(**claim_map)
 
 	dic = await get_relevant_datasets(claim_map)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
+	print(claim_map)
 
-	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
-	# print(dtps)
+	dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
+	print(dtps)
 	# p = Profiler()
 	# with p:
-	reason = await get_reason(claim_map, top_k_datasets, verbose=True)
+	# reason = await get_reason(claim_map, top_k_datasets, verbose=True)
 	
 	await openai.aiosession.get().close()
 

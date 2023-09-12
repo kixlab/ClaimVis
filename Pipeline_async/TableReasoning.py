@@ -724,7 +724,7 @@ class TableReasoner(object):
 async def main():
 	data_matcher = DataMatcher(datasrc="../Datasets")
 	table_reasoner = TableReasoner(datamatcher=data_matcher)
-	query = "Vietnam has topped the coffee production contest against China and other big manufacturers recently."
+	query = "The labor force participation rate of China is higher than that of the United States in 2014."
 	# query = "2 billion people don't have access to clean water."
 	# await table_reasoner._suggest_queries_2(query, verbose=True)
 	await table_reasoner._suggest_queries_2(query, verbose=True)
