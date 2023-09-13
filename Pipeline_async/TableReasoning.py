@@ -130,12 +130,10 @@ class TableReasoner(object):
 			filedir = "../Gloc/generation/finetune/claim_tagging.jsonl"
 			with open(filedir, 'r') as file:
 				data = [json.loads(line) for line in file]
-				data = [item for sublist in data for item in sublist["messages"][1:]]
 
-				even_indices = list(range(0, len(data), 2))
-				sampled_even_indices = random.sample(even_indices, samples)
-				sampled_pairs = [(i, i+1) for i in sampled_even_indices]
-				random_sample = [data[i] for pair in sampled_pairs for i in pair]
+				indices = list(range(0, len(data)))
+				sampled_indices = random.sample(indices, samples)
+				random_sample = [msg for idx in sampled_indices for msg in data[idx]["messages"][1:]]
 
 				msg.extend(random_sample)
 				
@@ -149,7 +147,10 @@ class TableReasoner(object):
 							)
 
 		# if verbose: print(f"model: {model}\nclaim tag: {claim_tag}")
-		return json.loads(claim_tag[0])
+		data = json.loads(claim_tag[0])
+		# check if the format of the response is correct
+		print("data: ", data)
+		return data
 		
 	async def _infer_country(
 			self, claim: str, 

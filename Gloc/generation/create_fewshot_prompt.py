@@ -1282,7 +1282,7 @@ train_data = [
 2. Value attributes. Rephrase attribute to be data-related if needed.
 3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
 4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
-        {"role": "user", "content": "Brunei has hold the record of the smallest coal consumer in 2010."},
+        {"role": "user", "content": "Brunei has held the record of the smallest coal consumer in 2010."},
         {"role": "assistant", "content": """{
             "country": ["Brunei", "@(Bottom 5 countries?)"],
             "value": [{
@@ -1970,6 +1970,24 @@ train_data = [
             "datetime": ["2005 - 2015"],
             "vis": "Show the {number of people who died of famine} of {Africa} from {2005} to {2015}.",
             "rephrase": "The {number of people who died of famine} of {Africa} had been increasing 10% every year from {2005} to {2015}."
+        }"""}]},
+
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "Japan has broken its own record of the least fertile country last year"},
+        {"role": "assistant", "content": """{
+            "country": ["Japan"],
+            "value": [{
+                "raw": "least fertile country",
+                "rephrase": "fertility rate"
+            }],
+            "datetime": ["@(X) - @(Y - 1)"],
+            "vis": "Show the {fertility rate} of {Japan} from {@(X)} to {@(Y - 1)}.",
+            "rephrase": "{Japan} has broken its own record of the {fertility rate} last year."
         }"""}]},
 
 ]

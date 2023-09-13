@@ -258,8 +258,8 @@ async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=
 	dataset = datasets[0]
 	table = dm.load_table(dataset.name, attributes=dataset.fields)
 	tb = TableReasoner(datamatcher=dm)
-	# reason = await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
-	reason = await tb.reason_2(claim_map, table, verbose=verbose, fuzzy_match=True)
+	reason = await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
+	# reason = await tb.reason_2(claim_map, table, verbose=verbose, fuzzy_match=True)
 	return reason
 
 @app.post("/get_datasets")
@@ -455,7 +455,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "the total fertility rate began to sink more quickly in the 2000s during the financial crises."
+	userClaim = "What was the population of South Korea in 2020?"
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim)
@@ -545,15 +545,13 @@ async def main():
 
 	dic = await get_relevant_datasets(claim_map)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
-	print(claim_map)
+	# print(claim_map)
 
-	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
-	# print(dtps)
+	dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
+	print(dtps)
 	# p = Profiler()
 	# with p:
-	reason = await get_reason(claim_map, top_k_datasets, verbose=True)
-	
-	await openai.aiosession.get().close()
+	# reason = await get_reason(claim_map, top_k_datasets, verbose=True)
 
 if __name__ == "__main__":
 	asyncio.run(main())
