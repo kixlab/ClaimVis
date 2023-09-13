@@ -1,5 +1,6 @@
 # CoT few-shot prompting 
 import sys
+import numpy as np
 sys.path.append("../Gloc")
 sys.path.append("..")
 
@@ -19,6 +20,7 @@ from models import UserClaimBody, ClaimMap, Dataset
 from collections import defaultdict
 from functools import cache
 from itertools import zip_longest
+from itertools import product
 import json
 import random
 import re
@@ -107,13 +109,14 @@ class TableReasoner(object):
 
 		return response
 
-	@log_decorator
+	# @log_decorator
 	async def _tag_claim(
 			self, claim: str, 
 			template_key: TemplateKey = TemplateKey.CLAIM_TAGGING,
 			model: Model = Model.GPT3,
 			verbose: bool = False,
-			samples: int = 10
+			fewshot_samples: int = 6,
+			gen_samples: int = 1
 		):
 		"""
 			Tag claim with claim type
@@ -132,14 +135,15 @@ class TableReasoner(object):
 			with open(filedir, 'r') as file:
 				data = [json.loads(line) for line in file]
 
-				indices = list(range(0, len(data)))
-				sampled_indices = random.sample(indices, samples)
+				# indices = list(range(0, len(data)))
+				# sampled_indices = [random.sample(indices, samples)]
+				sampled_indices = range(0, fewshot_samples)
 				random_sample = [msg for idx in sampled_indices for msg in data[idx]["messages"][1:]]
 
 				msg.extend(random_sample)
 				
 			msg.append({"role": "user", "content": claim})
-			claim_tag = await self._call_api_2(msg, model=model, max_decode_steps=400)
+			claim_tag = await self._call_api_2(msg, model=model, max_decode_steps=700, samples=gen_samples, temperature=.8)
 		else:
 			_, claim_tag = await self._call_api_1(
 								question=claim,
@@ -147,22 +151,33 @@ class TableReasoner(object):
 								model=model
 							)
 
-		data = json.loads(claim_tag[0])
-		if verbose: print(f"model: {model}\nclaim tag: {data}")
+		data = [json.loads(sample) for sample in claim_tag]
+		if verbose:
+			print(f"model: {model}")
+			for i, item in enumerate(data, 1):
+				print(f"claim tag {i}: {item}")
 		# check if the format of the response is correct
-		return data
+		return json.loads(claim_tag[0])
 		
 	async def _infer_country(
 			self, claim: str, 
 			dates: list[str], 
 			values: list[str], 
-			table: pd.DataFrame, 
-			verbose: bool=True
+			table: pd.DataFrame,
+			datasets: list[Dataset], 
+			verbose: bool=True,
 		):
-		queries, db = [], NeuralDB([table], add_row_id=False, normalize=False, lower_case=False)
-
-		from itertools import product
-		combos = list(product(dates, values))
+		queries, combos, cond = [], list(product(dates, values)), any(p in claim for p in ['with', 'Countries of'])
+		if cond: # identify the new dataset if needed
+			new_value = claim.replace("Countries of ", "").replace("Country", "").replace("with", "").strip()
+			scores = []
+			for dataset in datasets:
+				embed_dict = self.datamatcher.attrs_embeddings[dataset.name]
+				embeds = [embed_dict[attr] for attr in dataset.fields]
+				scores.append(self.datamatcher.attr_score_batch(new_value, embeds))
+			scores = np.array(scores)
+			dataset = datasets[scores.argmax()]
+			table, _, _ = self.datamatcher.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
 		for date, value in combos:
 			if '-' in date:
 				start, end = date.split('-')
@@ -170,18 +185,20 @@ class TableReasoner(object):
 			else:
 				date = "in {}".format(date)
 			
-			if "with" in claim: # no need to add value
-				queries.append("What are the {} {}?".format(claim[:-1], date))
-			else:
-				queries.append("What are the {} of {} {}?".format(claim[:-1], value, date))
-		
+			if cond: # no need to add value
+				queries.append("What are the {} {}?".format(claim, date))
+			else: 
+				queries.append("What are the {} of {} {}?".format(claim, value, date))
+
+		db = NeuralDB([table], add_row_id=False, normalize=False, lower_case=False)
+
 		if verbose: print(f"queries: {queries}")
 		response = await self._exec_sqls_from_sub_queries(db, queries, fuzzy_match=True, verbose=verbose)
 
 		try:
 			countries = [item for sublist in response[0] for item in eval(sublist[0])\
 							if isinstance(item, str) ]
-			return countries
+			return set(countries)
 		except Exception as e:
 			if verbose: print(e)
 			return []
@@ -343,7 +360,7 @@ class TableReasoner(object):
 		# if verbose: print(f"response: {response}")
 		return json.loads(response[0])
 	
-	async def _suggest_queries_2(self, body: UserClaimBody, verbose: bool=True, model: Model=Model.GPT3):
+	async def _suggest_queries_2(self, body: UserClaimBody, verbose: bool=True, model: Model=Model.GPT_TAG_4):
 		tasks = [self._suggest_variable(body, ind, verbose=verbose) \
 	   						for ind in self.INDICATOR] \
 				+ [self._tag_claim(
@@ -509,19 +526,7 @@ class TableReasoner(object):
 										template_key=TemplateKey.SQL_GENERATION_2,
 										fuzzy_match=fuzzy_match
 									)
-			if verbose: print(f"SQLs: {sqlss}")
-		
-		def process_ans(ans: list):
-			try:
-				if len(ans) > 30:
-					# sometimes the answer is too long to fit into the prompt
-					ans = [x for x in ans if isinstance(x, (int, float)) and not math.isnan(x)] 
-					return f"Ranging from {str(min(ans))} to {str(max(ans))}, with average {str(sum(ans)/len(ans))}"
-				return str(ans)
-			except Exception as e:
-				if verbose: print("error with list ans: ", e)
-				return []
-				
+						
 		for idx, (sqls, query) in enumerate(zip(sqlss, queries)):
 			if verbose: print(f"Q{idx+1}: {query}\nGenerated SQLs: {sqls}")
 
@@ -539,7 +544,7 @@ class TableReasoner(object):
 				nsqls=sqls,
 				pred_answer_list=preds
 			)
-			top_ans = process_ans(top_ans)
+			top_ans = self._process_list(top_ans, verbose)
 			unit = self.parser.parse_sql_unit(pred_sqls[0][0])
 			if verbose: print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")
 
@@ -575,6 +580,19 @@ class TableReasoner(object):
 			{ "role": "user", "content": sub_queries[-1] }
 		])
 		return dec_prompt
+
+	def _process_list(self, lst: list, verbose=False):
+		try:
+			if len(lst) > 30:
+				# sometimes the answer is too long to fit into the prompt
+				new_lst = [x for x in lst if isinstance(x, (int, float)) and not math.isnan(x)] 
+				if not new_lst and isinstance(lst[0], str): 
+					return str(random.sample(lst, 10)) # array full of string
+				return f"Ranging from {str(min(new_lst))} to {str(max(new_lst))}, with average {str(sum(new_lst)/len(new_lst))}"
+			return str(lst)
+		except Exception as e:
+			if verbose: print("error with list ans: ", e)
+			return "[]"
 
 	# @log_decorator
 	async def reason(
@@ -664,17 +682,6 @@ class TableReasoner(object):
 				verbose=False, 
 				fuzzy_match=True,
 			):
-		def process_ans(ans: list):
-			try:
-				if len(ans) > 30:
-					# sometimes the answer is too long to fit into the prompt
-					ans = [x for x in ans if isinstance(x, (int, float)) and not math.isnan(x)] 
-					return f"Ranging from {str(min(ans))} to {str(max(ans))}, with average {str(sum(ans)/len(ans))}"
-				return str(ans)
-			except Exception as e:
-				if verbose: print("error with list ans: ", e)
-				return []
-			
 		country_attr, date_attr = claim_map.mapping["country"], claim_map.mapping["date"]
 		# claim_map already contains the elements constituting the queries
 		queries, answers = [], []
@@ -699,7 +706,7 @@ class TableReasoner(object):
 					category_name = claim_map.mapping[category] 
 
 					val = df[date_mask & country_mask][category_name].values
-					val = process_ans(val)
+					val = self._process_list(val, verbose)
 					query = f"Q{len(queries)+1}: What is the {category_name} of {country_name} {date_name}?"
 					queries.append(query)
 					answer = f"A{len(answers)+1}: {str(val)}"
@@ -710,13 +717,15 @@ class TableReasoner(object):
 		# if verbose: print(f"full prompt:\n{dec_prompt}")
 		answers.extend(await self._call_api_2(dec_prompt))
 
+		msg = [
+				{"role": "system", "content": """You are an amazing rhetorician and logician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
+				You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction. Make adjustment to the logic if needed."""},
+				{"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(queries, answers))},
+			]
+		print(f"msg: {msg}")
 		response = await self._call_api_2(
-								prompt = [
-									{"role": "system", "content": """You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
-									You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction."""},
-									{"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(queries, answers))},
-								],
-								model=Model.GPT4 # 4
+								prompt = msg,
+								model=Model.GPT3 # 4
 							)
 		justification = response[0]
 		# justification = await self._evaluate_soundness(justification)
@@ -727,23 +736,30 @@ class TableReasoner(object):
 async def main():
 	data_matcher = DataMatcher(datasrc="../Datasets")
 	table_reasoner = TableReasoner(datamatcher=data_matcher)
-	query = "Is Japan's population in age 15-64 decreasing?."
+	query = "What was the population of South Korea in 2020?"
 	# await table_reasoner._suggest_queries_2(query, verbose=True)
-
-	tasks = [
-			table_reasoner._tag_claim(
-					query, TemplateKey.CLAIM_TAGGING_2, 
-					model=Model.GPT4, verbose=True, samples=5
-				), 
-			table_reasoner._tag_claim(
-					query, TemplateKey.CLAIM_TAGGING_2, 
-					model=Model.GPT_TAG_3, verbose=True, samples=10
-				),
-			table_reasoner._tag_claim(
+	data = await table_reasoner._tag_claim(
 				query, TemplateKey.CLAIM_TAGGING_2, 
-				model=Model.GPT_TAG_4, verbose=True, samples=10
-			)]
-	await asyncio.gather(*tasks)
+				model=Model.GPT_TAG_4, 
+				verbose=True, 
+				fewshot_samples=6, 
+				gen_samples=7
+			)
+
+	# tasks = [
+	# 		table_reasoner._tag_claim(
+	# 				query, TemplateKey.CLAIM_TAGGING_2, 
+	# 				model=Model.GPT4, verbose=True, samples=5
+	# 			), 
+	# 		table_reasoner._tag_claim(
+	# 				query, TemplateKey.CLAIM_TAGGING_2, 
+	# 				model=Model.GPT_TAG_3, verbose=True, samples=10
+	# 			),
+	# 		table_reasoner._tag_claim(
+	# 			query, TemplateKey.CLAIM_TAGGING_2, 
+	# 			model=Model.GPT_TAG_4, verbose=True, samples=10
+	# 		)]
+	# await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
 	asyncio.run(main())

@@ -44,14 +44,14 @@ data provided does not include the necessary information """
         print(table)
     
     def test_retrieve_data_points(self):
-        table = pd.read_csv(os.path.join(self.datasrc, "Private Sector.csv"))
+        table = pd.read_csv(os.path.join(self.datasrc, "Social Protection & Labor.csv"))
         db = NeuralDB(
             tables=[table],
-            add_row_id=True,
+            add_row_id=False,
             normalize=False,
-            lower_case=True
+            lower_case=False
         )
-        sql = """SELECT case when ( "Children in employment, total (% of children ages 7-14)" - lag ( "Children in employment, total (% of children ages 7-14)" ) over ( ORDER by "date" ) ) = -1 then \'Yes\' else \'No\' end FROM w WHERE "date" IN ( 2012 , 2016 ) """
+        sql = """SELECT "country_name" FROM w WHERE "Employment to population ratio, 15+, total (%) (national estimate)" > 7  AND "date" = 2020 """
         print(db.execute_query(sql))
 
     def test_parse_ans(self):
@@ -139,5 +139,5 @@ data provided does not include the necessary information """
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_create_fine_tune()
+    tester.test_retrieve_data_points()
     # pass

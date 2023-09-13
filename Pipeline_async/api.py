@@ -245,7 +245,7 @@ async def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test
 async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True) -> list[DataPointSet]:
 	dm = DataMatcher(datasrc="../Datasets")
 	dataset = datasets[0] # take the first one
-	table = dm.load_table(dataset.name, attributes=dataset.fields)
+	table, _, _ = dm.load_table(dataset.name, attributes=dataset.fields)
 	new_attributes = [claim_map.mapping[attr] for attr in claim_map.value]	
 
 	# 3. return DataPointSet
@@ -257,7 +257,7 @@ async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=
 	dm = DataMatcher(datasrc="../Datasets")
 	claim = claim_map.rephrase
 	dataset = datasets[0]
-	table = dm.load_table(dataset.name, attributes=dataset.fields)
+	table, _, _ = dm.load_table(dataset.name, attributes=dataset.fields)
 	tb = TableReasoner(datamatcher=dm)
 	# reason = await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
 	reason = await tb.reason_2(claim_map, table, verbose=verbose, fuzzy_match=True)
@@ -292,37 +292,20 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 	if verbose: print("Attributes:", new_attributes)
 
 	# update date and country real attribute name
-	table = dm.load_table(dataset.name)
-	if "country_name" in table.columns:
-		country_attr = "country_name"
-	elif "country" in table.columns:
-		country_attr = "country"
-	else: # calculate similarity to get country
-		scores = dm.similarity_batch("country", table.columns)
-		country_attr = table.columns[scores.argmax()]
-	if "date" in table.columns:
-		date_attr = "date"
-	elif "year" in table.columns:
-		date_attr = "year"
-	else:
-		scores = dm.batch2batch(["date", "year", "time"], table.columns)
-		scores = scores.max(axis=0)
-		date_attr = table.columns[scores.argmax()]
+	table, country_attr, date_attr = dm.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
 	print("Country:", country_attr, "Date:", date_attr)
 	claim_map.mapping.update({"date": date_attr, "country": country_attr})
 	claim_map.cloze_vis = claim_map.cloze_vis.replace("{date}", f'{{{date_attr}}}').replace("{country}", f'{{{country_attr}}}')
-	dataset.fields = list(set(dataset.fields + [country_attr, date_attr]))
-	table = table[dataset.fields]
 
 	# 2. Infer the @() countries
 	infer_country_tasks, country_to_infer = [], []
 	for idx, country in enumerate(claim_map.country):
 		if country.startswith('@('):
-			if any(p in country for p in ["Bottom", "Top", "with", "that"]):
+			if any(p in country for p in ["Bottom", "Top", "with", "Countries of"]):
 				infer_country_tasks.append(
 					tb._infer_country(
 						country[2:-1], claim_map.date, 
-						new_attributes, table
+						new_attributes, table, datasets
 					)
 				)	
 				country_to_infer.append(country)
@@ -439,7 +422,7 @@ def get_reasoning_evaluation(reasoning: str):
 	return reasoner._evaluate_soundness(reasoning)
 
 @app.post('/suggest_queries')
-async def get_suggested_queries(claim: UserClaimBody, model: Model = Model.GPT4):
+async def get_suggested_queries(claim: UserClaimBody, model: Model = Model.GPT_TAG_4):
 	tagged_claim = await TableReasoner()._suggest_queries_2(claim, model=model)
 	return ClaimMap(**tagged_claim)
 
@@ -456,7 +439,8 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Is Japan's working age population decreasing?"
+	userClaim = "Countries with employment rate > 7% would have population over 200M"
+	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
