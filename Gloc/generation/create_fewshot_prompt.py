@@ -1980,16 +1980,35 @@ train_data = [
 4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
         {"role": "user", "content": "Japan has broken its own record of the least fertile country last year"},
         {"role": "assistant", "content": """{
-            "country": ["Japan"],
+            "country": ["Japan", "@(Bottom 5 countries?)"],
             "value": [{
                 "raw": "least fertile country",
                 "rephrase": "fertility rate"
             }],
-            "datetime": ["@(X) - @(Y - 1)"],
-            "vis": "Show the {fertility rate} of {Japan} from {@(X)} to {@(Y - 1)}.",
-            "rephrase": "{Japan} has broken its own record of the {fertility rate} last year."
+            "datetime": ["@(Y - 2)", "@(Y - 1)"],
+            "vis": "Show the {fertility rate} of {Japan} and {@(Bottom 5 countries?)} in {@(Y - 2)} and {@(Y - 1)}.",
+            "rephrase": "The {fertility rate} of {Japan} in {@(Y - 1)} is lower than @{(Y - 2)}, and is the lowest among {@(Bottom 5 countries?)} in {@(Y - 1)}."
         }"""}]},
 
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "the total export began to sink more quickly in the 2000s during the financial crises"},
+        {"role": "assistant", "content": """{
+            "country": ["World"],
+            "value": [{
+                "raw": "total export",
+                "rephrase": "total export"
+            }],
+            "datetime": ["2000 - 2009", "1990 - 1999"],
+            "vis": "Show the {total export} of {World} from {1990} to {1999} and from {2000} to {2009}.",
+            "rephrase": "The {total export} of {World} began to sink more quickly from {2000} to {2009} compared to {1990} to {1999}."
+        }"""}]},
+
+            
 ]
 
 import json
