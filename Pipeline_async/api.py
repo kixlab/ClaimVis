@@ -19,6 +19,7 @@ from TableReasoning import TableReasoner
 from DataMatching import DataMatcher
 from Gloc.utils.normalizer import _get_matched_cells
 from pyinstrument import Profiler
+from Gloc.utils.async_llm import Model
 
 def get_db():
 	db = SessionLocal()
@@ -317,7 +318,7 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 	infer_country_tasks, country_to_infer = [], []
 	for idx, country in enumerate(claim_map.country):
 		if country.startswith('@('):
-			if any(p in country for p in ["Bottom", "Top", "with"]):
+			if any(p in country for p in ["Bottom", "Top", "with", "that"]):
 				infer_country_tasks.append(
 					tb._infer_country(
 						country[2:-1], claim_map.date, 
@@ -438,8 +439,8 @@ def get_reasoning_evaluation(reasoning: str):
 	return reasoner._evaluate_soundness(reasoning)
 
 @app.post('/suggest_queries')
-async def get_suggested_queries(claim: UserClaimBody):
-	tagged_claim = await TableReasoner()._suggest_queries_2(claim)
+async def get_suggested_queries(claim: UserClaimBody, model: Model = Model.GPT4):
+	tagged_claim = await TableReasoner()._suggest_queries_2(claim, model=model)
 	return ClaimMap(**tagged_claim)
 
 @app.get('/robots.txt', response_class=PlainTextResponse)
@@ -455,10 +456,11 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "South Korea broke its own record for the world’s lowest total fertility rate last year "
+	userClaim = "Is Japan's working age population decreasing?"
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
-	claim_map = await get_suggested_queries(claim)
+	claim_map = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
+
 # 	claim_map = {
 #     "country": [
 #         "South Korea",
@@ -545,7 +547,7 @@ async def main():
 
 	dic = await get_relevant_datasets(claim_map)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
-	# print(claim_map)
+	print(claim_map)
 
 	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
 	# print(dtps)

@@ -110,7 +110,7 @@ data provided does not include the necessary information """
         t = openai.File.create(
             file = open(file_path, 'rb'),
             purpose = 'fine-tune',
-            user_provided_filename= "claim_tagging_fine_tune_2"
+            user_provided_filename= "claim_tagging_fine_tune_3"
         )
         print(t)
 
@@ -120,8 +120,11 @@ data provided does not include the necessary information """
     
     def test_create_fine_tune(self):
         # t = openai.FineTuningJob.create(
-        #     training_file="file-QB3dm9RtoIwykKuLJrjLwVP2",
-        #     model = 'gpt-3.5-turbo'
+        #     training_file="file-nGHKtMTQqYdKfJU0uXRq06W9",
+        #     model = 'gpt-3.5-turbo',
+        #     hyperparameters = {
+        #         "n_epochs": 4,
+        #     }
         # )
         # print(t)
         t = openai.FineTuningJob.list()
@@ -136,5 +139,5 @@ data provided does not include the necessary information """
 
 if __name__ == "__main__":
     tester = Tester(datasrc="../Datasets")
-    tester.test_tag_date_time()
+    tester.test_create_fine_tune()
     # pass

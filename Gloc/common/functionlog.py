@@ -18,9 +18,9 @@ def log_decorator(func):
         logging.info(f"Arguments: {args}, {kwargs}")
         logging.info(f"Return Value: {result}")
         logging.info(f"Execution Time: {start_time}")
-        logging.info(f"Token used: {TokenCount.get_token_count()}")
+        logging.info(f"Token used: {AsyncTokenCount.get_token_count()}")
 
-        TokenCount.reset() 
+        AsyncTokenCount.reset() 
         return result
     return wrapper
 

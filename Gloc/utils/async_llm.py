@@ -16,6 +16,7 @@ class Model(str, enum.Enum):
     GPT_TAG = 'ft:gpt-3.5-turbo-0613:kixlab::7w7fWPZW'
     GPT_TAG_2 = "ft:gpt-3.5-turbo-0613:kixlab::7wCCe09Q"
     GPT_TAG_3 = "ft:gpt-3.5-turbo-0613:kixlab::7wQQiDqC"
+    GPT_TAG_4 = "ft:gpt-3.5-turbo-0613:kixlab::7yEL02QJ"
 
 def retry(try_count=3, sleep_seconds=2):
     """Retry decorator for async functions."""
@@ -104,7 +105,7 @@ async def call_model(
     results = []
     while len(results) < samples:
         if model in [Model.GPT3, Model.GPT3_16k, Model.GPT4, Model.GPT3_4k, \
-                     Model.GPT_TAG, Model.GPT_TAG_2, Model.GPT_TAG_3]:
+                     Model.GPT_TAG, Model.GPT_TAG_2, Model.GPT_TAG_3, Model.GPT_TAG_4]:
             result = await _call_openai(
                 prompt=prompt,
                 engine=model,

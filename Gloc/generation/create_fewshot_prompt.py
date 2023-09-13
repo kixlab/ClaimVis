@@ -2008,7 +2008,114 @@ train_data = [
             "rephrase": "The {total export} of {World} began to sink more quickly from {2000} to {2009} compared to {1990} to {1999}."
         }"""}]},
 
-            
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "Countries with a higher percentage of people aged 65 or over than that of the world average in 2007 all have population over 200 million."},
+        {"role": "assistant", "content": """{
+            "country": ["@(Countries with a higher percentage of people aged 65 or over than that of the world average?)"],
+            "value": [{
+                "raw": "population",
+                "rephrase": "population"
+            }],
+            "datetime": ["2007"],
+            "vis": "Show the {population} of @(Countries with a higher percentage of people aged 65 or over than that of the world average?) in {2007}.",
+            "rephrase": "All {@(Countries with a higher percentage of people aged 65 or over than that of the world average?)} in {2007} have {population} over 200 million."
+        }"""}]},
+
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "Countries with high literacy rates have a higher employment rate"},
+        {"role": "assistant", "content": """{
+            "country": ["@(Countries with high literacy rates?)", "@(Countries with low literacy rates?)"],
+            "value": [{
+                "raw": "employment rate",
+                "rephrase": "employment rate"
+            }],
+            "datetime": ["@(Y)"],
+            "vis": "Show the {employment rate} of {@(Countries with high literacy rates?)} and {@(Countries with low literacy rates?)} in {@(Y)}.",
+            "rephrase": "{@(Countries with high literacy rates?)} have a higher {employment rate} than {@(Countries with low literacy rates?)} in {@(Y)}."
+        }"""}]},
+
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "1 billion USD is the amount of external debt that AMEA members have accumulated in 2016."},
+        {"role": "assistant", "content": """{
+            "country": ["@(AMEA countries?)"],
+            "value": [{
+                "raw": "external debt",
+                "rephrase": "external debt"
+            }],
+            "datetime": ["2016"],
+            "vis": "Show the {external debt} of @(AMEA countries?) in {2016}.",
+            "rephrase": "The {external debt} of @(AMEA countries?) in {2016} is 1 billion USD."
+        }"""}]},
+
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "Central American people who have electricity now doubled that in the early 90s."},
+        {"role": "assistant", "content": """{
+            "country": ["@(Central American countries?)"],
+            "value": [{
+                "raw": "people who have electricity",
+                "rephrase": "number of people who have electricity"
+            }],
+            "datetime": ["1990 - 1999", "@(Y)"],
+            "vis": "Show the {number of people who have electricity} of @(Central American countries?) from {1990} to {1999} and in {@(Y)}.",
+            "rephrase": "The {number of people who have electricity} of @(Central American countries?) in {@(Y)} is twice that in {1990} to {1999}."
+        }"""}]},
+    
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "Back in 2000, when the internet was still in its infancy, the number of internet users in the world was only 6% of the world population, and has rised to 30% today."},
+        {"role": "assistant", "content": """{
+            "country": ["World"],
+            "value": [{
+                "raw": "internet users",
+                "rephrase": "number of internet users"
+            }],
+            "datetime": ["2000", "2019"],
+            "vis": "Show the {number of internet users} of {World} in {2000} and {2019}.",
+            "rephrase": "The {number of internet users} of {World} has risen from 6% of the world population in {2000} to 30% in {2019}."
+        }"""}]},
+    
+    {"messages": [
+        {"role": "system", "content": """Tag critical parts of the sentence. Critical parts include:
+1. Countries. When there are phrases that represent a groups of countries, tag them with @(<COUNTRY_GROUP>?). For example @(Asian countries?).  
+2. Value attributes. Rephrase attribute to be data-related if needed.
+3. Datetime. Use 'X' and 'Y' variables to represent the default oldest and newest dates. When a date expression is not interpretable using single number, tag them with @(<EXPRESSION>). For example  @(Y - 2).
+4. Also rephrase the sentence into a visualization task using extremal logic if possible."""},
+        {"role": "user", "content": "Austria produced 10 times as much steel as the second largest steel producer 15 years ago."},
+        {"role": "assistant", "content": """{
+            "country": ["Austria", "@(Second largest steel producing country?)"],
+            "value": [{
+                "raw": "steel",
+                "rephrase": "steel production"
+            }],
+            "datetime": ["@(Y - 15)"],
+            "vis": "Show the {steel production} of {Austria} and {@(Second largest steel producing country?)} in {@(Y - 15)}.",
+            "rephrase": "{Austria} produced 10 times as much {steel production} as {@(Second largest steel producing country?)} in {@(Y - 15)}."
+        }"""}]}
+# 50
 ]
 
 import json
