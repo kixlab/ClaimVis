@@ -339,7 +339,7 @@ class TableReasoner(object):
 		prompt = [
 			{
 				"role": "system",
-				"content": """From a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator to compare the statement in other contexts. Please try to select the values that could relate to the reader's background. Provide a one-sentence teaser question for each set of values to intrigue the reader to explore the context. Respond as JSON in the following format:
+				"content": """From a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator to compare the statement in other contexts. Please try to select the values that could relate to the reader's background. Provide a one-sentence teaser question for each set of values to intrigue the reader to explore the context. Please wrap each value with @() if it does not directly refer to the specific value. Respond as JSON in the following format:
 			[{
 				"values": ["<value 11>", "<value 12>", ...],
 				"teaser": "<teaser1>"
@@ -356,7 +356,7 @@ class TableReasoner(object):
 
 		Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
 		Statement: A significant amount of New Zealand's GDP comes from tourism
-		Variable: countries"""
+		Variable: country"""
 			},
 			{
 				"role": "assistant",
@@ -370,7 +370,7 @@ class TableReasoner(object):
 			"values": ["Australia", "France", "United Kingdom"],
 			"teaser": "What is the contribution of tourism in other developed countries?"
 		},{
-			"values": ["Top 3 countries with the highest contribution to GDP from tourism"],
+			"values": ["@(Top 3 countries with the highest contribution to GDP from tourism)"],
 			"teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
 		}]"""
 			},
@@ -380,7 +380,7 @@ class TableReasoner(object):
 
 		Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
 		Statement: A significant amount of New Zealand's GDP comes from tourism
-		Variable: years"""
+		Variable: year"""
 			},
 			{
 				"role": "assistant",
@@ -389,7 +389,7 @@ class TableReasoner(object):
 			"teaser": "What was the impact of the pandemic on New Zealand's tourism industry in 2020?"
 		},
 		{
-			"values": ["Year with the largest proportion of tourism in their GDP"],
+			"values": ["@(Year with the largest proportion of tourism in their GDP)"],
 			"teaser": "When did New Zealand have the largest proportion of tourism in their GDP?"
 		}]"""
 			},
@@ -399,7 +399,7 @@ class TableReasoner(object):
 
 		Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
 		Statement: A significant amount of New Zealand's GDP comes from tourism
-		Variable: alternative + complementary metrics"""
+		Variable: complementary + alternative indicators"""
 			},
 			{
 				"role": "assistant",
