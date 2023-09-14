@@ -117,6 +117,8 @@ class DataMatcher(object):
                 answer["Keywords"].append(claim) # add claim into keywords also
                 WEIGHT = 1/2
                 seed_embeds, weights = self.encode(answer["Keywords"]), [*[score*(1-WEIGHT) for score in answer["Scores"]], WEIGHT]
+            elif not claim:
+                seed_embeds, weights = self.encode(keywords), [1/len(keywords)]*len(keywords)
             else:
                 seed_embeds, weights = self.encode(keywords + [claim]), self.similarity_batch(claim, keywords + [claim])
                 weights = [score/sum(weights) for score in weights]
@@ -201,16 +203,45 @@ class DataMatcher(object):
             with open(f"{self.datasrc}/description/{dataset[:-5]}_column_embeddings.json", 'w') as f:
                 json.dump(embed, f)
     
-    def load_table(self, dataset: str, attributes: list=None, return_dict: bool=False):
+    def load_table(
+            self, dataset: str, 
+            attributes: list=None, 
+            return_dict: bool=False,
+            infer_date_and_country: bool=False
+        ):
         table = pd.read_csv(f"{self.datasrc}/{dataset}")
+        if infer_date_and_country:
+            if "country_name" in table.columns:
+                country_attr = "country_name"
+            elif "country" in table.columns:
+                country_attr = "country"
+            else: # calculate similarity to get country
+                scores = self.similarity_batch("country", table.columns)
+                country_attr = table.columns[scores.argmax()]
+            if "date" in table.columns:
+                date_attr = "date"
+            elif "year" in table.columns:
+                date_attr = "year"
+            else:
+                scores = self.batch2batch(["date", "year", "time"], table.columns)
+                scores = scores.max(axis=0)
+                date_attr = table.columns[scores.argmax()]
+        else:
+            country_attr, date_attr = None, None
+
         if attributes:
+            if infer_date_and_country:
+                attributes.extend([country_attr, date_attr]) # important to mutate the original list
+                attributes = list(set(attributes)) # remove duplicates
             table = table[attributes]
         table.name = dataset
         if not return_dict:
-            return table
+            return table, country_attr, date_attr
         return {
             "name": dataset,
-            "data": table
+            "data": table,
+            "country": country_attr,
+            "date": date_attr
         }
 
 async def main():
