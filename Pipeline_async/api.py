@@ -265,12 +265,13 @@ async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=
 
 @app.post("/get_datasets")
 async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
-	# suggest_keywords = [keyword for sublist in claim_map.suggestion.value for keyword in sublist.values]
-	suggest_keywords = []
-	keywords = suggest_keywords + claim_map.value
+	value_keywords = [keyword for sublist in claim_map.suggestion for keyword in sublist.values if sublist.field == "value"]
+	country_keywords = [keyword[2:-2].replace("Country", "").replace("Countries", "").strip() for keyword in claim_map.country if keyword.startswith("@")]
+	keywords = country_keywords + claim_map.value + value_keywords
+	print("keywords:", keywords)
 	dm = DataMatcher(datasrc="../Datasets")
 	tb = TableReasoner(datamatcher=dm)
-	top_k_datasets = await dm.find_top_k_datasets(claim_map.rephrase, k=5, method="gpt", verbose=verbose, keywords=keywords)
+	top_k_datasets = await dm.find_top_k_datasets("", k=5, method="gpt", verbose=verbose, keywords=keywords)
 	datasets = [Dataset(name=name, description=description, score=score, fields=fields) 
         for name, description, score, fields in top_k_datasets]
 
@@ -304,7 +305,7 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 			if any(p in country for p in ["Bottom", "Top", "with", "Countries of"]):
 				infer_country_tasks.append(
 					tb._infer_country(
-						country[2:-1], claim_map.date, 
+						country[2:-2], claim_map.date, 
 						new_attributes, table, datasets
 					)
 				)	
@@ -439,11 +440,12 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Countries with employment rate > 7% would have population over 200M"
+	userClaim = "Countries with GDP < 500M USD are prone to high fertility rate, with minimum of 1.5 "
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	claim_map = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
+	print(claim_map)
 
 # 	claim_map = {
 #     "country": [
@@ -531,7 +533,6 @@ async def main():
 
 	dic = await get_relevant_datasets(claim_map)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
-	print(claim_map)
 
 	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
 	# print(dtps)

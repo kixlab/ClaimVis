@@ -143,7 +143,7 @@ class TableReasoner(object):
 				msg.extend(random_sample)
 				
 			msg.append({"role": "user", "content": claim})
-			claim_tag = await self._call_api_2(msg, model=model, max_decode_steps=700, samples=gen_samples, temperature=.8)
+			claim_tag = await self._call_api_2(msg, model=model, max_decode_steps=700, samples=gen_samples, temperature=.0)
 		else:
 			_, claim_tag = await self._call_api_1(
 								question=claim,
@@ -152,12 +152,23 @@ class TableReasoner(object):
 							)
 
 		data = [json.loads(sample) for sample in claim_tag]
-		if verbose:
-			print(f"model: {model}")
-			for i, item in enumerate(data, 1):
-				print(f"claim tag {i}: {item}")
+		# if verbose:
+		# 	print(f"model: {model}")
+		# 	for i, item in enumerate(data, 1):
+		# 		print(f"claim tag {i}: {item}")
+		# majority vote
+		if len(data) > 1:
+			# <TODO: Majority vote>
+			answer = None
+		else:
+			answer = data[0]
 		# check if the format of the response is correct
-		return json.loads(claim_tag[0])
+		for idx, country in enumerate(answer["country"]):
+			if country.startswith("@(") and country not in answer["vis"]:
+				if country[:-2] in answer["vis"]: # lack ?
+					answer["country"][idx] = country[:-2] + "?)"
+
+		return answer
 		
 	async def _infer_country(
 			self, claim: str, 
@@ -335,7 +346,7 @@ class TableReasoner(object):
 				}, {
 				"values": ["<value 21>", "<value 22>", ...],
 				"teaser": "<teaser2>"
-			}]
+			}, ...]
 
 		Each suggested set of value must be CONSISTENT with the indicator!"""
 			},
@@ -447,16 +458,23 @@ class TableReasoner(object):
 				else:
 					val = date
 
-				claim_tag["rephrase"] = claim_tag["rephrase"].replace(f"{{{date}}}", f"{{{str(val)}}}")
+				claim_tag["rephrase"] = claim_tag["rephrase"].replace(f"{{{date}}}", f"{str(val)}")
 				claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{date}}}", "{date}")
-		for tagged_country in claim_tag["country"]:
+
+		for idx, tagged_country in enumerate(claim_tag["country"]):
 			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_country}}}", "{country}")
-			if tagged_country.startswith("@(") and "countries" not in tagged_country.lower():
-				new_tagged_country = f"@(Countries of {tagged_country[2:]}"
-				claim_tag["vis"] = claim_tag["vis"].replace(f"{{{tagged_country}}}", f"{{{new_tagged_country}}}")
+			if tagged_country.startswith("@("):
+				if all(p not in tagged_country.lower() for p in ["countries", "country"]):
+					new_tagged_country = f"@(Countries of {tagged_country[2:]}"
+					claim_tag["vis"] = claim_tag["vis"].replace(f"{{{tagged_country}}}", f"{{{new_tagged_country}}}")
+					claim_tag["country"][idx] = new_tagged_country
+				else:
+					new_tagged_country = tagged_country
+				claim_tag["rephrase"] = claim_tag["rephrase"].replace(f"{{{tagged_country}}}", f"{new_tagged_country[2:-2]}") 
 			
 		for tagged_attr in claim_tag["value"]:
 			claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
+			claim_tag['rephrase'] = claim_tag['rephrase'].replace(f"{{{tagged_attr['rephrase']}}}", f"{tagged_attr['rephrase']}") 
 
 		claim_tag["suggestion"] = attributes + years + countries
 		claim_tag["mapping"] = dict()
@@ -791,7 +809,7 @@ class TableReasoner(object):
 		print(f"msg: {msg}")
 		response = await self._call_api_2(
 								prompt = msg,
-								model=Model.GPT3 # 4
+								model=Model.GPT4 # 4
 							)
 		justification = response[0]
 		# justification = await self._evaluate_soundness(justification)
