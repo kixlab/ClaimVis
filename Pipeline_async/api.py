@@ -265,6 +265,11 @@ async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=
 
 @app.post("/get_datasets")
 async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
+	"""
+		1. Infer the most related attributes
+		2. Infer the @() countries
+		3. Infer @() years????
+	"""
 	value_keywords = [keyword for sublist in claim_map.suggestion for keyword in sublist.values if sublist.field == "value"]
 	country_keywords = [keyword[2:-2].replace("Country", "").replace("Countries", "").strip() for keyword in claim_map.country if keyword.startswith("@")]
 	keywords = country_keywords + claim_map.value + value_keywords

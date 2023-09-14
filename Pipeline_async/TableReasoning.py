@@ -32,7 +32,7 @@ class TableReasoner(object):
 	MAX_DATE = 2020
 	INDICATOR = {
 		"alternative + complementary metrics": "value",
-		"years": "datetime",
+		"years": "date",
 		"countries": "country"
 	}
 	
@@ -370,7 +370,7 @@ class TableReasoner(object):
 			"values": ["Australia", "France", "United Kingdom"],
 			"teaser": "What is the contribution of tourism in other developed countries?"
 		},{
-			"values": ["@(Top 3 countries with the highest contribution to GDP from tourism)"],
+			"values": ["@(Top 3 countries with the highest contribution to GDP from tourism?)"],
 			"teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
 		}]"""
 			},
@@ -389,7 +389,7 @@ class TableReasoner(object):
 			"teaser": "What was the impact of the pandemic on New Zealand's tourism industry in 2020?"
 		},
 		{
-			"values": ["@(Year with the largest proportion of tourism in their GDP)"],
+			"values": ["@(Year with the largest proportion of tourism in their GDP?)"],
 			"teaser": "When did New Zealand have the largest proportion of tourism in their GDP?"
 		}]"""
 			},
@@ -779,15 +779,22 @@ class TableReasoner(object):
 					else:
 						date_mask = df[date_attr] == int(datetime)
 						date_name = f"in {datetime}"
-					
-					if country.startswith("@("):
+
+					category_name = claim_map.mapping[category] 
+
+					if country.startswith("@("):						
 						country_name = claim_map.mapping[country]
 						country_mask = df[country_attr].isin(country_name)
+
+						if any(p in country for p in ['with', 'Countries of']):
+							query = f"What are the {country[2:-2]} {date_name}?"
+						else:
+							query = f"What is the {category_name} of {country[2:-2]} {date_name}?"
+						queries.append(f"Q{len(queries)+1}: {query}")
+						answers.append(f"A{len(answers)+1}: {country_name}")
 					else:
 						country_mask = df[country_attr] == country
 						country_name = country
-					
-					category_name = claim_map.mapping[category] 
 
 					val = df[date_mask & country_mask][category_name].values
 					val = self._process_list(val, verbose)
