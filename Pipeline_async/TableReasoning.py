@@ -32,7 +32,7 @@ class TableReasoner(object):
 	MAX_DATE = 2020
 	INDICATOR = {
 		"alternative + complementary metrics": "value",
-		"years": "date",
+		"years": "datetime",
 		"countries": "country"
 	}
 	
@@ -181,13 +181,7 @@ class TableReasoner(object):
 		queries, combos, cond = [], list(product(dates, values)), any(p in claim for p in ['with', 'Countries of'])
 		if cond: # identify the new dataset if needed
 			new_value = claim.replace("Countries of ", "").replace("Country", "").replace("with", "").strip()
-			scores = []
-			for dataset in datasets:
-				embed_dict = self.datamatcher.attrs_embeddings[dataset.name]
-				embeds = [embed_dict[attr] for attr in dataset.fields]
-				scores.append(self.datamatcher.attr_score_batch(new_value, embeds))
-			scores = np.array(scores)
-			dataset = datasets[scores.argmax()]
+			dataset, score, _ = self.datamatcher.match_attr_with_dataset(new_value, datasets)
 			table, _, _ = self.datamatcher.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
 		for date, value in combos:
 			if '-' in date:
@@ -789,7 +783,7 @@ class TableReasoner(object):
 						if any(p in country for p in ['with', 'Countries of']):
 							query = f"What are the {country[2:-2]} {date_name}?"
 						else:
-							query = f"What is the {category_name} of {country[2:-2]} {date_name}?"
+							query = f"What is the {country[2:-2]} of {category_name} {date_name}?"
 						queries.append(f"Q{len(queries)+1}: {query}")
 						answers.append(f"A{len(answers)+1}: {country_name}")
 					else:

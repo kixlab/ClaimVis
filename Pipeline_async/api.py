@@ -244,24 +244,23 @@ async def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test
 @app.post("/potential_data_point_sets_2")
 async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True) -> list[DataPointSet]:
 	dm = DataMatcher(datasrc="../Datasets")
-	dataset = datasets[0] # take the first one
-	table, _, _ = dm.load_table(dataset.name, attributes=dataset.fields)
+	table, _, _, fields, _, info_table = dm.merge_datasets(datasets, change_dataset=True)
 	new_attributes = [claim_map.mapping[attr] for attr in claim_map.value]	
 
 	# 3. return DataPointSet
-	av = AutomatedViz(table=table, attributes=dataset.fields, matcher=dm)
-	return await av.retrieve_data_points_2(claim_map, new_attributes, verbose=verbose)
+	av = AutomatedViz(table=table, attributes=fields, matcher=dm)
+	return await av.retrieve_data_points_2(claim_map, new_attributes, verbose=verbose, info_table=info_table)
 
 @app.post("/get_reason")
-async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True):
+async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True, fast_mode:bool=True):
 	dm = DataMatcher(datasrc="../Datasets")
 	claim = claim_map.rephrase
-	dataset = datasets[0]
-	table, _, _ = dm.load_table(dataset.name, attributes=dataset.fields)
+	table, _, _, _, _, _ = dm.merge_datasets(datasets, change_dataset=True)
 	tb = TableReasoner(datamatcher=dm)
-	# reason = await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
-	reason = await tb.reason_2(claim_map, table, verbose=verbose, fuzzy_match=True)
-	return reason
+	if fast_mode:
+		return await tb.reason_2(claim_map, table, verbose=verbose, fuzzy_match=True)
+	else:
+		return await tb.reason(claim, table, verbose=verbose, fuzzy_match=True)
 
 @app.post("/get_datasets")
 async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
@@ -281,24 +280,21 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
         for name, description, score, fields in top_k_datasets]
 
 	# 1. Infer the most related attributes
-	dataset = datasets[0] # take the first one for now
-	embed_dict = dm.attrs_embeddings[dataset.name]
-	embeddings = [embed_dict[attr] for attr in dataset.fields]
+	table, country_attr, date_attr, fields, embeddings, _ = dm.merge_datasets(datasets)
 	attributes = claim_map.value
 	scores = cosine_similarity(dm.encode(attributes), embeddings)
 	argmax_indices = scores.argmax(axis=1)
-	if any(score[argmax_indices[i]] < 0.5 for i, score in enumerate(scores)):
-		try:
-			msg = "The pipeline cannot find valid statistical attribute from the database. Scores = {}".format(scores.max(axis=1))
-			raise HTTPException(status_code=500, detail=msg)
-		except HTTPException as e:
-			print("@"*100+"\n", msg)
-	new_attributes = [dataset.fields[i] for i in argmax_indices]
+	for i, score in enumerate(scores):
+		if score[argmax_indices[i]] < 0.5:
+			warning = f"The pipeline is not confident."
+			print(warning, "Score:", score[argmax_indices[i]])
+		else:
+			warning = None
+
+	new_attributes = [fields[i] for i in argmax_indices] 
 	claim_map.mapping.update({attr: new_attributes[i] for i, attr in enumerate(attributes)})
-	if verbose: print("Attributes:", new_attributes)
 
 	# update date and country real attribute name
-	table, country_attr, date_attr = dm.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
 	print("Country:", country_attr, "Date:", date_attr)
 	claim_map.mapping.update({"date": date_attr, "country": country_attr})
 	claim_map.cloze_vis = claim_map.cloze_vis.replace("{date}", f'{{{date_attr}}}').replace("{country}", f'{{{country_attr}}}')
@@ -333,7 +329,8 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 
 	return {
 		"datasets": datasets,
-		"claim_map": claim_map
+		"claim_map": claim_map,
+		"warning": warning
 	}
 
 @app.post("/get_viz_spec")
@@ -445,7 +442,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Countries with GDP < 500M USD are prone to high fertility rate, with minimum of 1.5 "
+	userClaim = "Brazil had a really low education ratio, lower than Thailand. "
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
@@ -458,80 +455,16 @@ async def main():
 #         "World"
 #     ],
 #     "value": [
-#         {
-#             "raw": "total fertility rate",
-#             "rephrase": "total fertility rate"
-#         }
+# 		"unemployment rate", 
+# 		"fertility rate"
 #     ],
 #     "date": [
 #         "2019"
 #     ],
 #     "vis": "Show the {total fertility rate} of {South Korea} and {World} in {2019}.",
 #     "cloze_vis": "Show the {value} of {country} and {country} in {date}.",
-#     "rephrase": "{South Korea} broke its own record for the world's lowest {total fertility rate} in {2019}.",
-#     "suggestion": [
-#         {
-#             "field": "value",
-#             "values": [
-#                 "birth rate",
-#                 "population growth rate"
-#             ],
-#             "explain": "Alternative metrics to explore the declining fertility rate in South Korea."
-#         },
-#         {
-#             "field": "value",
-#             "values": [
-#                 "average age",
-#                 "dependency ratio"
-#             ],
-#             "explain": "Complementary metrics to understand the impact of the shrinking and aging population in South Korea."
-#         },
-#         {
-#             "field": "years",
-#             "values": [
-#                 "2018",
-#                 "2017",
-#                 "2016"
-#             ],
-#             "explain": "These values explore the trend of South Korea's total fertility rate over the past few years."
-#         },
-#         {
-#             "field": "years",
-#             "values": [
-#                 "2019",
-#                 "2020",
-#                 "2021"
-#             ],
-#             "explain": "These values explore the projected total fertility rate for South Korea in the coming years."
-#         },
-#         {
-#             "field": "countries",
-#             "values": [
-#                 "Japan",
-#                 "Italy",
-#                 "Germany"
-#             ],
-#             "explain": "These countries have also been experiencing low fertility rates and could be compared to South Korea."
-#         },
-#         {
-#             "field": "countries",
-#             "values": [
-#                 "Niger",
-#                 "Somalia",
-#                 "Congo"
-#             ],
-#             "explain": "These countries have higher fertility rates compared to South Korea and could provide a contrast."
-#         },
-#         {
-#             "field": "countries",
-#             "values": [
-#                 "China",
-#                 "India",
-#                 "United States"
-#             ],
-#             "explain": "These countries have large populations and could be compared to South Korea in terms of the impact of low fertility rates on population size."
-#         }
-#     ],
+#     "rephrase": "",
+#     "suggestion": [],
 #     "mapping": {}
 # }
 # 	claim_map = ClaimMap(**claim_map)
