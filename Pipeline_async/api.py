@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import uvicorn
 from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import Depends, FastAPI, HTTPException
@@ -284,12 +285,16 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 	attributes = claim_map.value
 	scores = cosine_similarity(dm.encode(attributes), embeddings)
 	argmax_indices = scores.argmax(axis=1)
+	
+	warn_flag, warning = False, ""
 	for i, score in enumerate(scores):
 		if score[argmax_indices[i]] < 0.5:
 			warning = f"The pipeline is not confident."
-			print(warning, "Score:", score[argmax_indices[i]])
-		else:
-			warning = None
+			print(f"{'@'*100}\n{warning}. Score: {score[argmax_indices[i]]}\n{'@'*100}")
+			warn_flag = True
+			break
+	if not warn_flag:
+		print(f"{'@'*100}\nThe pipeline is confident. Score: {min(score[argmax_indices[i]] for i, score in enumerate(scores))}\n{'@'*100}")
 
 	new_attributes = [fields[i] for i in argmax_indices] 
 	claim_map.mapping.update({attr: new_attributes[i] for i, attr in enumerate(attributes)})
@@ -442,7 +447,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Brazil had a really low education ratio, lower than Thailand. "
+	userClaim = "20 years ago, India used to be dominant in rice import. "
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
