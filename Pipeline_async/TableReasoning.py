@@ -175,10 +175,9 @@ class TableReasoner(object):
 			dates: list[str], 
 			values: list[str], 
 			table: pd.DataFrame,
-			datasets: list[Dataset], 
 			verbose: bool=True,
 		):
-		queries, combos= [], list(product(dates, values))
+		queries, combos= set(), list(product(dates, values))
 		for date, value in combos:
 			if '-' in date:
 				start, end = date.split('-')
@@ -186,10 +185,13 @@ class TableReasoner(object):
 			else:
 				date = "in {}".format(date)
 			
-			if not re.match(r'(Top|Bottom) (\d+) countries$', claim): # no need to add value
-				queries.append("What are the {} {}?".format(claim, date))
+			if claim.startswith("Year"):
+				queries.add("What is the {}?".format(claim))
+				break # no need to iterate through all combos
+			elif not re.match(r'(Top|Bottom) (\d+) countries$', claim): # no need to add value
+				queries.add("What are the {} {}?".format(claim, date))
 			else: 
-				queries.append("What are the {} of {} {}?".format(claim, value, date))
+				queries.add("What are the {} of {} {}?".format(claim, value, date))
 
 		db = NeuralDB([table], add_row_id=False, normalize=False, lower_case=False)
 
@@ -197,9 +199,11 @@ class TableReasoner(object):
 		response = await self._exec_sqls_from_sub_queries(db, queries, fuzzy_match=True, verbose=verbose)
 
 		try:
-			countries = [item for sublist in response[0] for item in eval(sublist[0])\
-							if isinstance(item, str) ]
-			return set(countries)
+			countries = [item for sublist in response[0] for item in eval(sublist[0])]
+			if claim.startswith("Year"):
+				return set(item for item in countries if isinstance(item, int))
+			else:
+				return set(item for item in countries if isinstance(item, str))
 		except Exception as e:
 			if verbose: print(e)
 			return []
