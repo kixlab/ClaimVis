@@ -424,6 +424,22 @@ def get_dataset_explanation(dataset: str, column_name: str):
 	else:
 		return ''
 
+@app.get('/dataset_explanation_2') 
+def get_dataset_explanation_2(datasets: list[Dataset], column_name: str):
+	for dataset in datasets:
+		if column_name in dataset.fields:
+			table_name = dataset.name
+			break
+	df = pd.read_csv(f"../Datasets/info/{table_name}")
+	if 'value' in df.columns:
+		df = df[df['value'] == column_name]
+		return df['Longdefinition'].iloc[0]
+	elif 'title' in df.columns:
+		df = df[df['title'] == column_name]
+		return df['description'].iloc[0]
+	else:
+		return ''
+
 @app.post('/reasoning_evaluation')
 def get_reasoning_evaluation(reasoning: str):
 	# activate evaluation only when users click on the reasoning dropdown or call it right after the pipeline returned the data points
@@ -448,7 +464,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Albania has the same CO2 emission as Greenland in 2009 and 2014. "
+	userClaim = "the total fertility rate began to sink more quickly in the 2000s during the financial crises. "
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
@@ -566,7 +582,7 @@ async def main():
 	print(dtps)
 	# p = Profiler()
 	# with p:
-	# reason = await get_reason(claim_map, top_k_datasets, verbose=True)
+	reason = await get_reason(claim_map, top_k_datasets, verbose=True)
 
 if __name__ == "__main__":
 	asyncio.run(main())
