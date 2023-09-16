@@ -1,3 +1,4 @@
+from functools import reduce
 import sys
 sys.path.append("../Gloc")
 sys.path.append("..")
@@ -6,6 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from Gloc.utils.async_llm import *
 from Summarizer import Summarizer
+from models import Dataset
 import numpy as np
 import pandas as pd
 import json
@@ -157,6 +159,18 @@ class DataMatcher(object):
 
         return top_k_datasets
 
+    def match_attr_with_dataset(self, attr: str, datasets: list[Dataset]):
+        scores, max_attr_indices = [], []
+        for dataset in datasets:
+            embed_dict = self.attrs_embeddings[dataset.name]
+            embeds = [embed_dict[attr] for attr in dataset.fields]
+            attr_scores = self.similarity_batch(attr, embeds)
+            max_idx = attr_scores.argmax()
+            scores.append(attr_scores[max_idx])
+            max_attr_indices.append(dataset.fields[max_idx])
+        pos_max = np.array(scores).argmax()
+        return datasets[pos_max], scores[pos_max], max_attr_indices[pos_max]
+
     def similarity_score(self, phrase1, phrase2):
         phrase1_embedding = self.encode(phrase1) if isinstance(phrase1, str) else phrase1
         phrase2_embedding = self.encode(phrase2) if isinstance(phrase2, str) else phrase2
@@ -231,8 +245,10 @@ class DataMatcher(object):
 
         if attributes:
             if infer_date_and_country:
-                attributes.extend([country_attr, date_attr]) # important to mutate the original list
-                attributes = list(set(attributes)) # remove duplicates
+                # important to mutate the original list
+                for p in [country_attr, date_attr]:
+                    if p not in attributes:
+                        attributes.append(p)
             table = table[attributes]
         table.name = dataset
         if not return_dict:
@@ -243,6 +259,43 @@ class DataMatcher(object):
             "country": country_attr,
             "date": date_attr
         }
+
+    def merge_datasets(self, datasets: list[Dataset], change_dataset: bool=False):
+        COUNTRY, DATE = "country_name", "date"
+        attributes, tables, embed_dict, info_tables, name = set(), [], dict(), [], ""
+        for dataset in datasets:
+            name += dataset.name[:-4] + "@"
+            embed_dict.update(self.attrs_embeddings[dataset.name])
+
+            table, country_attr, date_attr = self.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
+            if country_attr != COUNTRY:
+                table = table.rename(columns={country_attr: COUNTRY})
+                if change_dataset:
+                    dataset.fields[dataset.fields.index(country_attr)] = COUNTRY
+            if date_attr != DATE:
+                table = table.rename(columns={date_attr: DATE})
+                if change_dataset:
+                    dataset.fields[dataset.fields.index(date_attr)] = DATE
+            attributes.update(dataset.fields) # update after renaming
+            tables.append(table)   
+
+            info_table = pd.read_csv(f"{self.datasrc}/info/{dataset.name}")
+            info_table.columns = info_table.columns.str.lower()
+            if "value" in info_table.columns:
+                info_table = info_table[info_table["value"].isin(dataset.fields)]
+                info_table = info_table[["value", "unit", "source"]]            
+            elif "column" in info_table.columns:
+                info_table = info_table[info_table["title"].isin(dataset.fields)]
+                info_table = info_table[["title", "units", "source"]].rename(columns={"units": "unit", "title": "value"})
+            info_tables.append(info_table)
+
+        attributes = list(attributes)
+        embeds = [embed_dict[attr] for attr in attributes]
+        info_table = reduce(lambda left, right: pd.merge(left, right, on=["value", "unit", "source"], how= 'outer'), info_tables)
+
+        df = reduce(lambda left, right: pd.merge(left, right), tables)
+        df.name = name
+        return df, COUNTRY, DATE, attributes, embeds, info_table
 
 async def main():
     matcher = DataMatcher(datasrc="../Datasets")

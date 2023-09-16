@@ -47,15 +47,15 @@ a) indicators referred in the context, b) indicators breaking down the statement
 Provide a one-sentence teaser question for each set of values to intrigue the reader to explore the context. Please wrap each value with @() if it does not directly refer to the specific value. Respond as JSON in the following format:
 
 [{
-	"indicator": "",
-	"sets": [{
-		"values": ["<value 11>", "<value 12>", ...],
-		"teaser": "<teaser1>"
-	}, 
-	{
-		"values": ["<value 21>", "<value 22>", ...],
-		"teaser": "<teaser2>"
-	}]
+    "indicator": "",
+    "sets": [{
+        "values": ["<value 11>", "<value 12>", ...],
+        "teaser": "<teaser1>"
+    }, 
+    {
+        "values": ["<value 21>", "<value 22>", ...],
+        "teaser": "<teaser2>"
+    }]
 }, ...]
 
 Each suggested set of value must be CONSISTENT with the indicator!""",
@@ -94,12 +94,12 @@ Statement: A significant amount of New Zealand's GDP comes from tourism""",
 a) time period referred in the context, b) time period related to reader's background,  c) time period related or similar to the period in the statement, d) time period similar or related to reader's background, e) time periods with extreme values in terms of the statement's context.
 Provide a one-sentence teaser question for each set of values to intrigue the reader to explore the context. Please wrap each value with @() if it does not directly refer to the specific value. Respond as JSON in the following format:
     [{
-		"values": ["<value 11>", "<value 12>", ...],
-		"teaser": "<teaser1>"
-		}, {
-		"values": ["<value 21>", "<value 22>", ...],
-		"teaser": "<teaser2>"
-	}]
+        "values": ["<value 11>", "<value 12>", ...],
+        "teaser": "<teaser1>"
+        }, {
+        "values": ["<value 21>", "<value 22>", ...],
+        "teaser": "<teaser2>"
+    }]
 
 Each suggested set of values must be CONSISTENT with the indicator!""",
             },
@@ -113,12 +113,12 @@ Statement: A significant amount of New Zealand's GDP comes from tourism""",
             {
                 "role": "assistant",
                 "content": """[{
-	"values": ["2019", "2021"],
-	"teaser": "What was the impact of the pandemic on New Zealand's tourism industry in 2020?"
+    "values": ["2019", "2021"],
+    "teaser": "What was the impact of the pandemic on New Zealand's tourism industry in 2020?"
 },
 {
-	"values": ["@(Year with the largest proportion of tourism in their GDP)"],
-	"teaser": "When did New Zealand have the largest proportion of tourism in their GDP?"
+    "values": ["@(Year with the largest proportion of tourism in their GDP)"],
+    "teaser": "When did New Zealand have the largest proportion of tourism in their GDP?"
 }]""",
             },
         ],
@@ -127,12 +127,12 @@ Statement: A significant amount of New Zealand's GDP comes from tourism""",
             "content": """For a given statement, a context paragraph, and the background of the reader, please suggest different sets of countries to compare the statement in other contexts. Select the countries in following order, but skip if there is no appropriate country. 
 a) countries referred in the context, b) countries of reader's background,  c) countries related or similar to the country in the statement, d) countries similar or related to reader's background, e) countries extreme in terms of the statement's context. Provide a one-sentence teaser question for each set of values to intrigue the reader to explore the context. Wrap each value with @() if it does not directly refer to the specific value. Respond as JSON in the following format:
     [{
-		"values": ["<value 11>", "<value 12>", ...],
-		"teaser": "<teaser1>"
-		}, {
-		"values": ["<value 21>", "<value 22>", ...],
-		"teaser": "<teaser2>"
-	}]
+        "values": ["<value 11>", "<value 12>", ...],
+        "teaser": "<teaser1>"
+        }, {
+        "values": ["<value 21>", "<value 22>", ...],
+        "teaser": "<teaser2>"
+    }]
 
 Each suggested set of values must be CONSISTENT with the indicator!"""
         },
@@ -146,20 +146,20 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         {
             "role": "assistant",
             "content": """[{
-	"values": ["South Korea"],
-	"teaser": "How does the impact of tourism on New Zealand's economy compare to that of South Korea?"
+    "values": ["South Korea"],
+    "teaser": "How does the impact of tourism on New Zealand's economy compare to that of South Korea?"
 },{
-	"values": ["Thailand", "Greece", "Spain"],
-	"teaser": "How is the impact of tourism on the economy in other countries known for tourism?"
+    "values": ["Thailand", "Greece", "Spain"],
+    "teaser": "How is the impact of tourism on the economy in other countries known for tourism?"
 }, {
-	"values": ["Australia", "Canada", "Norway"],
-	"teaser": "How is the impact of tourism on the economy in other developed countries?"
+    "values": ["Australia", "Canada", "Norway"],
+    "teaser": "How is the impact of tourism on the economy in other developed countries?"
 }, {
-	"values": ["Japan", "China", "Taiwan"],
-	"teaser": "How does the impact of tourism on New Zealand's economy compare to that of other East Asian countries?"
+    "values": ["Japan", "China", "Taiwan"],
+    "teaser": "How does the impact of tourism on New Zealand's economy compare to that of other East Asian countries?"
 }, {
-	"values": ["@(Top 3 countries with the highest contribution to GDP from tourism)"],
-	"teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
+    "values": ["@(Top 3 countries with the highest contribution to GDP from tourism)"],
+    "teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
 }]"""
         }],
     }
@@ -277,69 +277,58 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                 ]
 
                 msg.extend(random_sample)
-
+                
             msg.append({"role": "user", "content": claim})
-            claim_tag = await self._call_api_2(
-                msg,
-                model=model,
-                max_decode_steps=700,
-                samples=gen_samples,
-                temperature=0.8,
-            )
+            claim_tag = await self._call_api_2(msg, model=model, max_decode_steps=700, samples=gen_samples, temperature=.0)
         else:
             _, claim_tag = await self._call_api_1(
-                question=claim, template_key=template_key, model=model
-            )
+                                question=claim,
+                                template_key=template_key,
+                                model=model
+                            )
 
         data = [json.loads(sample) for sample in claim_tag]
-        if verbose:
-            print(f"model: {model}")
-            for i, item in enumerate(data, 1):
-                print(f"claim tag {i}: {item}")
+        # if verbose:
+        #     print(f"model: {model}")
+        #     for i, item in enumerate(data, 1):
+        #         print(f"claim tag {i}: {item}")
+        # majority vote
+        if len(data) > 1:
+            # <TODO: Majority vote>
+            answer = None
+        else:
+            answer = data[0]
         # check if the format of the response is correct
-        return json.loads(claim_tag[0])
+        for idx, country in enumerate(answer["country"]):
+            if country.startswith("@(") and country not in answer["vis"]:
+                if country[:-2] in answer["vis"]: # lack ?
+                    answer["country"][idx] = country[:-2] + "?)"
 
+        return answer
+        
     async def _infer_country(
-        self,
-        claim: str,
-        dates: list[str],
-        values: list[str],
-        table: pd.DataFrame,
-        datasets: list[Dataset],
-        verbose: bool = True,
-    ):
-        queries, combos, cond = (
-            [],
-            list(product(dates, values)),
-            any(p in claim for p in ["with", "Countries of"]),
-        )
-        if cond:  # identify the new dataset if needed
-            new_value = (
-                claim.replace("Countries of ", "")
-                .replace("Country", "")
-                .replace("with", "")
-                .strip()
-            )
-            scores = []
-            for dataset in datasets:
-                embed_dict = self.datamatcher.attrs_embeddings[dataset.name]
-                embeds = [embed_dict[attr] for attr in dataset.fields]
-                scores.append(self.datamatcher.attr_score_batch(new_value, embeds))
-            scores = np.array(scores)
-            dataset = datasets[scores.argmax()]
-            table, _, _ = self.datamatcher.load_table(
-                dataset.name, dataset.fields, infer_date_and_country=True
-            )
+            self, claim: str, 
+            dates: list[str], 
+            values: list[str], 
+            table: pd.DataFrame,
+            datasets: list[Dataset], 
+            verbose: bool=True,
+        ):
+        queries, combos, cond = [], list(product(dates, values)), any(p in claim for p in ['with', 'Countries of'])
+        if cond: # identify the new dataset if needed
+            new_value = claim.replace("Countries of ", "").replace("Country", "").replace("with", "").strip()
+            dataset, score, _ = self.datamatcher.match_attr_with_dataset(new_value, datasets)
+            table, _, _ = self.datamatcher.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
         for date, value in combos:
-            if "-" in date:
-                start, end = date.split("-")
+            if '-' in date:
+                start, end = date.split('-')
                 date = "from {} to {}".format(start, end)
             else:
                 date = "in {}".format(date)
-
-            if cond:  # no need to add value
+            
+            if cond: # no need to add value
                 queries.append("What are the {} {}?".format(claim, date))
-            else:
+            else: 
                 queries.append("What are the {} of {} {}?".format(claim, value, date))
 
         db = NeuralDB([table], add_row_id=False, normalize=False, lower_case=False)
@@ -380,33 +369,33 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                 {
                     "role": "system",
                     "content": f"""Please add date or time to the query if needed. 
-				 
-				 The rules will be demonstrated via the following examples. Let's use default oldest and newest dates as 1960 and 2021, respectively.
-					1. Add the most recent date when the query lacks date. E.g "US' GDP > China's GDP" --> "US' GDP > China's GDP in 2021"
-					2. Add the most recent date when the query lacks the end date. E.g "US' GDP > China's GDP since 2010" --> "US' GDP > China's GDP since 2010 to 2021"
-					3. Add the oldest date when the query lacks the start date. E.g "US' GDP > China's GDP until 2010" --> "US' GDP > China's GDP from 1960 until 2010"
-					4. Do not add date when the query already doesn't need more date. E.g "US' GDP > China's GDP in 2010" --> "US' GDP > China's GDP in 2010"
+                 
+                 The rules will be demonstrated via the following examples. Let's use default oldest and newest dates as 1960 and 2021, respectively.
+                    1. Add the most recent date when the query lacks date. E.g "US' GDP > China's GDP" --> "US' GDP > China's GDP in 2021"
+                    2. Add the most recent date when the query lacks the end date. E.g "US' GDP > China's GDP since 2010" --> "US' GDP > China's GDP since 2010 to 2021"
+                    3. Add the oldest date when the query lacks the start date. E.g "US' GDP > China's GDP until 2010" --> "US' GDP > China's GDP from 1960 until 2010"
+                    4. Do not add date when the query already doesn't need more date. E.g "US' GDP > China's GDP in 2010" --> "US' GDP > China's GDP in 2010"
 
-					User will give multiple queries inform of
-				 /*
-				 Please use the following default dates:
-				 OLDEST: <oldest date>
-				 NEWEST: <newest date>
-					Q1: <query 1>
-					Q2: <query 2>
-					...
-				 */
+                    User will give multiple queries inform of
+                 /*
+                 Please use the following default dates:
+                 OLDEST: <oldest date>
+                 NEWEST: <newest date>
+                    Q1: <query 1>
+                    Q2: <query 2>
+                    ...
+                 */
 
-					Please answer the queries in the following format:
-					A1: <answer 1>
-					A2: <answer 2>
-					...""",
+                    Please answer the queries in the following format:
+                    A1: <answer 1>
+                    A2: <answer 2>
+                    ...""",
                 },
                 {
                     "role": "user",
                     "content": f"""Please use the following default dates: 
-				 OLDEST: {start_default}
-				 NEWEST: {end_default}"""
+                 OLDEST: {start_default}
+                 NEWEST: {end_default}"""
                     + "\n".join(
                         [f"Q{i+1}: {query}" for i, query in enumerate(queries)]
                     ),
@@ -512,9 +501,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                     del attributes[idx]
 
         # assert every column name in attribute is unique
-        assert len(attributes) == len(
-            set(attributes)
-        ), "Column names in attributes are not unique"
+        assert len(attributes) == len(set(attributes)), "Column names in attributes are not unique"     
         return queries, vis_tasks, reasons, attributes
     
     def create_recommendation_prompt(self, variable: str, userClaim: str, paragraph: str, userBackground: str = 'South Korea'):
@@ -529,89 +516,87 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
 
         return prompt
 
-    async def _suggest_variable(
-        self, claim: UserClaimBody, variable: str, verbose: bool = True
-    ):
+    async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
         # prompt = [
         #     {
         #         "role": "system",
         #         "content": """From a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator to compare the statement in other contexts. Please try to select the values that could relate to the reader's background. Provide a one-sentence teaser question for each set of values to intrigue the reader to explore the context. Please wrap each value with @() if it does not directly refer to the specific value. Respond as JSON in the following format:
-		# 	[{
-		# 		"values": ["<value 11>", "<value 12>", ...],
-		# 		"teaser": "<teaser1>"
-		# 		}, {
-		# 		"values": ["<value 21>", "<value 22>", ...],
-		# 		"teaser": "<teaser2>"
-		# 	}]
+        #     [{
+        #         "values": ["<value 11>", "<value 12>", ...],
+        #         "teaser": "<teaser1>"
+        #         }, {
+        #         "values": ["<value 21>", "<value 22>", ...],
+        #         "teaser": "<teaser2>"
+        #     }, ...]
 
-		# Each suggested set of value must be CONSISTENT with the indicator!""",
+        # Each suggested set of value must be CONSISTENT with the indicator!"""
         #     },
         #     {
         #         "role": "user",
         #         "content": """Reader's background: South Korea
 
-		# Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
-		# Statement: A significant amount of New Zealand's GDP comes from tourism
-		# Variable: country""",
+        # Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
+        # Statement: A significant amount of New Zealand's GDP comes from tourism
+        # Variable: country"""
         #     },
         #     {
         #         "role": "assistant",
         #         "content": """[{
-		# 	"values": ["South Korea"],
-		# 	"teaser": "How does the impact of tourism on New Zealand's economy compare to that of South Korea?"
-		# }, {
-		# 	"values": ["Thailand", "Greece", "Portugal"],
-		# 	"teaser": "What is the contribution of tourism in other countries known for tourism?"
-		# },{
-		# 	"values": ["Australia", "France", "United Kingdom"],
-		# 	"teaser": "What is the contribution of tourism in other developed countries?"
-		# },{
-		# 	"values": ["@(Top 3 countries with the highest contribution to GDP from tourism)"],
-		# 	"teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
-		# }]""",
+        #     "values": ["South Korea"],
+        #     "teaser": "How does the impact of tourism on New Zealand's economy compare to that of South Korea?"
+        # }, {
+        #     "values": ["Thailand", "Greece", "Portugal"],
+        #     "teaser": "What is the contribution of tourism in other countries known for tourism?"
+        # },{
+        #     "values": ["Australia", "France", "United Kingdom"],
+        #     "teaser": "What is the contribution of tourism in other developed countries?"
+        # },{
+        #     "values": ["@(Top 3 countries with the highest contribution to GDP from tourism?)"],
+        #     "teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
+        # }]"""
         #     },
         #     {
         #         "role": "user",
         #         "content": """Reader's background: South Korea
 
-		# Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
-		# Statement: A significant amount of New Zealand's GDP comes from tourism
-		# Variable: year""",
+        # Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
+        # Statement: A significant amount of New Zealand's GDP comes from tourism
+        # Variable: year"""
         #     },
         #     {
         #         "role": "assistant",
         #         "content": """[{
-		# 	"values": ["2019", "2021"],
-		# 	"teaser": "What was the impact of the pandemic on New Zealand's tourism industry in 2020?"
-		# },
-		# {
-		# 	"values": ["@(Year with the largest proportion of tourism in their GDP)"],
-		# 	"teaser": "When did New Zealand have the largest proportion of tourism in their GDP?"
-		# }]""",
+        #     "values": ["2019", "2021"],
+        #     "teaser": "What was the impact of the pandemic on New Zealand's tourism industry in 2020?"
+        # },
+        # {
+        #     "values": ["@(Year with the largest proportion of tourism in their GDP?)"],
+        #     "teaser": "When did New Zealand have the largest proportion of tourism in their GDP?"
+        # }]"""
         #     },
         #     {
         #         "role": "user",
         #         "content": """Reader's background: South Korea
 
-		# Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
-		# Statement: A significant amount of New Zealand's GDP comes from tourism
-		# Variable: complementary + alternative indicators""",
-        #     },
-        #     {
-        #         "role": "assistant",
-        #         "content": """[{
-		# 	"values": ["exports", "international trade"],
-		# 	"teaser": "How does New Zealand's reliance on tourism compare to its reliance on exports or international trade?"
-		# }, {
-		# 	"values": ["agriculture", "manufacturing"],
-		# 	"teaser": "What other sectors contribute significantly to New Zealand's GDP besides tourism?"
-		# }]""",
-        #     },
-        #     {
-        #         "role": "user",
-        #         "content": f"""Reader's background: South Korea\nContext: {claim.paragraph}\nStatement: "{claim.userClaim}"\nIndicator: "{variable}" """,
-        #     },
-        # ]
+        # # Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
+        # # Statement: A significant amount of New Zealand's GDP comes from tourism
+        # # Variable: complementary + alternative indicators""",
+        # #     },
+        # #     {
+        # #         "role": "assistant",
+        # #         "content": """[{
+        # #     "values": ["exports", "international trade"],
+        # #     "teaser": "How does New Zealand's reliance on tourism compare to its reliance on exports or international trade?"
+        # # }, {
+        # #     "values": ["agriculture", "manufacturing"],
+        # #     "teaser": "What other sectors contribute significantly to New Zealand's GDP besides tourism?"
+        # # }]""",
+        # #     },
+        # #     {
+        # #         "role": "user",
+        # #         "content": f"""Reader's background: South Korea\nContext: {claim.paragraph}\nStatement: "{claim.userClaim}"\nIndicator: "{variable}" """,
+        # #     },
+        # # ]
         prompt = self.create_recommendation_prompt(variable, claim.userClaim, claim.paragraph, 'South Korea')
         
         response = await self._call_api_2(
@@ -641,13 +626,13 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
             {
                 "role": "system",
                 "content": """You are a keen learner. You are given a statement, and a context paragraph. Please suggest a list of questions that could explore the context of the statement. Provide a one-sentence explanation for each question and respond as JSON in following format:
-			[{
-				"question": "<question 1>",
-				"explain": "<explanation>"
-				},{
-				"question": "<question 2>",
-				"explain": "<explanation>"
-			},...]""",
+            [{
+                "question": "<question 1>",
+                "explain": "<explanation>"
+                },{
+                "question": "<question 2>",
+                "explain": "<explanation>"
+            },...]""",
             },
             {
                 "role": "user",
@@ -694,29 +679,23 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                 else:
                     val = date
 
-                claim_tag["rephrase"] = claim_tag["rephrase"].replace(
-                    f"{{{date}}}", f"{{{str(val)}}}"
-                )
-                claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(
-                    f"{{{date}}}", "{date}"
-                )
-        for tagged_country in claim_tag["country"]:
-            claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(
-                f"{{{tagged_country}}}", "{country}"
-            )
-            if (
-                tagged_country.startswith("@(")
-                and "countries" not in tagged_country.lower()
-            ):
-                new_tagged_country = f"@(Countries of {tagged_country[2:]}"
-                claim_tag["vis"] = claim_tag["vis"].replace(
-                    f"{{{tagged_country}}}", f"{{{new_tagged_country}}}"
-                )
+                claim_tag["rephrase"] = claim_tag["rephrase"].replace(f"{{{date}}}", f"{str(val)}")
+                claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{date}}}", "{date}")
 
+        for idx, tagged_country in enumerate(claim_tag["country"]):
+            claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_country}}}", "{country}")
+            if tagged_country.startswith("@("):
+                if all(p not in tagged_country.lower() for p in ["countries", "country"]):
+                    new_tagged_country = f"@(Countries of {tagged_country[2:]}"
+                    claim_tag["vis"] = claim_tag["vis"].replace(f"{{{tagged_country}}}", f"{{{new_tagged_country}}}")
+                    claim_tag["country"][idx] = new_tagged_country
+                else:
+                    new_tagged_country = tagged_country
+                claim_tag["rephrase"] = claim_tag["rephrase"].replace(f"{{{tagged_country}}}", f"{new_tagged_country[2:-2]}") 
+            
         for tagged_attr in claim_tag["value"]:
-            claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(
-                f"{{{tagged_attr['rephrase']}}}", "{value}"
-            )
+            claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
+            claim_tag['rephrase'] = claim_tag['rephrase'].replace(f"{{{tagged_attr['rephrase']}}}", f"{tagged_attr['rephrase']}") 
 
         claim_tag["suggestion"] = attributes + years + countries
         claim_tag["mapping"] = dict()
@@ -891,11 +870,11 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                 {
                     "role": "system",
                     "content": """You are an amazing logician. You are given a sequence of logical deduction based on real-world data. 
-				You need to evaluate the soundness of the reasoning and fix the reasoning while still RETAIN the core idea and be as informative as possible in the following format.
-				\{
-					explain: "<TODO: explain why the reasoning is sound or not sound>"   
-					revised: "<TODO: revised reasoning>"
-				\}""",
+                You need to evaluate the soundness of the reasoning and fix the reasoning while still RETAIN the core idea and be as informative as possible in the following format.
+                \{
+                    explain: "<TODO: explain why the reasoning is sound or not sound>"   
+                    revised: "<TODO: revised reasoning>"
+                \}""",
                 },
                 {"role": "user", "content": reasoning},
             ],
@@ -997,7 +976,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                     {
                         "role": "system",
                         "content": """You are an amazing rhetorician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
-									You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction.""",
+                                    You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction.""",
                     },
                     {
                         "role": "user",
@@ -1023,49 +1002,51 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                 }
             )
 
-        if verbose:
-            print(f"final justifications: {reason_map}\n{'@'*75}")
-
+        if verbose: print(f"final justifications: {reason_map}\n{'@'*75}")
+        
         return {
             "suggestions": reason_map,
-            "sub_table": {"data": db.get_table_df()},
-            "attributes": attributes,
+            "sub_table": {
+                "data": db.get_table_df()
+            },
+            "attributes": attributes
         }
-
+    
     async def reason_2(
-        self,
-        claim_map: ClaimMap,
-        df: pd.DataFrame,
-        verbose=False,
-        fuzzy_match=True,
-    ):
-        country_attr, date_attr = (
-            claim_map.mapping["country"],
-            claim_map.mapping["date"],
-        )
+                self, claim_map: ClaimMap, 
+                df: pd.DataFrame,
+                verbose=False, 
+                fuzzy_match=True,
+            ):
+        country_attr, date_attr = claim_map.mapping["country"], claim_map.mapping["date"]
         # claim_map already contains the elements constituting the queries
         queries, answers = [], []
         for country in claim_map.country:
             for datetime in claim_map.date:
                 for category in claim_map.value:
-                    if "-" in datetime:
-                        start, end = datetime.split("-")
-                        date_mask = (df[date_attr] >= int(start)) & (
-                            df[date_attr] <= int(end)
-                        )
+                    if '-' in datetime:
+                        start, end = datetime.split('-')
+                        date_mask = (df[date_attr] >= int(start)) & (df[date_attr] <= int(end))
                         date_name = f"from {start} to {end}"
                     else:
                         date_mask = df[date_attr] == int(datetime)
                         date_name = f"in {datetime}"
 
-                    if country.startswith("@("):
+                    category_name = claim_map.mapping[category] 
+
+                    if country.startswith("@("):                        
                         country_name = claim_map.mapping[country]
                         country_mask = df[country_attr].isin(country_name)
+
+                        if any(p in country for p in ['with', 'Countries of']):
+                            query = f"What are the {country[2:-2]} {date_name}?"
+                        else:
+                            query = f"What is the {country[2:-2]} of {category_name} {date_name}?"
+                        queries.append(f"Q{len(queries)+1}: {query}")
+                        answers.append(f"A{len(answers)+1}: {country_name}")
                     else:
                         country_mask = df[country_attr] == country
                         country_name = country
-
-                    category_name = claim_map.mapping[category]
 
                     val = df[date_mask & country_mask][category_name].values
                     val = self._process_list(val, verbose)
@@ -1080,26 +1061,20 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         answers.extend(await self._call_api_2(dec_prompt))
 
         msg = [
-            {
-                "role": "system",
-                "content": """You are an amazing rhetorician and logician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
-				You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction. Make adjustment to the logic if needed.""",
-            },
-            {
-                "role": "user",
-                "content": "\n".join(
-                    query + "\n" + answer for query, answer in zip(queries, answers)
-                ),
-            },
-        ]
+                {"role": "system", "content": """You are an amazing rhetorician and logician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
+                You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction. Make adjustment to the logic if needed."""},
+                {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(queries, answers))},
+            ]
         print(f"msg: {msg}")
-        response = await self._call_api_2(prompt=msg, model=Model.GPT3)  # 4
+        response = await self._call_api_2(
+                                prompt = msg,
+                                model=Model.GPT4 # 4
+                            )
         justification = response[0]
         # justification = await self._evaluate_soundness(justification)
-        if verbose:
-            print(f"justification: {justification}")
+        if verbose: print(f"justification: {justification}")
         return justification
-
+                        
 
 async def main():
     data_matcher = DataMatcher(datasrc="../Datasets")
@@ -1116,18 +1091,18 @@ async def main():
     )
 
     # tasks = [
-    # 		table_reasoner._tag_claim(
-    # 				query, TemplateKey.CLAIM_TAGGING_2,
-    # 				model=Model.GPT4, verbose=True, samples=5
-    # 			),
-    # 		table_reasoner._tag_claim(
-    # 				query, TemplateKey.CLAIM_TAGGING_2,
-    # 				model=Model.GPT_TAG_3, verbose=True, samples=10
-    # 			),
-    # 		table_reasoner._tag_claim(
-    # 			query, TemplateKey.CLAIM_TAGGING_2,
-    # 			model=Model.GPT_TAG_4, verbose=True, samples=10
-    # 		)]
+    #         table_reasoner._tag_claim(
+    #                 query, TemplateKey.CLAIM_TAGGING_2,
+    #                 model=Model.GPT4, verbose=True, samples=5
+    #             ),
+    #         table_reasoner._tag_claim(
+    #                 query, TemplateKey.CLAIM_TAGGING_2,
+    #                 model=Model.GPT_TAG_3, verbose=True, samples=10
+    #             ),
+    #         table_reasoner._tag_claim(
+    #             query, TemplateKey.CLAIM_TAGGING_2,
+    #             model=Model.GPT_TAG_4, verbose=True, samples=10
+    #         )]
     # await asyncio.gather(*tasks)
 
 

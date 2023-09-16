@@ -4,6 +4,8 @@ import pandas as pd
 from typing import Dict, List
 import uuid
 import duckdb
+from Pipeline_async.models import Dataset
+from Pipeline_async.DataMatching import DataMatcher
 
 from utils.normalizer import convert_df_type, process_raw_table
 # from utils.mmqa.image_stuff import get_caption
@@ -136,16 +138,19 @@ class NeuralDB(object):
 
 class MultiNeuralDB(object):
     def __init__(
-            self, 
-            tables: list[dict or pd.DataFrame],
-            add_row_id=False, 
-            normalize=False, 
-            lower_case=False
+            self, datasets: list[Dataset],
+            dm: DataMatcher
         ):
-        self.tables = [process_raw_table(
-                            table,
-                            add_row_id=add_row_id,
-                            normalize=normalize,
-                            lower_case=lower_case
-                        ) for table in tables]
+        self.tables = {}
+        for dataset in datasets:
+            data_file, country_attr, date_attr = dm.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
+            self.tables[dataset.name] = {
+                "data": data_file,
+                "country": country_attr,
+                "date": date_attr,
+                "fields": dataset.fields,
+            }
+
+    
+
         

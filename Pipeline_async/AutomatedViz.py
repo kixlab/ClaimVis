@@ -301,9 +301,15 @@ class AutomatedViz(object):
 		
 		return [newSet]
 
-	async def retrieve_data_points_2(self, claim_map: ClaimMap, categories: list[str], verbose: bool = False):
-		info_table = pd.read_csv(f'../Datasets/info/{self.table_name}')
-		info_table.columns = info_table.columns.str.lower()
+	async def retrieve_data_points_2(
+			self, claim_map: ClaimMap, 
+			categories: list[str], 
+			verbose: bool = False,
+			info_table: Optional[pd.DataFrame] = None
+		):
+		if info_table.empty:
+			info_table = pd.read_csv(f'../Datasets/info/{self.table_name}')
+			info_table.columns = info_table.columns.str.lower()
 		
 		def get_provenance(attr: str):
 			if 'value' in info_table.columns:
@@ -316,6 +322,7 @@ class AutomatedViz(object):
 		
 		def get_unit(attr: str):
 			if 'unit' in info_table.columns:
+				print(info_table['value'], attr)
 				provenance = info_table[info_table['value'] == attr]['unit'].iloc[0] 
 				provenance = provenance if str(provenance) != 'nan' else None
 			elif 'units' in info_table.columns:
