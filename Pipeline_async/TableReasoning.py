@@ -178,11 +178,7 @@ class TableReasoner(object):
 			datasets: list[Dataset], 
 			verbose: bool=True,
 		):
-		queries, combos, cond = [], list(product(dates, values)), any(p in claim for p in ['with', 'Countries of'])
-		if cond: # identify the new dataset if needed
-			new_value = claim.replace("Countries of ", "").replace("Country", "").replace("with", "").strip()
-			dataset, score, _ = self.datamatcher.match_attr_with_dataset(new_value, datasets)
-			table, _, _ = self.datamatcher.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
+		queries, combos= [], list(product(dates, values))
 		for date, value in combos:
 			if '-' in date:
 				start, end = date.split('-')
@@ -190,7 +186,7 @@ class TableReasoner(object):
 			else:
 				date = "in {}".format(date)
 			
-			if cond: # no need to add value
+			if not re.match(r'(Top|Bottom) (\d+) countries$', claim): # no need to add value
 				queries.append("What are the {} {}?".format(claim, date))
 			else: 
 				queries.append("What are the {} of {} {}?".format(claim, value, date))
@@ -436,7 +432,7 @@ class TableReasoner(object):
 	   						for ind in self.INDICATOR] \
 				+ [self._tag_claim(
 					body.userClaim, TemplateKey.CLAIM_TAGGING_2, 
-		      		model=model, verbose=verbose
+		      		model=model, verbose=verbose, fewshot_samples=10
 				)]
 		attributes, years, countries, claim_tag = await asyncio.gather(*tasks)
 

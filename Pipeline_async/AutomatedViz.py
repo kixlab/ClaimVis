@@ -323,7 +323,6 @@ class AutomatedViz(object):
 		
 		def get_unit(attr: str):
 			if 'unit' in info_table.columns:
-				print(f"""{info_table['value']}\n{'@'*100}\n{attr}""")
 				provenance = info_table[info_table['value'] == attr]['unit'].iloc[0] 
 				provenance = provenance if str(provenance) != 'nan' else None
 			elif 'units' in info_table.columns:

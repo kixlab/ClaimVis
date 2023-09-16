@@ -447,117 +447,117 @@ async def main():
 	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
 	# p = Profiler()
 	# p.start()
-	# paragraph = ""
-	# userClaim = "20 years ago, India used to be dominant in rice import. "
-	# # userClaim = "New Zealand's GDP is 10% from tourism."
-	# # A significant amount of New Zealand's GDP comes from tourism
-	# claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
-	# claim_map = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
-	# print(claim_map)
+	paragraph = ""
+	userClaim = "Albania has the same CO2 emission as Greenland in 2009 and 2014. "
+	# userClaim = "New Zealand's GDP is 10% from tourism."
+	# A significant amount of New Zealand's GDP comes from tourism
+	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
+	claim_map = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
+	print(f"{claim_map}\n{'@'*100}")
 
-	claim_map = {
-  "country": [
-	"World"
-  ],
-  "value": [
-	"economic indicators",
-	"financial crises"
-  ],
-  "date": [
-	"1990 - 1999",
-	"2000 - 2009"
-  ],
-  "vis": "Show the {total fertility rate} of the {World} from {1990} to {1999} and from {2000} to {2009}.",
-  "cloze_vis": "Show the {value} of the {country} from {date} to {date} and from {date} to {date}.",
-  "rephrase": "",
-  "suggestion": [
-	{
-  	"field": "value",
-  	"values": [
-    	"economic indicators",
-    	"financial crises"
-  	],
-  	"explain": "How did the financial crises in the 2000s impact other economic indicators in the country?"
-	},
-	{
-  	"field": "value",
-  	"values": [
-    	"housing costs",
-    	"child care costs",
-    	"education costs",
-    	"unemployment rate"
-  	],
-  	"explain": "What specific factors contributed to the decline in the total fertility rate during the financial crises?"
-	},
-	{
-  	"field": "value",
-  	"values": [
-    	"youth unemployment rate",
-    	"youth anxiety levels"
-  	],
-  	"explain": "How did the financial crises affect the employment prospects and mental well-being of young people in the country?"
-	},
-	{
-  	"field": "datetime",
-  	"values": [
-    	"1997",
-    	"2008"
-  	],
-  	"explain": "How did the financial crises in South Korea impact the total fertility rate in the 2000s?"
-	},
-	{
-  	"field": "datetime",
-  	"values": [
-    	"@(Year with the lowest total fertility rate)"
-  	],
-  	"explain": "When did South Korea experience the lowest total fertility rate?"
-	},
-	{
-  	"field": "country",
-  	"values": [
-    	"South Korea"
-  	],
-  	"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other countries?"
-	},
-	{
-  	"field": "country",
-  	"values": [
-    	"Japan",
-    	"Germany",
-    	"Italy"
-  	],
-  	"explain": "How did the financial crises impact the total fertility rate in other developed countries?"
-	},
-	{
-  	"field": "country",
-  	"values": [
-    	"United States",
-    	"United Kingdom",
-    	"Canada"
-  	],
-  	"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other English-speaking countries?"
-	},
-	{
-  	"field": "country",
-  	"values": [
-    	"China",
-    	"Taiwan",
-    	"Hong Kong"
-  	],
-  	"explain": "How did the financial crises impact the total fertility rate in other East Asian countries?"
-	},
-	{
-  	"field": "country",
-  	"values": [
-    	"@(Countries with the highest fertility rates)"
-  	],
-  	"explain": "Which countries have the highest fertility rates?"
-	}
-  ],
-  "mapping": {}
-}
+# 	claim_map = {
+#   "country": [
+# 	"World"
+#   ],
+#   "value": [
+# 	"economic indicators",
+# 	"financial crises"
+#   ],
+#   "date": [
+# 	"1990 - 1999",
+# 	"2000 - 2009"
+#   ],
+#   "vis": "Show the {total fertility rate} of the {World} from {1990} to {1999} and from {2000} to {2009}.",
+#   "cloze_vis": "Show the {value} of the {country} from {date} to {date} and from {date} to {date}.",
+#   "rephrase": "",
+#   "suggestion": [
+# 	{
+#   	"field": "value",
+#   	"values": [
+#     	"economic indicators",
+#     	"financial crises"
+#   	],
+#   	"explain": "How did the financial crises in the 2000s impact other economic indicators in the country?"
+# 	},
+# 	{
+#   	"field": "value",
+#   	"values": [
+#     	"housing costs",
+#     	"child care costs",
+#     	"education costs",
+#     	"unemployment rate"
+#   	],
+#   	"explain": "What specific factors contributed to the decline in the total fertility rate during the financial crises?"
+# 	},
+# 	{
+#   	"field": "value",
+#   	"values": [
+#     	"youth unemployment rate",
+#     	"youth anxiety levels"
+#   	],
+#   	"explain": "How did the financial crises affect the employment prospects and mental well-being of young people in the country?"
+# 	},
+# 	{
+#   	"field": "datetime",
+#   	"values": [
+#     	"1997",
+#     	"2008"
+#   	],
+#   	"explain": "How did the financial crises in South Korea impact the total fertility rate in the 2000s?"
+# 	},
+# 	{
+#   	"field": "datetime",
+#   	"values": [
+#     	"@(Year with the lowest total fertility rate)"
+#   	],
+#   	"explain": "When did South Korea experience the lowest total fertility rate?"
+# 	},
+# 	{
+#   	"field": "country",
+#   	"values": [
+#     	"South Korea"
+#   	],
+#   	"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other countries?"
+# 	},
+# 	{
+#   	"field": "country",
+#   	"values": [
+#     	"Japan",
+#     	"Germany",
+#     	"Italy"
+#   	],
+#   	"explain": "How did the financial crises impact the total fertility rate in other developed countries?"
+# 	},
+# 	{
+#   	"field": "country",
+#   	"values": [
+#     	"United States",
+#     	"United Kingdom",
+#     	"Canada"
+#   	],
+#   	"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other English-speaking countries?"
+# 	},
+# 	{
+#   	"field": "country",
+#   	"values": [
+#     	"China",
+#     	"Taiwan",
+#     	"Hong Kong"
+#   	],
+#   	"explain": "How did the financial crises impact the total fertility rate in other East Asian countries?"
+# 	},
+# 	{
+#   	"field": "country",
+#   	"values": [
+#     	"@(Countries with the highest fertility rates)"
+#   	],
+#   	"explain": "Which countries have the highest fertility rates?"
+# 	}
+#   ],
+#   "mapping": {}
+# }
 
-	claim_map = ClaimMap(**claim_map)
+# 	claim_map = ClaimMap(**claim_map)
 
 	dic = await get_relevant_datasets(claim_map)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
