@@ -307,6 +307,7 @@ class AutomatedViz(object):
 			verbose: bool = False,
 			info_table: Optional[pd.DataFrame] = None
 		):
+		categories = [p for p in categories if p not in ['year', 'date', 'time', 'country', 'country_name']] # remove temporal/nominal attributes
 		if info_table.empty:
 			info_table = pd.read_csv(f'../Datasets/info/{self.table_name}')
 			info_table.columns = info_table.columns.str.lower()
@@ -322,7 +323,7 @@ class AutomatedViz(object):
 		
 		def get_unit(attr: str):
 			if 'unit' in info_table.columns:
-				print(info_table['value'], attr)
+				print(f"""{info_table['value']}\n{'@'*100}\n{attr}""")
 				provenance = info_table[info_table['value'] == attr]['unit'].iloc[0] 
 				provenance = provenance if str(provenance) != 'nan' else None
 			elif 'units' in info_table.columns:
