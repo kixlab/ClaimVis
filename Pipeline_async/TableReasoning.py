@@ -314,11 +314,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
             datasets: list[Dataset], 
             verbose: bool=True,
         ):
-        queries, combos, cond = [], list(product(dates, values)), any(p in claim for p in ['with', 'Countries of'])
-        if cond: # identify the new dataset if needed
-            new_value = claim.replace("Countries of ", "").replace("Country", "").replace("with", "").strip()
-            dataset, score, _ = self.datamatcher.match_attr_with_dataset(new_value, datasets)
-            table, _, _ = self.datamatcher.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
+        queries, combos= [], list(product(dates, values))
         for date, value in combos:
             if '-' in date:
                 start, end = date.split('-')
@@ -326,7 +322,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
             else:
                 date = "in {}".format(date)
             
-            if cond: # no need to add value
+            if not re.match(r'(Top|Bottom) (\d+) countries$', claim): # no need to add value
                 queries.append("What are the {} {}?".format(claim, date))
             else: 
                 queries.append("What are the {} of {} {}?".format(claim, value, date))
@@ -517,86 +513,6 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         return prompt
 
     async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
-        # prompt = [
-        #     {
-        #         "role": "system",
-        #         "content": """From a given statement, a context paragraph, and an indicator, please suggest different sets of values for the indicator to compare the statement in other contexts. Please try to select the values that could relate to the reader's background. Provide a one-sentence teaser question for each set of values to intrigue the reader to explore the context. Please wrap each value with @() if it does not directly refer to the specific value. Respond as JSON in the following format:
-        #     [{
-        #         "values": ["<value 11>", "<value 12>", ...],
-        #         "teaser": "<teaser1>"
-        #         }, {
-        #         "values": ["<value 21>", "<value 22>", ...],
-        #         "teaser": "<teaser2>"
-        #     }, ...]
-
-        # Each suggested set of value must be CONSISTENT with the indicator!"""
-        #     },
-        #     {
-        #         "role": "user",
-        #         "content": """Reader's background: South Korea
-
-        # Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
-        # Statement: A significant amount of New Zealand's GDP comes from tourism
-        # Variable: country"""
-        #     },
-        #     {
-        #         "role": "assistant",
-        #         "content": """[{
-        #     "values": ["South Korea"],
-        #     "teaser": "How does the impact of tourism on New Zealand's economy compare to that of South Korea?"
-        # }, {
-        #     "values": ["Thailand", "Greece", "Portugal"],
-        #     "teaser": "What is the contribution of tourism in other countries known for tourism?"
-        # },{
-        #     "values": ["Australia", "France", "United Kingdom"],
-        #     "teaser": "What is the contribution of tourism in other developed countries?"
-        # },{
-        #     "values": ["@(Top 3 countries with the highest contribution to GDP from tourism?)"],
-        #     "teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
-        # }]"""
-        #     },
-        #     {
-        #         "role": "user",
-        #         "content": """Reader's background: South Korea
-
-        # Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
-        # Statement: A significant amount of New Zealand's GDP comes from tourism
-        # Variable: year"""
-        #     },
-        #     {
-        #         "role": "assistant",
-        #         "content": """[{
-        #     "values": ["2019", "2021"],
-        #     "teaser": "What was the impact of the pandemic on New Zealand's tourism industry in 2020?"
-        # },
-        # {
-        #     "values": ["@(Year with the largest proportion of tourism in their GDP?)"],
-        #     "teaser": "When did New Zealand have the largest proportion of tourism in their GDP?"
-        # }]"""
-        #     },
-        #     {
-        #         "role": "user",
-        #         "content": """Reader's background: South Korea
-
-        # # Context: A significant amount of New Zealand's GDP comes from tourism, and our GDP overall is a lot lower than in the states, so in reality we should have been financially impacted more not less, and have less money to fight the virus than the US did.
-        # # Statement: A significant amount of New Zealand's GDP comes from tourism
-        # # Variable: complementary + alternative indicators""",
-        # #     },
-        # #     {
-        # #         "role": "assistant",
-        # #         "content": """[{
-        # #     "values": ["exports", "international trade"],
-        # #     "teaser": "How does New Zealand's reliance on tourism compare to its reliance on exports or international trade?"
-        # # }, {
-        # #     "values": ["agriculture", "manufacturing"],
-        # #     "teaser": "What other sectors contribute significantly to New Zealand's GDP besides tourism?"
-        # # }]""",
-        # #     },
-        # #     {
-        # #         "role": "user",
-        # #         "content": f"""Reader's background: South Korea\nContext: {claim.paragraph}\nStatement: "{claim.userClaim}"\nIndicator: "{variable}" """,
-        # #     },
-        # # ]
         prompt = self.create_recommendation_prompt(variable, claim.userClaim, claim.paragraph, 'South Korea')
         
         response = await self._call_api_2(
@@ -620,42 +536,30 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
             )
         )
         return new_res
-
-    async def _suggest_exploration(self, claim: UserClaimBody, verbose: bool = True):
+    
+    async def _suggest_exploration(self, claim: UserClaimBody, verbose: bool=True):
         prompt = [
-            {
-                "role": "system",
-                "content": """You are a keen learner. You are given a statement, and a context paragraph. Please suggest a list of questions that could explore the context of the statement. Provide a one-sentence explanation for each question and respond as JSON in following format:
+            {"role": "system", "content": """You are a keen learner. You are given a statement, and a context paragraph. Please suggest a list of questions that could explore the context of the statement. Provide a one-sentence explanation for each question and respond as JSON in following format:
             [{
                 "question": "<question 1>",
                 "explain": "<explanation>"
                 },{
                 "question": "<question 2>",
                 "explain": "<explanation>"
-            },...]""",
-            },
-            {
-                "role": "user",
-                "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}" """,
-            },
+            },...]"""},
+            {"role": "user", "content": f"""Context: {claim.paragraph}\nStatement: "{claim.userClaim}" """}
         ]
-        response = await self._call_api_2(prompt, model=Model.GPT3, temperature=0.8)
+        response = await self._call_api_2(prompt, model=Model.GPT3, temperature=.8)
         # if verbose: print(f"response: {response}")
         return json.loads(response[0])
-
-    async def _suggest_queries_2(
-        self, body: UserClaimBody, verbose: bool = True, model: Model = Model.GPT_TAG_4
-    ):
-        tasks = [
-            self._suggest_variable(body, ind, verbose=verbose) for ind in self.INDICATOR
-        ] + [
-            self._tag_claim(
-                body.userClaim,
-                TemplateKey.CLAIM_TAGGING_2,
-                model=model,
-                verbose=verbose,
-            )
-        ]
+    
+    async def _suggest_queries_2(self, body: UserClaimBody, verbose: bool=True, model: Model=Model.GPT_TAG_4):
+        tasks = [self._suggest_variable(body, ind, verbose=verbose) \
+                               for ind in self.INDICATOR] \
+                + [self._tag_claim(
+                    body.userClaim, TemplateKey.CLAIM_TAGGING_2, 
+                      model=model, verbose=verbose, fewshot_samples=10
+                )]
         attributes, years, countries, claim_tag = await asyncio.gather(*tasks)
 
         variables, claim_tag["cloze_vis"] = {
