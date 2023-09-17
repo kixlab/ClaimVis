@@ -21,6 +21,7 @@ from DataMatching import DataMatcher
 from Gloc.utils.normalizer import _get_matched_cells
 from pyinstrument import Profiler
 from Gloc.utils.async_llm import Model
+from ClaimDetection import ClaimDetector
 
 def get_db():
 	db = SessionLocal()
@@ -463,6 +464,11 @@ async def get_suggested_queries(claim: UserClaimBody, model: Model = Model.GPT_T
 	tagged_claim = await TableReasoner()._suggest_queries_2(claim, model=model)
 	return ClaimMap(**tagged_claim)
 
+@app.post('/detect_claim')
+async def detect_claim(claim: UserClaimBody):
+	detector = ClaimDetector()
+	return await detector.detect_2(claim.userClaim)
+
 @app.get('/robots.txt', response_class=PlainTextResponse)
 def robots():
 	data = """User-agent: *\nDisallow: /"""
@@ -536,7 +542,7 @@ async def main():
 			{
 			"field": "datetime",
 			"values": [
-				"@(Year with the lowest total fertility rate?)"
+				"@(Year with the lowest Global total fertility rate?)"
 			],
 			"explain": "When did South Korea experience the lowest total fertility rate?"
 			},
