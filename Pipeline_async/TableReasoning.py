@@ -512,7 +512,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         return prompt
 
     async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
-        prompt = self.create_recommendation_prompt(variable, claim.userClaim, claim.paragraph, 'South Korea')
+        prompt = self.create_recommendation_prompt(variable, claim.userClaim, claim.paragraph, userBackground=claim.context)
         
         response = await self._call_api_2(
             prompt, model=Model.GPT3, temperature=0.8, max_decode_steps=600

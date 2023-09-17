@@ -80,6 +80,7 @@ class Dataset(BaseModel):
 class UserClaimBody(BaseModel):
     userClaim: str
     paragraph: Optional[str] = None
+    context: Optional[str] = 'South Korea'
 
 class GetVizSpecBody(BaseModel):
     userClaim: str
