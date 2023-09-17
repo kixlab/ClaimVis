@@ -245,7 +245,7 @@ async def potential_data_point_sets(body: UserClaimBody, verbose:bool=True, test
 
 @app.post("/potential_data_point_sets_2")
 async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True) -> list[DataPointSet]:
-	dm = DataMatcher(datasrc="../Datasets")
+	dm = DataMatcher(datasrc="../Datasets", load_desc=False)
 	table, _, _, fields, _, info_table = dm.merge_datasets(datasets, change_dataset=True)
 	new_attributes = [claim_map.mapping[attr] for attr in claim_map.value]	
 
@@ -255,7 +255,7 @@ async def potential_data_point_sets_2(claim_map: ClaimMap, datasets: list[Datase
 
 @app.post("/get_reason")
 async def get_reason(claim_map: ClaimMap, datasets: list[Dataset], verbose:bool=True, fast_mode:bool=True):
-	dm = DataMatcher(datasrc="../Datasets")
+	dm = DataMatcher(datasrc="../Datasets", load_desc=False)
 	claim = claim_map.rephrase
 	table, _, _, _, _, _ = dm.merge_datasets(datasets, change_dataset=True)
 	tb = TableReasoner(datamatcher=dm)
@@ -414,6 +414,48 @@ def get_data_new(body: GetVizDataBodyNew) -> list[dict]:
 		
 	return res_dict
 
+@app.post("/get_data_2")
+def get_data_new_2(body: GetVizDataBodyMulti) -> list[dict]:
+	datasets = body.datasets
+	df, _, _, _, _, _ = DataMatcher(datasrc="../Datasets", load_desc=False).merge_datasets(datasets)
+
+	otherFieldNames = list(map(lambda x: x, body.fields))
+	dateFieldNames = [k for (k, v) in body.fields.items() if isinstance(v, DateRange)]
+	dateFieldName = dateFieldNames[0] if len(dateFieldNames) > 0 else None
+	## remove date from otherFieldsNames
+	otherFieldNames.remove(dateFieldName)
+	if dateFieldName:
+		date_start = int(body.fields[dateFieldName].date_start.value)
+		date_end = int(body.fields[dateFieldName].date_end.value)
+		dates = [(i) for i in range(date_start, date_end + 1)]
+	else:
+		dates = None
+	values = list(map(lambda x: x.value, body.values))
+	categories = otherFieldNames + [dateFieldName] + values # add country and year to the list of categories
+
+	# select rows with dates
+	dataframe = df[df[dateFieldName].isin(dates)] if dates is not None else df
+	for of in otherFieldNames:
+		otherFieldValue = list(map(lambda x: x.value, body.fields[of]))
+		dataframe = dataframe[dataframe[of].isin(otherFieldValue)]
+	# df.columns = df.columns.str.lower()
+	dataframe = dataframe[categories]
+	dataframe.rename(columns={dateFieldName: 'date'}, inplace=True)
+
+	dataframe.fillna(0, inplace=True)
+
+	res_dict = dataframe.to_dict(orient='records')
+	for r in res_dict:
+		r['fields'] = {}
+		for of in otherFieldNames:
+			r['fields'][of] = r[of]
+			del r[of]
+		if dates:
+			r['fields']['date'] = r['date']
+			del r['date']
+		
+	return res_dict
+
 @app.post("/logs", response_model = models.Log)
 def create_log(body: LogCreate, db: Session = Depends(get_db)):
 	return log_crud.create_log(db=db, log=body)
@@ -481,122 +523,141 @@ async def main():
 	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
 	# p = Profiler()
 	# p.start()
-	# paragraph = ""
-	# userClaim = "The year New Zealand had the highest GDP, China had the lowest GDP."
-	# # userClaim = "New Zealand's GDP is 10% from tourism."
-	# # A significant amount of New Zealand's GDP comes from tourism
-	# claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
-	# claim_map = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
-	# print(f"{claim_map}\n{'@'*100}")
+	paragraph = ""
+	userClaim = "The year New Zealand had the highest GDP, China had the lowest GDP."
+	# userClaim = "New Zealand's GDP is 10% from tourism."
+	# A significant amount of New Zealand's GDP comes from tourism
+	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
+	claim_map = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
+	print(f"{claim_map}\n{'@'*100}")
 
-	claim_map = {
-		"country": [
-			"World"
-		],
-		"value": [
-			"economic indicators",
-			"financial crises"
-		],
-		"date": [
-			"1990 - 1999",
-			"2000 - 2009"
-		],
-		"vis": "Show the {total fertility rate} of the {World} from {1990} to {1999} and from {2000} to {2009}.",
-		"cloze_vis": "Show the {value} of the {country} from {date} to {date} and from {date} to {date}.",
-		"rephrase": "",
-		"suggestion": [
-			{
-			"field": "value",
-			"values": [
-				"economic indicators",
-				"financial crises"
-			],
-			"explain": "How did the financial crises in the 2000s impact other economic indicators in the country?"
-			},
-			{
-			"field": "value",
-			"values": [
-				"housing costs",
-				"child care costs",
-				"education costs",
-				"unemployment rate"
-			],
-			"explain": "What specific factors contributed to the decline in the total fertility rate during the financial crises?"
-			},
-			{
-			"field": "value",
-			"values": [
-				"youth unemployment rate",
-				"youth anxiety levels"
-			],
-			"explain": "How did the financial crises affect the employment prospects and mental well-being of young people in the country?"
-			},
-			{
-			"field": "datetime",
-			"values": [
-				"1997",
-				"2008"
-			],
-			"explain": "How did the financial crises in South Korea impact the total fertility rate in the 2000s?"
-			},
-			{
-			"field": "datetime",
-			"values": [
-				"@(Year with the lowest Global total fertility rate?)"
-			],
-			"explain": "When did South Korea experience the lowest total fertility rate?"
-			},
-			{
-			"field": "country",
-			"values": [
-				"South Korea"
-			],
-			"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other countries?"
-			},
-			{
-			"field": "country",
-			"values": [
-				"Japan",
-				"Germany",
-				"Italy"
-			],
-			"explain": "How did the financial crises impact the total fertility rate in other developed countries?"
-			},
-			{
-			"field": "country",
-			"values": [
-				"United States",
-				"United Kingdom",
-				"Canada"
-			],
-			"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other English-speaking countries?"
-			},
-			{
-			"field": "country",
-			"values": [
-				"China",
-				"Taiwan",
-				"Hong Kong"
-			],
-			"explain": "How did the financial crises impact the total fertility rate in other East Asian countries?"
-			},
-			{
-			"field": "country",
-			"values": [
-				"@(Countries with the highest fertility rates?)"
-			],
-			"explain": "Which countries have the highest fertility rates?"
-			}
-		],
-		"mapping": {}
-	}
+	# claim_map = {
+	# 	"country": [
+	# 		"World"
+	# 	],
+	# 	"value": [
+	# 		"economic indicators",
+	# 		"financial crises"
+	# 	],
+	# 	"date": [
+	# 		"1990 - 1999",
+	# 		"2000 - 2009"
+	# 	],
+	# 	"vis": "Show the {total fertility rate} of the {World} from {1990} to {1999} and from {2000} to {2009}.",
+	# 	"cloze_vis": "Show the {value} of the {country} from {date} to {date} and from {date} to {date}.",
+	# 	"rephrase": "",
+	# 	"suggestion": [
+	# 		{
+	# 		"field": "value",
+	# 		"values": [
+	# 			"economic indicators",
+	# 			"financial crises"
+	# 		],
+	# 		"explain": "How did the financial crises in the 2000s impact other economic indicators in the country?"
+	# 		},
+	# 		{
+	# 		"field": "value",
+	# 		"values": [
+	# 			"housing costs",
+	# 			"child care costs",
+	# 			"education costs",
+	# 			"unemployment rate"
+	# 		],
+	# 		"explain": "What specific factors contributed to the decline in the total fertility rate during the financial crises?"
+	# 		},
+	# 		{
+	# 		"field": "value",
+	# 		"values": [
+	# 			"youth unemployment rate",
+	# 			"youth anxiety levels"
+	# 		],
+	# 		"explain": "How did the financial crises affect the employment prospects and mental well-being of young people in the country?"
+	# 		},
+	# 		{
+	# 		"field": "datetime",
+	# 		"values": [
+	# 			"1997",
+	# 			"2008"
+	# 		],
+	# 		"explain": "How did the financial crises in South Korea impact the total fertility rate in the 2000s?"
+	# 		},
+	# 		{
+	# 		"field": "datetime",
+	# 		"values": [
+	# 			"@(Year with the lowest Global total fertility rate?)"
+	# 		],
+	# 		"explain": "When did South Korea experience the lowest total fertility rate?"
+	# 		},
+	# 		{
+	# 		"field": "country",
+	# 		"values": [
+	# 			"South Korea"
+	# 		],
+	# 		"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other countries?"
+	# 		},
+	# 		{
+	# 		"field": "country",
+	# 		"values": [
+	# 			"Japan",
+	# 			"Germany",
+	# 			"Italy"
+	# 		],
+	# 		"explain": "How did the financial crises impact the total fertility rate in other developed countries?"
+	# 		},
+	# 		{
+	# 		"field": "country",
+	# 		"values": [
+	# 			"United States",
+	# 			"United Kingdom",
+	# 			"Canada"
+	# 		],
+	# 		"explain": "How does the decline in total fertility rate during the financial crises in South Korea compare to other English-speaking countries?"
+	# 		},
+	# 		{
+	# 		"field": "country",
+	# 		"values": [
+	# 			"China",
+	# 			"Taiwan",
+	# 			"Hong Kong"
+	# 		],
+	# 		"explain": "How did the financial crises impact the total fertility rate in other East Asian countries?"
+	# 		},
+	# 		{
+	# 		"field": "country",
+	# 		"values": [
+	# 			"@(Countries with the highest fertility rates?)"
+	# 		],
+	# 		"explain": "Which countries have the highest fertility rates?"
+	# 		}
+	# 	],
+	# 	"mapping": {}
+	# }
 
-	claim_map = ClaimMap(**claim_map)
+	# claim_map = ClaimMap(**claim_map)
 
 	dic = await get_relevant_datasets(claim_map)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
 	print(claim_map)
 
+	BodyViz = GetVizDataBodyMulti(
+		datasets=top_k_datasets,
+		fields={
+			"date": DateRange(
+				date_start={
+					"label": "1990",
+					"value": "1990"
+				},
+				date_end={
+					"label": "1999",
+					"value": "1999"
+				}
+			),
+			"country_name": [OptionProps(label="World", value="World")]
+		},
+		values=list(map(lambda x: {"label": x, "value": x}, random.sample(top_k_datasets[1].fields + top_k_datasets[0].fields + top_k_datasets[2].fields, 5)))
+	)
+	dts = get_data_new_2(BodyViz)
+	print(dts)
 	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
 	# print(dtps)
 	# p = Profiler()

@@ -16,7 +16,7 @@ import os
 
 class DataMatcher(object):
     embedder = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-    def __init__(self, datasrc: str=None, summarize: bool=True):
+    def __init__(self, datasrc: str=None, summarize: bool=True, load_desc: bool=True):
         self.summarizer = Summarizer(datasrc=datasrc)
         
         if not datasrc:
@@ -25,6 +25,9 @@ class DataMatcher(object):
         self.datasrc = datasrc
         self.datasets = [filename for filename in os.listdir(self.datasrc) if filename.endswith('.csv')]
 
+        self.load_desc = load_desc
+        if not load_desc:
+            return
         with open(f'{self.datasrc}/description/desc.json', 'r+') as openfile:
             self.description = json.load(openfile)
 
@@ -265,7 +268,8 @@ class DataMatcher(object):
         attributes, tables, embed_dict, info_tables, name = set(), [], dict(), [], ""
         for dataset in datasets:
             name += dataset.name[:-4] + "@"
-            embed_dict.update(self.attrs_embeddings[dataset.name])
+            if self.load_desc:
+                embed_dict.update(self.attrs_embeddings[dataset.name])
 
             table, country_attr, date_attr = self.load_table(dataset.name, dataset.fields, infer_date_and_country=True)
             if country_attr != COUNTRY:
@@ -290,7 +294,7 @@ class DataMatcher(object):
             info_tables.append(info_table)
 
         attributes = list(attributes)
-        embeds = [embed_dict[attr] for attr in attributes]
+        embeds = [embed_dict[attr] for attr in attributes]  if self.load_desc else self.encode(attributes)
         info_table = reduce(lambda left, right: pd.merge(left, right, on=["value", "unit", "source"], how= 'outer'), info_tables)
 
         df = reduce(lambda left, right: pd.merge(left, right), tables)
