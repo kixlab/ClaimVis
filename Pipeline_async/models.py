@@ -91,6 +91,11 @@ class GetVizDataBodyNew(BaseModel):
     values: list[OptionProps]
     fields: Dict[str, Union[list[OptionProps], DateRange]]
 
+class GetVizDataBodyMulti(BaseModel):
+    datasets: list[Dataset]
+    values: list[OptionProps]
+    fields: Dict[str, Union[list[OptionProps], DateRange]]
+
 class LogBase(BaseModel):
     event: str
     payload: Optional[str] = None
