@@ -68,15 +68,15 @@ async def _call_openai(
     """
     try:
         reply = await openai.ChatCompletion.acreate(
-						model=engine,
-						messages=prompt,
-						temperature=temperature,
-						max_tokens=max_decode_steps,
-						top_p=top_p,
-						frequency_penalty=frequency_penalty,
-						presence_penalty=presence_penalty,
-						n=samples,
-						stop=stop
+                        model=engine,
+                        messages=prompt,
+                        temperature=temperature,
+                        max_tokens=max_decode_steps,
+                        top_p=top_p,
+                        frequency_penalty=frequency_penalty,
+                        presence_penalty=presence_penalty,
+                        n=samples,
+                        stop=stop
                     )
         
         contents = [choice['message']['content'] for choice in reply['choices']] if reply else []

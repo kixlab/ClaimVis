@@ -424,7 +424,7 @@ def get_dataset_explanation(dataset: str, column_name: str):
 	else:
 		return ''
 
-@app.get('/dataset_explanation_2') 
+@app.post('/dataset_explanation_2') 
 def get_dataset_explanation_2(datasets: list[Dataset], column_name: str):
 	for dataset in datasets:
 		if column_name in dataset.fields:
