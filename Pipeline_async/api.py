@@ -1,8 +1,9 @@
 import random
+from typing import Annotated
 import numpy as np
 import uvicorn
 from sklearn.metrics.pairwise import cosine_similarity
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Body, Depends, FastAPI, HTTPException
 from models import *
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
@@ -480,7 +481,7 @@ def get_dataset_explanation(dataset: str, column_name: str):
 		return ''
 
 @app.post('/dataset_explanation_2') 
-def get_dataset_explanation_2(datasets: list[Dataset], column_name: str):
+def get_dataset_explanation_2(datasets: list[Dataset], column_name: Annotated[str, Body()]):
 	for dataset in datasets:
 		if column_name in dataset.fields:
 			table_name = dataset.name
