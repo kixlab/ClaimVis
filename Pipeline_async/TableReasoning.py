@@ -528,7 +528,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
 3. Is the question helpful to consider the broader context around the claim?
 4. Is the question suggesting a new aspect?
 
-Simply answer A or B
+Simply ANSWER A or B
 """
             },
             {
@@ -536,13 +536,14 @@ Simply answer A or B
                 "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nQuestion A: {questionA}\nQuestion B: {questionB}"""
             }
         ]
-        response = await self._call_api_2(prompt, model=Model.GPT4, temperature=0.25, max_decode_steps=600)
+        response = await self._call_api_2(prompt, model=Model.GPT4, temperature=0.25, max_decode_steps=1)
 
         if response[0] == "A":
             return questionA
         elif response[0] == "B":
             return questionB
         else:
+            print(response[0])
             return 0
         
     async def _fill_each_element(self, questions: list, i, j, claim: UserClaimBody, matrix: np.ndarray, verbose=True):
@@ -555,15 +556,10 @@ Simply answer A or B
         questionA = questions[i]
         questionB = questions[j]
         question = await self._pairwise_comparison(claim, questionA, questionB)
-        if question == questionB:
-            matrix[i][j] = 1
-            matrix[j][i] = -1
-        elif question == questionA:
-            matrix[i][j] = -1
-            matrix[j][i] = 1
-        else:
-            matrix[i][j] = 0
-            matrix[j][i] = 0
+        if question == questionA:
+            matrix[i][j] += 0.5
+        elif question == questionB:
+            matrix[j][i] += 0.5
         return 
         
     
@@ -574,16 +570,16 @@ Simply answer A or B
         Output: sorted questions
         """
         # <TODO>
-        print('start_time', time.time())
         ## First, mix the order of questions to avoid bias  
         random.shuffle(questions)
 
         ## Then, compute the matrix of pairwise comparison for each question
         matrix = np.zeros((len(questions), len(questions)))
 
-        result = await asyncio.gather(*[self._fill_each_element(questions, i, j, claim, matrix, verbose) for i in range(len(questions)) for j in range(i + 1, len(questions))])
+        result = await asyncio.gather(*[self._fill_each_element(questions, i, j, claim, matrix, verbose) for i in range(len(questions)) for j in range(len(questions)) if i != j])
 
         ## From the matrix, compute the score of each question
+        if verbose: print(f"score matrix: {matrix}")
         score = np.sum(matrix, axis=1)
 
         ## Then, sort the questions so higher priority questions are at the top, from bottom to the top
@@ -604,7 +600,6 @@ Simply answer A or B
         
         for i in range(len(questions)):
             questions[i]["rank"] = i + 1
-        print('end_time', time.time())
 
         return questions
 
@@ -1130,16 +1125,16 @@ Simply answer A or B
 async def main():
     data_matcher = DataMatcher(datasrc="../Datasets")
     table_reasoner = TableReasoner(datamatcher=data_matcher)
-    query = "What was the population of South Korea in 2020?"
-    # await table_reasoner._suggest_queries_2(query, verbose=True)
-    data = await table_reasoner._tag_claim(
-        query,
-        TemplateKey.CLAIM_TAGGING_2,
-        model=Model.GPT_TAG_4,
-        verbose=True,
-        fewshot_samples=6,
-        gen_samples=7,
-    )
+    query = "Korea fertility rate has dropped to 0.4 in 2019"
+    await table_reasoner._suggest_queries_2(UserClaimBody(userClaim=query), verbose=True)
+    # data = await table_reasoner._tag_claim(
+    #     query,
+    #     TemplateKey.CLAIM_TAGGING_2,
+    #     model=Model.GPT_TAG_4,
+    #     verbose=True,
+    #     fewshot_samples=6,
+    #     gen_samples=7,
+    # )
 
     # tasks = [
     #         table_reasoner._tag_claim(
