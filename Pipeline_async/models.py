@@ -61,6 +61,7 @@ class ClaimMap(BaseModel):
         field: str
         values: list[str]
         explain: str
+        rank: int
 
     country: list[str]
     value: list[str]
@@ -80,6 +81,7 @@ class Dataset(BaseModel):
 class UserClaimBody(BaseModel):
     userClaim: str
     paragraph: Optional[str] = None
+    context: Optional[str] = 'South Korea'
 
 class GetVizSpecBody(BaseModel):
     userClaim: str
