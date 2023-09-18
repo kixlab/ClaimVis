@@ -281,8 +281,6 @@ class DataMatcher(object):
                 if change_dataset:
                     dataset.fields[dataset.fields.index(date_attr)] = DATE
             attributes.update(dataset.fields) # update after renaming
-            if dataset.name == "Climate Change.csv":
-                print("special table: ", table[COUNTRY].unique().tolist())
             tables.append(table)   
 
             info_table = pd.read_csv(f"{self.datasrc}/info/{dataset.name}")
