@@ -543,7 +543,7 @@ Give the ranking in the following JSON format.
             }
         ]
 
-        response = await self._call_api_2(prompt, model=Model.GPT3, temperature=0.8, max_decode_steps=600)
+        response = await self._call_api_2(prompt, model=Model.GPT4, temperature=0.25, max_decode_steps=600)
         if verbose: print(f"response: {response}")
         temp_res = json.loads(response[0])
         for s in suggestions:
