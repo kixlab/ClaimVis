@@ -511,48 +511,110 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
 
         return prompt
     
-    async def _rank_suggestions(self, suggestions: list, claim: UserClaimBody, verbose: bool=True):
+    async def _pairwise_comparison(self, claim: UserClaimBody, questionA, questionB):
         """
-        Rank suggestions based on the claim
-        Input: suggestions, claim
-        Output: ranked suggestions
+        Compare two questions and return the one with higher priority
+        Input: questionA, questionB
+        Output: question with higher priority
         """
         # <TODO>
-    
         prompt = [
             {
                 "role": "system",
-                "content": """Given a claim, surrounding paragraph, a reader's context, and a list of questions to contextualize the claim in JSON format, give a single ranking of the recommendations. When ranking, consider the following:
+                "content": """Given a claim, surrounding paragraph, a reader's context, and a pair of questions to contextualize the claim, give a judgment on which is better in terms of the following criteria:
 
-1. Is the question interesting for the reader to explore?
-2. Is the question helpful to consider the broader context and global trend around the claim?
-3. Is the question suggesting a new aspect?
+1. Is the question testable with quantitative data? 
+2. Is the question interesting for the reader to explore?
+3. Is the question helpful to consider the broader context around the claim?
+4. Is the question suggesting a new aspect?
 
-Give the ranking in the following JSON format.
-[
-{
-   rank: 1,
-   question: <question>
-},
-...
-]"""
+Simply answer A or B
+"""
             },
             {
                 "role": "user",
-                "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nSuggestions: {suggestions}"""
+                "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nQuestion A: {questionA}\nQuestion B: {questionB}"""
             }
         ]
-
         response = await self._call_api_2(prompt, model=Model.GPT4, temperature=0.25, max_decode_steps=600)
-        if verbose: print(f"response: {response}")
-        temp_res = json.loads(response[0])
-        for s in suggestions:
-            for r in temp_res:
-                if s['explain'] == r['question']:
-                    s['rank'] = r['rank']
-                    break
-        suggestions = sorted(suggestions, key=lambda x: x['rank'])
-        return suggestions
+
+        if response[0] == "A":
+            return questionA
+        elif response[0] == "B":
+            return questionB
+        else:
+            return None
+    
+    async def _bubble_sort(self, questions: list, claim: UserClaimBody, verbose=True):
+        """
+        Sort questions based on the claim
+        Input: questions, claim
+        Output: sorted questions
+        """
+        # <TODO>
+        print('start_time', time.time())
+        ## First, mix the order of questions to avoid bias  
+        random.shuffle(questions)
+
+        ## Then, sort the questions so higher priority questions are at the top, from bottom to the top
+        for i in range(3): ## Maybe just present 3 questions
+            for j in range(len(questions) - i - 1, 0, -1):
+                questionA = questions[j - 1]
+                questionB = questions[j]
+                question = await self._pairwise_comparison(claim, questionA, questionB)
+                if question == questionB:
+                    questions[j - 1], questions[j] = questions[j], questions[j - 1]
+
+        
+        for i in range(len(questions)):
+            questions[i]["rank"] = i + 1
+        print('end_time', time.time())
+
+        return questions
+
+    
+#     async def _rank_suggestions(self, suggestions: list, claim: UserClaimBody, verbose: bool=True):
+#         """
+#         Rank suggestions based on the claim
+#         Input: suggestions, claim
+#         Output: ranked suggestions
+#         """
+#         # <TODO>
+    
+#         prompt = [
+#             {
+#                 "role": "system",
+#                 "content": """Given a claim, surrounding paragraph, a reader's context, and a list of questions to contextualize the claim in JSON format, give a single ranking of the recommendations. When ranking, consider the following:
+
+# 1. Is the question interesting for the reader to explore?
+# 2. Is the question helpful to consider the broader context and global trend around the claim?
+# 3. Is the question suggesting a new aspect?
+
+# Give the ranking in the following JSON format.
+# [
+# {
+#    rank: 1,
+#    question: <question>
+# },
+# ...
+# ]"""
+#             },
+#             {
+#                 "role": "user",
+#                 "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nSuggestions: {suggestions}"""
+#             }
+#         ]
+
+#         response = await self._call_api_2(prompt, model=Model.GPT4, temperature=0.25, max_decode_steps=600)
+#         if verbose: print(f"response: {response}")
+#         temp_res = json.loads(response[0])
+#         for s in suggestions:
+#             for r in temp_res:
+#                 if s['explain'] == r['question']:
+#                     s['rank'] = r['rank']
+#                     break
+#         suggestions = sorted(suggestions, key=lambda x: x['rank'])
+#         return suggestions
 
     async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
         prompt = self.create_recommendation_prompt(variable, claim.userClaim, claim.paragraph, userBackground=claim.context)
@@ -608,7 +670,7 @@ Give the ranking in the following JSON format.
         # run rank_suggestions concurrent with the other logic
         loop = asyncio.get_event_loop()
         ranked_suggestions = asyncio.create_task(
-            self._rank_suggestions((attributes + years + countries), body, verbose=verbose)
+            self._bubble_sort((attributes + years + countries), body, verbose=verbose)
         )
         variables, claim_tag["cloze_vis"] = {
             "X": self.MIN_DATE,
