@@ -510,6 +510,49 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         prompt.append(final_prompt)
 
         return prompt
+    
+    async def _rank_suggestions(self, suggestions: list, claim: UserClaimBody, verbose: bool=True):
+        """
+        Rank suggestions based on the claim
+        Input: suggestions, claim
+        Output: ranked suggestions
+        """
+        # <TODO>
+    
+        prompt = [
+            {
+                "role": "system",
+                "content": """Given a claim, surrounding paragraph, a reader's context, and a list of questions to contextualize the claim in JSON format, give a single ranking of the recommendations. When ranking, consider the following:
+
+1. Is the question interesting for the reader to explore?
+2. Is the question helpful to consider the broader context and global trend around the claim?
+3. Is the question suggesting a new aspect?
+
+Give the ranking in the following JSON format.
+[
+{
+   rank: 1,
+   question: <question>
+},
+...
+]"""
+            },
+            {
+                "role": "user",
+                "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nSuggestions: {suggestions}"""
+            }
+        ]
+
+        response = await self._call_api_2(prompt, model=Model.GPT3, temperature=0.8, max_decode_steps=600)
+        if verbose: print(f"response: {response}")
+        temp_res = json.loads(response[0])
+        for s in suggestions:
+            for r in temp_res:
+                if s['explain'] == r['question']:
+                    s['rank'] = r['rank']
+                    break
+
+        return suggestions
 
     async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
         prompt = self.create_recommendation_prompt(variable, claim.userClaim, claim.paragraph, userBackground=claim.context)
@@ -561,6 +604,12 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
                 )]
         attributes, years, countries, claim_tag = await asyncio.gather(*tasks)
 
+        # ranked_suggestions = self._rank_suggestions(attributes, body, verbose=verbose)
+        # run rank_suggestions concurrent with the other logic
+        loop = asyncio.get_event_loop()
+        ranked_suggestions = asyncio.create_task(
+            self._rank_suggestions((attributes + years + countries), body, verbose=verbose)
+        )
         variables, claim_tag["cloze_vis"] = {
             "X": self.MIN_DATE,
             "Y": self.MAX_DATE,
@@ -599,8 +648,9 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         for tagged_attr in claim_tag["value"]:
             claim_tag["cloze_vis"] = claim_tag["cloze_vis"].replace(f"{{{tagged_attr['rephrase']}}}", "{value}")
             claim_tag['rephrase'] = claim_tag['rephrase'].replace(f"{{{tagged_attr['rephrase']}}}", f"{tagged_attr['rephrase']}") 
-
-        claim_tag["suggestion"] = attributes + years + countries
+        
+        rank_result = await ranked_suggestions
+        claim_tag["suggestion"] = rank_result # attributes + years + countries
         claim_tag["mapping"] = dict()
         claim_tag["value"] = [attr["rephrase"] for attr in claim_tag["value"]]
         claim_tag["date"] = claim_tag["datetime"]
