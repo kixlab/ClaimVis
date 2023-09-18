@@ -525,7 +525,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "renewable energy contributes a smaller share of South Korea’s total electricity generation than in other OECD countries."
+	userClaim = "South Korea’s emissions did not peak until 2018."
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
