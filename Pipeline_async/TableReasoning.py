@@ -551,7 +551,7 @@ Give the ranking in the following JSON format.
                 if s['explain'] == r['question']:
                     s['rank'] = r['rank']
                     break
-
+        suggestions = sorted(suggestions, key=lambda x: x['rank'])
         return suggestions
 
     async def _suggest_variable(self, claim: UserClaimBody, variable: str, verbose: bool=True):
