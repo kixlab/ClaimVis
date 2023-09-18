@@ -543,7 +543,29 @@ Simply answer A or B
         elif response[0] == "B":
             return questionB
         else:
-            return None
+            return 0
+        
+    async def _fill_each_element(self, questions: list, i, j, claim: UserClaimBody, matrix: np.ndarray, verbose=True):
+        """
+        Fill each element in the question
+        Input: questions, claim
+        Output: questions with filled elements
+        """
+        # <TODO>
+        questionA = questions[i]
+        questionB = questions[j]
+        question = await self._pairwise_comparison(claim, questionA, questionB)
+        if question == questionB:
+            matrix[i][j] = 1
+            matrix[j][i] = -1
+        elif question == questionA:
+            matrix[i][j] = -1
+            matrix[j][i] = 1
+        else:
+            matrix[i][j] = 0
+            matrix[j][i] = 0
+        return 
+        
     
     async def _bubble_sort(self, questions: list, claim: UserClaimBody, verbose=True):
         """
@@ -556,14 +578,28 @@ Simply answer A or B
         ## First, mix the order of questions to avoid bias  
         random.shuffle(questions)
 
+        ## Then, compute the matrix of pairwise comparison for each question
+        matrix = np.zeros((len(questions), len(questions)))
+
+        result = await asyncio.gather(*[self._fill_each_element(questions, i, j, claim, matrix, verbose) for i in range(len(questions)) for j in range(i + 1, len(questions))])
+
+        ## From the matrix, compute the score of each question
+        score = np.sum(matrix, axis=1)
+
         ## Then, sort the questions so higher priority questions are at the top, from bottom to the top
-        for i in range(3): ## Maybe just present 3 questions
-            for j in range(len(questions) - i - 1, 0, -1):
-                questionA = questions[j - 1]
-                questionB = questions[j]
-                question = await self._pairwise_comparison(claim, questionA, questionB)
-                if question == questionB:
-                    questions[j - 1], questions[j] = questions[j], questions[j - 1]
+        for i in range(len(questions)):
+            questions[i]["score"] = score[i]
+
+        questions = sorted(questions, key=lambda x: x['score'], reverse=True)
+        
+        ## Then, sort the questions so higher priority questions are at the top, from bottom to the top
+        # for i in range(3): ## Maybe just present 3 questions
+        #     for j in range(len(questions) - i - 1, 0, -1):
+        #         questionA = questions[j - 1]
+        #         questionB = questions[j]
+        #         question = await self._pairwise_comparison(claim, questionA, questionB)
+        #         if question == questionB:
+        #             questions[j - 1], questions[j] = questions[j], questions[j - 1]
 
         
         for i in range(len(questions)):
