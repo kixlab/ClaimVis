@@ -281,6 +281,8 @@ class DataMatcher(object):
                 if change_dataset:
                     dataset.fields[dataset.fields.index(date_attr)] = DATE
             attributes.update(dataset.fields) # update after renaming
+            if dataset.name == "Climate Change.csv":
+                print("special table: ", table[COUNTRY].unique().tolist())
             tables.append(table)   
 
             info_table = pd.read_csv(f"{self.datasrc}/info/{dataset.name}")
@@ -297,7 +299,7 @@ class DataMatcher(object):
         embeds = [embed_dict[attr] for attr in attributes]  if self.load_desc else self.encode(attributes)
         info_table = reduce(lambda left, right: pd.merge(left, right, on=["value", "unit", "source"], how= 'outer'), info_tables)
 
-        df = reduce(lambda left, right: pd.merge(left, right), tables)
+        df = reduce(lambda left, right: pd.merge(left, right, how='outer'), tables)
         df.name = name
         return df, COUNTRY, DATE, attributes, embeds, info_table
 

@@ -321,7 +321,7 @@ async def get_relevant_datasets(claim_map: ClaimMap, verbose:bool=True):
 				)	
 				country_to_infer.append(country)
 			else: # query like @(Asian countries?) have been handled by the _suggest_variable module
-				cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == "countries"]
+				cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == tb.INDICATOR["countries"]]
 				suggest_countries = set(cntry for sublist in cntry_sets for cntry in sublist.values)
 				actual_suggest_countries = []
 				for cntry in suggest_countries:
@@ -525,7 +525,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "The year New Zealand had the highest GDP, China had the lowest GDP."
+	userClaim = "renewable energy contributes a smaller share of South Korea’s total electricity generation than in other OECD countries."
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
@@ -640,27 +640,114 @@ async def main():
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
 	print(claim_map)
 
-	BodyViz = GetVizDataBodyMulti(
-		datasets=top_k_datasets,
-		fields={
-			"date": DateRange(
-				date_start={
-					"label": "1990",
-					"value": "1990"
-				},
-				date_end={
-					"label": "1999",
-					"value": "1999"
-				}
-			),
-			"country_name": [OptionProps(label="World", value="World")]
-		},
-		values=list(map(lambda x: {"label": x, "value": x}, random.sample(top_k_datasets[1].fields + top_k_datasets[0].fields + top_k_datasets[2].fields, 5)))
-	)
-	dts = get_data_new_2(BodyViz)
-	print(dts)
-	# dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
-	# print(dtps)
+	# BodyViz = {
+	# 		"datasets":[
+	# 			{
+	# 				"name":"Health.csv",
+	# 				"description":"",
+	# 				"score":0.4800550764391787,
+	# 				"fields":[
+	# 						"Wanted fertility rate (births per woman)","Adolescent fertility rate (births per 1,000 women ages 15-19)","Fertility rate, total (births per woman)","country_name","date"
+	# 				]
+	# 			},
+	# 			{
+	# 				"name":"Economy & Growth.csv",
+	# 				"description":"",
+	# 				"score":0.44914940256599467,
+	# 				"fields":["GDP per capita growth (annual %)","GDP growth (annual %)","country_name","date"
+	# 				]
+	# 			},
+	# 			{
+	# 				"name":"Gender.csv",
+	# 				"description":"",
+	# 				"score":0.43736179043032325,
+	# 				"fields":[
+	# 					"Wanted fertility rate (births per woman)","Adolescent fertility rate (births per 1,000 women ages 15-19)","Fertility rate, total (births per woman)","country_name","date"]
+	# 			},
+	# 			{
+	# 				"name":"Environment.csv",
+	# 				"description":"",
+	# 				"score":0.4293302021300258,
+	# 				"fields":["Adjusted savings: education expenditure (current US$)","country_name","date"]
+	# 			},
+	# 			{
+	# 				"name":"Climate Change.csv",
+	# 				"description":"",
+	# 				"score":0.4060632659846748,
+	# 				"fields":["Population growth (annual %)","country_name","date"]
+	# 			}],
+	# 		"values":[
+	# 			{
+	# 				"label":"Droughts, floods, extreme temperatures (% of population, average 1990-2009)",
+    #  				"value":"Droughts, floods, extreme temperatures (% of population, average 1990-2009)",
+	# 				"unit":"% of population, average 1990-2009",
+	# 				"provenance":"EM-DAT: The OFDA/CRED International Disaster Database: www.emdat.be, Université Catholique de Louvain, Brussels (Belgium), World Bank."
+	# 			},
+	# 			{
+	# 				"label":"Droughts, floods, extreme temperatures (% of population, average 1990-2009)",
+	# 				"value":"Droughts, floods, extreme temperatures (% of population, average 1990-2009)",
+	# 				"unit":"% of population, average 1990-2009","provenance":"EM-DAT: The OFDA/CRED International Disaster Database: www.emdat.be, Université Catholique de Louvain, Brussels (Belgium), World Bank."
+	# 			},
+	# 			{
+	# 				"label":"Adolescent fertility rate (births per 1,000 women ages 15-19)",
+	# 				"value":"Adolescent fertility rate (births per 1,000 women ages 15-19)",
+	# 				"unit":"births per 1,000 women ages 15-19",
+	# 				"provenance":"United Nations Population Division, World Population Prospects."
+	# 			},
+	# 			{
+	# 				"label":"Wanted fertility rate (births per woman)",
+	# 				"value":"Wanted fertility rate (births per woman)",
+	# 				"unit":"births per woman",
+	# 				"provenance":"Demographic and Health Surveys."
+	# 			},
+	# 			{
+	# 				"label":"Mortality rate, under-5 (per 1,000 live births)",
+	# 				"value":"Mortality rate, under-5 (per 1,000 live births)",
+	# 				"unit":"per 1,000 live births",
+	# 				"provenance":"Estimates developed by the UN Inter-agency Group for Child Mortality Estimation (UNICEF, WHO, World Bank, UN DESA Population Division) at www.childmortality.org."
+	# 			},
+	# 			{
+	# 				"label":"Population growth (annual %)",
+	# 				"value":"Population growth (annual %)",
+	# 				"unit":"annual %",
+	# 				"provenance":"Derived from total population. Population source: (1) United Nations Population Division. World Population Prospects: 2022 Revision, (2) Census reports and other statistical publications from national statistical offices, (3) Eurostat: Demographic Statistics, (4) United Nations Statistical Division. Population and Vital Statistics Reprot (various years), (5) U.S. Census Bureau: International Database, and (6) Secretariat of the Pacific Community: Statistics and Demography Programme."
+	# 			},
+	# 			{
+	# 				"label":"Fertility rate, total (births per woman)",
+	# 				"value":"Fertility rate, total (births per woman)",
+	# 				"unit":"births per woman",
+	# 				"provenance":"(1) United Nations Population Division. World Population Prospects: 2022 Revision. (2) Census reports and other statistical publications from national statistical offices, (3) Eurostat: Demographic Statistics, (4) United Nations Statistical Division. Population and Vital Statistics Reprot (various years), (5) U.S. Census Bureau: International Database, and (6) Secretariat of the Pacific Community: Statistics and Demography Programme."
+	# 			},
+	# 			{
+	# 				"label":"Primary completion rate, total (% of relevant age group)",
+	# 				"value":"Primary completion rate, total (% of relevant age group)",
+	# 				"unit":"% of relevant age group",
+	# 				"provenance":"UNESCO Institute for Statistics (UIS). UIS.Stat Bulk Data Download Service. Accessed October 24, 2022. https://apiportal.uis.unesco.org/bdds."
+	# 			},
+	# 			{
+	# 				"label":"Adjusted savings: education expenditure (current US$)",
+	# 				"value":"Adjusted savings: education expenditure (current US$)",
+	# 				"unit":"current US$",
+	# 				"provenance":"World Bank staff estimates using data from the United Nations Statistics Division's Statistical Yearbook, and the UNESCO Institute for Statistics online database."
+	# 			}],
+	# 		"fields":{
+	# 			"country_name":[
+	# 				{"label":"Afghanistan","value":"Afghanistan"},
+	# 				{"label":"Africa Eastern and Southern","value":"Africa Eastern and Southern"},
+	# 				{"label":"Africa Western and Central","value":"Africa Western and Central"},{"label":"Albania","value":"Albania"},{"label":"Algeria","value":"Algeria"},{"label":"American Samoa","value":"American Samoa"},{"label":"Andorra","value":"Andorra"},{"label":"Angola","value":"Angola"},{"label":"Antigua and Barbuda","value":"Antigua and Barbuda"},{"label":"Arab World","value":"Arab World"},{"label":"Argentina","value":"Argentina"},{"label":"Armenia","value":"Armenia"},{"label":"Aruba","value":"Aruba"},{"label":"Australia","value":"Australia"},{"label":"Austria","value":"Austria"},{"label":"Azerbaijan","value":"Azerbaijan"},{"label":"Bahamas, The","value":"Bahamas, The"},{"label":"Bahrain","value":"Bahrain"},{"label":"Bangladesh","value":"Bangladesh"},{"label":"Barbados","value":"Barbados"},{"label":"Belarus","value":"Belarus"},{"label":"Belgium","value":"Belgium"},{"label":"Belize","value":"Belize"},{"label":"Benin","value":"Benin"},{"label":"Bermuda","value":"Bermuda"},{"label":"Bhutan","value":"Bhutan"},{"label":"Bolivia","value":"Bolivia"},{"label":"Bosnia and Herzegovina","value":"Bosnia and Herzegovina"},{"label":"Botswana","value":"Botswana"},{"label":"Brazil","value":"Brazil"},{"label":"British Virgin Islands","value":"British Virgin Islands"},{"label":"Brunei Darussalam","value":"Brunei Darussalam"},{"label":"Bulgaria","value":"Bulgaria"},{"label":"Burkina Faso","value":"Burkina Faso"},{"label":"Burundi","value":"Burundi"},{"label":"Cabo Verde","value":"Cabo Verde"},{"label":"Cambodia","value":"Cambodia"},{"label":"Cameroon","value":"Cameroon"},{"label":"Canada","value":"Canada"},{"label":"Caribbean small states","value":"Caribbean small states"},{"label":"Cayman Islands","value":"Cayman Islands"},{"label":"Central African Republic","value":"Central African Republic"},{"label":"Central Europe and the Baltics","value":"Central Europe and the Baltics"},{"label":"Chad","value":"Chad"},{"label":"Channel Islands","value":"Channel Islands"},{"label":"Chile","value":"Chile"},{"label":"China","value":"China"},{"label":"Colombia","value":"Colombia"},{"label":"Comoros","value":"Comoros"},{"label":"Costa Rica","value":"Costa Rica"},{"label":"Cote d'Ivoire","value":"Cote d'Ivoire"},{"label":"Croatia","value":"Croatia"},{"label":"Cuba","value":"Cuba"},{"label":"Curacao","value":"Curacao"},{"label":"Cyprus","value":"Cyprus"},{"label":"Czechia","value":"Czechia"},{"label":"Democratic People's Republic of Korea","value":"Democratic People's Republic of Korea"},{"label":"Democratic Republic of Congo","value":"Democratic Republic of Congo"},{"label":"Denmark","value":"Denmark"},{"label":"Djibouti","value":"Djibouti"},{"label":"Dominica","value":"Dominica"},{"label":"Dominican Republic","value":"Dominican Republic"},{"label":"Early-demographic dividend","value":"Early-demographic dividend"},{"label":"East Asia & Pacific","value":"East Asia & Pacific"},{"label":"East Asia & Pacific (excluding high income)","value":"East Asia & Pacific (excluding high income)"},{"label":"East Asia & Pacific (IDA & IBRD countries)","value":"East Asia & Pacific (IDA & IBRD countries)"},{"label":"Ecuador","value":"Ecuador"},{"label":"Egypt, Arab Rep.","value":"Egypt, Arab Rep."},{"label":"El Salvador","value":"El Salvador"},{"label":"Equatorial Guinea","value":"Equatorial Guinea"},{"label":"Eritrea","value":"Eritrea"},{"label":"Estonia","value":"Estonia"},{"label":"Eswatini","value":"Eswatini"},{"label":"Ethiopia","value":"Ethiopia"},{"label":"Euro area","value":"Euro area"},{"label":"Europe & Central Asia","value":"Europe & Central Asia"},{"label":"Europe & Central Asia (excluding high income)","value":"Europe & Central Asia (excluding high income)"},{"label":"Europe & Central Asia (IDA & IBRD countries)","value":"Europe & Central Asia (IDA & IBRD countries)"},{"label":"European Union","value":"European Union"},{"label":"Faroe Islands","value":"Faroe Islands"},{"label":"Fiji","value":"Fiji"},{"label":"Finland","value":"Finland"},{"label":"Fragile and conflict affected situations","value":"Fragile and conflict affected situations"},{"label":"France","value":"France"},{"label":"French Polynesia","value":"French Polynesia"},{"label":"Gabon","value":"Gabon"},{"label":"Gambia, The","value":"Gambia, The"},{"label":"Georgia","value":"Georgia"},{"label":"Germany","value":"Germany"},{"label":"Ghana","value":"Ghana"},{"label":"Gibraltar","value":"Gibraltar"},{"label":"Greece","value":"Greece"},{"label":"Greenland","value":"Greenland"},{"label":"Grenada","value":"Grenada"},{"label":"Guam","value":"Guam"},{"label":"Guatemala","value":"Guatemala"},{"label":"Guinea","value":"Guinea"},{"label":"Guinea-Bissau","value":"Guinea-Bissau"},{"label":"Guyana","value":"Guyana"},{"label":"Haiti","value":"Haiti"},{"label":"Heavily indebted poor countries (HIPC)","value":"Heavily indebted poor countries (HIPC)"},{"label":"High income","value":"High income"},{"label":"Honduras","value":"Honduras"},{"label":"Hong Kong SAR, China","value":"Hong Kong SAR, China"},{"label":"Hungary","value":"Hungary"},{"label":"IBRD only","value":"IBRD only"},{"label":"Iceland","value":"Iceland"},{"label":"IDA & IBRD total","value":"IDA & IBRD total"},{"label":"IDA blend","value":"IDA blend"},{"label":"IDA only","value":"IDA only"},{"label":"IDA total","value":"IDA total"},{"label":"India","value":"India"},{"label":"Indonesia","value":"Indonesia"},{"label":"Iran, Islamic Rep.","value":"Iran, Islamic Rep."},{"label":"Iraq","value":"Iraq"},{"label":"Ireland","value":"Ireland"},{"label":"Isle of Man","value":"Isle of Man"},{"label":"Israel","value":"Israel"},{"label":"Italy","value":"Italy"},{"label":"Jamaica","value":"Jamaica"},{"label":"Japan","value":"Japan"},{"label":"Jordan","value":"Jordan"},{"label":"Kazakhstan","value":"Kazakhstan"},{"label":"Kenya","value":"Kenya"},{"label":"Kiribati","value":"Kiribati"},{"label":"Kosovo","value":"Kosovo"},{"label":"Kuwait","value":"Kuwait"},{"label":"Kyrgyz Republic","value":"Kyrgyz Republic"},{"label":"Lao PDR","value":"Lao PDR"},{"label":"Late-demographic dividend","value":"Late-demographic dividend"},{"label":"Latin America & Caribbean","value":"Latin America & Caribbean"},{"label":"Latin America & Caribbean (excluding high income)","value":"Latin America & Caribbean (excluding high income)"},{"label":"Latin America & the Caribbean (IDA & IBRD countries)","value":"Latin America & the Caribbean (IDA & IBRD countries)"},{"label":"Latvia","value":"Latvia"},{"label":"Least developed countries: UN classification","value":"Least developed countries: UN classification"},{"label":"Lebanon","value":"Lebanon"},{"label":"Lesotho","value":"Lesotho"},{"label":"Liberia","value":"Liberia"},{"label":"Libya","value":"Libya"},{"label":"Liechtenstein","value":"Liechtenstein"},{"label":"Lithuania","value":"Lithuania"},{"label":"Low & middle income","value":"Low & middle income"},{"label":"Low income","value":"Low income"},{"label":"Lower middle income","value":"Lower middle income"},{"label":"Luxembourg","value":"Luxembourg"},{"label":"Macao SAR, China","value":"Macao SAR, China"},{"label":"Madagascar","value":"Madagascar"},{"label":"Malawi","value":"Malawi"},{"label":"Malaysia","value":"Malaysia"},{"label":"Maldives","value":"Maldives"},{"label":"Mali","value":"Mali"},{"label":"Malta","value":"Malta"},{"label":"Marshall Islands","value":"Marshall Islands"},{"label":"Mauritania","value":"Mauritania"},{"label":"Mauritius","value":"Mauritius"},{"label":"Mexico","value":"Mexico"},{"label":"Micronesia, Fed. Sts.","value":"Micronesia, Fed. Sts."},{"label":"Middle East & North Africa","value":"Middle East & North Africa"},{"label":"Middle East & North Africa (excluding high income)","value":"Middle East & North Africa (excluding high income)"},{"label":"Middle East & North Africa (IDA & IBRD countries)","value":"Middle East & North Africa (IDA & IBRD countries)"},{"label":"Middle income","value":"Middle income"},{"label":"Moldova","value":"Moldova"},{"label":"Monaco","value":"Monaco"},{"label":"Mongolia","value":"Mongolia"},{"label":"Montenegro","value":"Montenegro"},{"label":"Morocco","value":"Morocco"},{"label":"Mozambique","value":"Mozambique"},{"label":"Myanmar","value":"Myanmar"},{"label":"Namibia","value":"Namibia"},{"label":"Nauru","value":"Nauru"},{"label":"Nepal","value":"Nepal"},{"label":"Netherlands","value":"Netherlands"},{"label":"New Caledonia","value":"New Caledonia"},{"label":"New Zealand","value":"New Zealand"},{"label":"Nicaragua","value":"Nicaragua"},{"label":"Niger","value":"Niger"},{"label":"Nigeria","value":"Nigeria"},{"label":"North America","value":"North America"},{"label":"North Macedonia","value":"North Macedonia"},{"label":"Northern Mariana Islands","value":"Northern Mariana Islands"},{"label":"Norway","value":"Norway"},{"label":"Not classified","value":"Not classified"},{"label":"OECD members","value":"OECD members"},{"label":"Oman","value":"Oman"},{"label":"Other small states","value":"Other small states"},{"label":"Pacific island small states","value":"Pacific island small states"},{"label":"Pakistan","value":"Pakistan"},{"label":"Palau","value":"Palau"},{"label":"Panama","value":"Panama"},{"label":"Papua New Guinea","value":"Papua New Guinea"},{"label":"Paraguay","value":"Paraguay"},{"label":"Peru","value":"Peru"},{"label":"Philippines","value":"Philippines"},{"label":"Poland","value":"Poland"},{"label":"Portugal","value":"Portugal"},{"label":"Post-demographic dividend","value":"Post-demographic dividend"},{"label":"Pre-demographic dividend","value":"Pre-demographic dividend"},{"label":"Puerto Rico","value":"Puerto Rico"},{"label":"Qatar","value":"Qatar"},{"label":"Republic of Congo","value":"Republic of Congo"},{"label":"Republic of Korea","value":"Republic of Korea"},{"label":"Romania","value":"Romania"},{"label":"Russian Federation","value":"Russian Federation"},{"label":"Rwanda","value":"Rwanda"},{"label":"Samoa","value":"Samoa"},{"label":"San Marino","value":"San Marino"},{"label":"Sao Tome and Principe","value":"Sao Tome and Principe"},{"label":"Saudi Arabia","value":"Saudi Arabia"},{"label":"Senegal","value":"Senegal"},{"label":"Serbia","value":"Serbia"},{"label":"Seychelles","value":"Seychelles"},{"label":"Sierra Leone","value":"Sierra Leone"},{"label":"Singapore","value":"Singapore"},{"label":"Sint Maarten (Dutch part)","value":"Sint Maarten (Dutch part)"},{"label":"Slovak Republic","value":"Slovak Republic"},{"label":"Slovenia","value":"Slovenia"},{"label":"Small states","value":"Small states"},{"label":"Solomon Islands","value":"Solomon Islands"},{"label":"Somalia","value":"Somalia"},{"label":"South Africa","value":"South Africa"},{"label":"South Asia","value":"South Asia"},{"label":"South Asia (IDA & IBRD)","value":"South Asia (IDA & IBRD)"},{"label":"South Sudan","value":"South Sudan"},{"label":"Spain","value":"Spain"},{"label":"Sri Lanka","value":"Sri Lanka"},{"label":"St. Kitts and Nevis","value":"St. Kitts and Nevis"},{"label":"St. Lucia","value":"St. Lucia"},{"label":"St. Martin (French part)","value":"St. Martin (French part)"},{"label":"St. Vincent and the Grenadines","value":"St. Vincent and the Grenadines"},{"label":"Sub-Saharan Africa","value":"Sub-Saharan Africa"},{"label":"Sub-Saharan Africa (excluding high income)","value":"Sub-Saharan Africa (excluding high income)"},{"label":"Sub-Saharan Africa (IDA & IBRD countries)","value":"Sub-Saharan Africa (IDA & IBRD countries)"},{"label":"Sudan","value":"Sudan"},{"label":"Suriname","value":"Suriname"},{"label":"Sweden","value":"Sweden"},{"label":"Switzerland","value":"Switzerland"},{"label":"Syrian Arab Republic","value":"Syrian Arab Republic"},{"label":"Tajikistan","value":"Tajikistan"},{"label":"Tanzania","value":"Tanzania"},{"label":"Thailand","value":"Thailand"},{"label":"Timor-Leste","value":"Timor-Leste"},{"label":"Togo","value":"Togo"},{"label":"Tonga","value":"Tonga"},{"label":"Trinidad and Tobago","value":"Trinidad and Tobago"},{"label":"Tunisia","value":"Tunisia"},{"label":"Turkiye","value":"Turkiye"},{"label":"Turkmenistan","value":"Turkmenistan"},{"label":"Turks and Caicos Islands","value":"Turks and Caicos Islands"},{"label":"Tuvalu","value":"Tuvalu"},{"label":"Uganda","value":"Uganda"},{"label":"Ukraine","value":"Ukraine"},{"label":"United Arab Emirates","value":"United Arab Emirates"},{"label":"United Kingdom","value":"United Kingdom"},{"label":"United States","value":"United States"},{"label":"Upper middle income","value":"Upper middle income"},{"label":"Uruguay","value":"Uruguay"},{"label":"Uzbekistan","value":"Uzbekistan"},{"label":"Vanuatu","value":"Vanuatu"},{"label":"Venezuela, RB","value":"Venezuela, RB"},{"label":"Vietnam","value":"Vietnam"},{"label":"Virgin Islands (U.S.)","value":"Virgin Islands (U.S.)"},{"label":"West Bank and Gaza","value":"West Bank and Gaza"},{"label":"World","value":"World"},{"label":"Yemen, Rep.","value":"Yemen, Rep."},{"label":"Zambia","value":"Zambia"},{"label":"Zimbabwe","value":"Zimbabwe"}
+	# 			],
+	# 			"date":{
+	# 				"date_start":{"label":"1960","value":"1960","unit":None,"provenance":None},
+	# 				"date_end":{"label":"2020","value":"2020","unit":None,"provenance":None}
+	# 			}
+	# 		}
+	# 	}
+
+	# dts = get_data_new_2(GetVizDataBodyMulti(**BodyViz))
+	# print(dts)
+
+	dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
+	print(dtps)
 	# p = Profiler()
 	# with p:
 	# reason = await get_reason(claim_map, top_k_datasets, verbose=True)
