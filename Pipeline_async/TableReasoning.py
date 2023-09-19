@@ -333,14 +333,16 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
 
         db = NeuralDB([table], add_row_id=False, normalize=False, lower_case=False)
 
-        if verbose:
-            print(f"queries: {queries}")
+        if verbose: print(f"queries: {queries}")
         response = await self._exec_sqls_from_sub_queries(
             db, queries, fuzzy_match=True, verbose=verbose
         )
 
         try:
-            countries = [item for sublist in response[0] for item in eval(sublist[0])]
+            def safe_eval(items:str):
+                items = re.sub(r'\bnan\b', 'float("nan")', items)
+                return eval(items)
+            countries = [item for sublist in response[0] for item in safe_eval(sublist[0])]
             if claim.startswith("Year"):
                 return set(item for item in countries if isinstance(item, int))
             else:
@@ -702,6 +704,8 @@ Simply ANSWER A or B
         # ranked_suggestions = self._rank_suggestions(attributes, body, verbose=verbose)
         # run rank_suggestions concurrent with the other logic
         loop = asyncio.get_event_loop()
+        p = Profiler(   )
+        p.start()
         ranked_suggestions = asyncio.create_task(
             self._bubble_sort((attributes + years + countries), body, verbose=verbose)
         )
@@ -771,23 +775,29 @@ Simply ANSWER A or B
 
         # 1. Infer the most related attributes
         table, country_attr, date_attr, fields, embeddings, _ = self.dm.merge_datasets(datasets)
-        attributes = claim_map.value
+        attributes = claim_map.value + [keyword for keyword in value_keywords if not keyword.startswith("@(")]
         scores = cosine_similarity(self.dm.encode(attributes), embeddings)
         argmax_indices = scores.argmax(axis=1)
+        new_attributes = [fields[i] for i in argmax_indices] 
         
         warn_flag, warning = False, ""
         for i, score in enumerate(scores):
             if score[argmax_indices[i]] < 0.5:
-                warning = f"The pipeline is not confident."
-                print(f"{'@'*100}\n{warning}. Score: {score[argmax_indices[i]]}\n{'@'*100}")
-                warn_flag = True
-                break
-        if not warn_flag:
-            print(f"{'@'*100}\nThe pipeline is confident. Score: {min(score[argmax_indices[i]] for i, score in enumerate(scores))}\n{'@'*100}")
+                if i < len(claim_map.value):
+                    warning = f"The pipeline is not confident with {attributes[i]}."
+                    print(f"{'@'*100}\n{warning}. Score: {score[argmax_indices[i]]}\n{'@'*100}")
+                    warn_flag = True
+                else:
+                    rec_warn = f"The pipeline is not confident about the suggested value attribute {attributes[i]}"
+                    print(f"{'@'*100}\n{rec_warn}. Score: {score[argmax_indices[i]]}\n{'@'*100}")
+                    new_attributes[i] = None
 
-        new_attributes = [fields[i] for i in argmax_indices] 
+        if not warn_flag:
+            print(f"{'@'*100}\nThe pipeline is confident. Score: {min(score[argmax_indices[i]] for i, score in enumerate(scores[:len(claim_map.value)]))}\n{'@'*100}")
+
         print("new_attributes:", new_attributes)
         claim_map.mapping.update({attr: new_attributes[i] for i, attr in enumerate(attributes)})
+        new_attributes = new_attributes[:len(claim_map.value)] # only update the value attributes
 
         # update date and country real attribute name
         print("Country:", country_attr, "Date:", date_attr)
@@ -801,7 +811,8 @@ Simply ANSWER A or B
                 if any(p in country for p in ["Bottom", "Top", "with", "Countries of"]):
                     infer_country_tasks.append(
                         self._infer_country(
-                            country[2:-2], claim_map.date, 
+                            country[2:-2], 
+                            claim_map.date, 
                             new_attributes, table
                         )
                     )	
@@ -824,7 +835,7 @@ Simply ANSWER A or B
                 if val.startswith('@('):
                     infer_country_tasks.append(
                         self._infer_country(
-                            val[2:-2], claim_map.date, 
+                            val[2:-2 if val[-2]=="?" else -1], claim_map.date, 
                             new_attributes, table
                         )
                     )
@@ -832,6 +843,12 @@ Simply ANSWER A or B
 
         inferred_countries = await asyncio.gather(*infer_country_tasks)
         claim_map.mapping.update({country_to_infer[idx]: country_list for idx, country_list in enumerate(inferred_countries)})
+
+        for suggest in claim_map.suggestion: 
+            for idx, val in enumerate(suggest.values):
+                if (val.startswith('@(') or suggest.field == "value") and\
+                    not claim_map.mapping[val]:
+                    del suggest.values[idx]
 
         return {
             "datasets": datasets,
@@ -974,6 +991,7 @@ Simply ANSWER A or B
                 fuzzy_match=fuzzy_match,
             )
 
+        # print(f"sqlss: {sqlss}")
         for idx, (sqls, query) in enumerate(zip(sqlss, queries)):
             if verbose:
                 print(f"Q{idx+1}: {query}\nGenerated SQLs: {sqls}")
@@ -1213,7 +1231,7 @@ Simply ANSWER A or B
 async def main():
     data_matcher = DataMatcher(datasrc="../Datasets")
     table_reasoner = TableReasoner(datamatcher=data_matcher)
-    query = "China used to boast a higher export of merchandise than India in 2010s."
+    query = "Vietnam has become the largest coal manufacturer since 2017."
     await table_reasoner._suggest_queries_2(UserClaimBody(userClaim=query), verbose=True)
     # data = await table_reasoner._tag_claim(
     #     query,

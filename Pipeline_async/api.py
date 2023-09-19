@@ -526,14 +526,13 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "Vietnam has become the largest coffee manufacturer since 2017."
+	userClaim = "Vietnam has become the largest coal manufacturer since 2017."
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
 	dic = await get_suggested_queries(claim, model=Model.GPT_TAG_4)
 	top_k_datasets, claim_map = dic["datasets"], dic["claim_map"]
-	print(f"{claim_map}\n{'@'*100}")
-
+	print("claim_map:", claim_map)
 	# BodyViz = {
 	# 		"datasets":[
 	# 			{
@@ -640,11 +639,12 @@ async def main():
 	# dts = get_data_new_2(GetVizDataBodyMulti(**BodyViz))
 	# print(dts)
 
-	dtps = await potential_data_point_sets_2(claim_map, top_k_datasets)
+	import copy
+	dtps = await potential_data_point_sets_2(claim_map, copy.deepcopy(top_k_datasets))
 	print(dtps)
 	# p = Profiler()
 	# with p:
-	reason = await get_reason(claim_map, top_k_datasets, verbose=True)
+	# reason = await get_reason(claim_map, top_k_datasets, verbose=True)
 
 if __name__ == "__main__":
 	asyncio.run(main())
