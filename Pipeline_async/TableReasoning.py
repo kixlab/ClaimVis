@@ -22,6 +22,8 @@ from collections import defaultdict
 from functools import cache
 from itertools import zip_longest
 from itertools import product
+from sklearn.metrics.pairwise import cosine_similarity
+from Gloc.utils.normalizer import _get_matched_cells
 import json
 import random
 import re
@@ -174,7 +176,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
     ):
         self.prompter = Prompter()
         self.parser = AnsParser()
-        self.datamatcher = datamatcher
+        self.dm = datamatcher
 
         self.temperature = temperature  # to change
         self.max_decode_steps = max_decode_steps  # fixed
@@ -453,14 +455,14 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
 
         attributes, col_set = set(attributes + more_attrs), set(table.columns)
         # add datefield if exist and infer datetime from the queries if needed
-        time_batch = self.datamatcher.encode(["time", "date", "year"])
-        col_embeds = list(self.datamatcher.attrs_embeddings[table.name].values())
+        time_batch = self.dm.encode(["time", "date", "year"])
+        col_embeds = list(self.dm.attrs_embeddings[table.name].values())
         datefields, start_index = (
             [],
             1 if table.columns[0] == "row_id" else 0,
         )  # row_id added to table so index starts at 1
         for col, embed in zip(table.columns[start_index:], col_embeds):
-            score = self.datamatcher.attr_score_batch(embed, time_batch)
+            score = self.dm.attr_score_batch(embed, time_batch)
             if score > 0.5:
                 datefields.append((col, score))
         best_datefield = max(datefields, key=lambda x: x[1])[0] if datefields else None
@@ -743,13 +745,99 @@ Simply ANSWER A or B
             claim_tag['rephrase'] = claim_tag['rephrase'].replace(f"{{{tagged_attr['rephrase']}}}", f"{tagged_attr['rephrase']}") 
         
         rank_result = await ranked_suggestions
+        if verbose: print(f"rank_result: {rank_result}")
         claim_tag["suggestion"] = rank_result # attributes + years + countries
         claim_tag["mapping"] = dict()
         claim_tag["value"] = [attr["rephrase"] for attr in claim_tag["value"]]
         claim_tag["date"] = claim_tag["datetime"]
         del claim_tag["datetime"]
         # if verbose: print(f"claim tag: {claim_tag}\n{'@'*75}")
-        return claim_tag
+        return ClaimMap(**claim_tag)
+
+    async def _get_relevant_datasets(self, claim_map: ClaimMap, verbose: bool=True):
+        """
+		1. Infer the most related attributes
+		2. Infer the @() countries
+		3. Infer @() years????
+	"""
+
+        value_keywords = [keyword for sublist in claim_map.suggestion for keyword in sublist.values if sublist.field == "value" or keyword.startswith("@(")]
+        country_keywords = [keyword[2:-2].replace("Country", "").replace("Countries", "").strip() for keyword in claim_map.country if keyword.startswith("@(")]
+        keywords = country_keywords + claim_map.value + value_keywords
+        print("keywords:", keywords)
+        top_k_datasets = await self.dm.find_top_k_datasets("", k=5, method="gpt", verbose=verbose, keywords=keywords)
+        datasets = [Dataset(name=name, description=description, score=score, fields=fields) 
+            for name, description, score, fields in top_k_datasets]
+
+        # 1. Infer the most related attributes
+        table, country_attr, date_attr, fields, embeddings, _ = self.dm.merge_datasets(datasets)
+        attributes = claim_map.value
+        scores = cosine_similarity(self.dm.encode(attributes), embeddings)
+        argmax_indices = scores.argmax(axis=1)
+        
+        warn_flag, warning = False, ""
+        for i, score in enumerate(scores):
+            if score[argmax_indices[i]] < 0.5:
+                warning = f"The pipeline is not confident."
+                print(f"{'@'*100}\n{warning}. Score: {score[argmax_indices[i]]}\n{'@'*100}")
+                warn_flag = True
+                break
+        if not warn_flag:
+            print(f"{'@'*100}\nThe pipeline is confident. Score: {min(score[argmax_indices[i]] for i, score in enumerate(scores))}\n{'@'*100}")
+
+        new_attributes = [fields[i] for i in argmax_indices] 
+        print("new_attributes:", new_attributes)
+        claim_map.mapping.update({attr: new_attributes[i] for i, attr in enumerate(attributes)})
+
+        # update date and country real attribute name
+        print("Country:", country_attr, "Date:", date_attr)
+        claim_map.mapping.update({"date": date_attr, "country": country_attr})
+        claim_map.cloze_vis = claim_map.cloze_vis.replace("{date}", f'{{{date_attr}}}').replace("{country}", f'{{{country_attr}}}')
+
+        # 2. Infer the @() countries/ @() years from both the claim and the suggested values
+        infer_country_tasks, country_to_infer = [], []
+        for idx, country in enumerate(claim_map.country):
+            if country.startswith('@('):
+                if any(p in country for p in ["Bottom", "Top", "with", "Countries of"]):
+                    infer_country_tasks.append(
+                        self._infer_country(
+                            country[2:-2], claim_map.date, 
+                            new_attributes, table
+                        )
+                    )	
+                    country_to_infer.append(country)
+                else: # query like @(Asian countries?) have been handled by the _suggest_variable module
+                    cntry_sets = [cntry_set for cntry_set in claim_map.suggestion if cntry_set.field == self.INDICATOR["countries"]]
+                    suggest_countries = set(cntry for sublist in cntry_sets for cntry in sublist.values)
+                    actual_suggest_countries = []
+                    for cntry in suggest_countries:
+                        matched_cells = _get_matched_cells(cntry, self.dm, table, attr=country_attr)
+                        if matched_cells:
+                            actual_suggest_countries.append(matched_cells[0][0])
+                    # suggest_countries = random.sample(suggest_countries, 5)
+                    claim_map.mapping[country] = actual_suggest_countries[:5] # take the top 5 suggested
+            else:
+                claim_map.country[idx] = _get_matched_cells(country, self.dm, table, attr=country_attr)[0][0]
+
+        for suggest in claim_map.suggestion: 
+            for val in suggest.values:
+                if val.startswith('@('):
+                    infer_country_tasks.append(
+                        self._infer_country(
+                            val[2:-2], claim_map.date, 
+                            new_attributes, table
+                        )
+                    )
+                    country_to_infer.append(val)
+
+        inferred_countries = await asyncio.gather(*infer_country_tasks)
+        claim_map.mapping.update({country_to_infer[idx]: country_list for idx, country_list in enumerate(inferred_countries)})
+
+        return {
+            "datasets": datasets,
+            "claim_map": claim_map,
+            "warning": warning
+        }
 
     async def _decompose_query(self, query: str):
         """
@@ -844,7 +932,7 @@ Simply ANSWER A or B
                         new_sql_str, new_val_map = post_process_sql(
                             sql_str=psql,
                             df=table,
-                            matcher=self.datamatcher,
+                            matcher=self.dm,
                             process_program_with_fuzzy_match_on_db=fuzzy_match,
                             verbose=False,
                         )
@@ -1125,7 +1213,7 @@ Simply ANSWER A or B
 async def main():
     data_matcher = DataMatcher(datasrc="../Datasets")
     table_reasoner = TableReasoner(datamatcher=data_matcher)
-    query = "Korea fertility rate has dropped to 0.4 in 2019"
+    query = "China used to boast a higher export of merchandise than India in 2010s."
     await table_reasoner._suggest_queries_2(UserClaimBody(userClaim=query), verbose=True)
     # data = await table_reasoner._tag_claim(
     #     query,

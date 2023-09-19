@@ -166,6 +166,6 @@ if __name__ == "__main__":
 
     # profile_func(api_main) 
     start = time.perf_counter()
-    asyncio.run(table_reasoner_main())
+    asyncio.run(api_main())
     end = time.perf_counter()
     print(f"Table Reasoner: {end - start:0.4f} seconds")

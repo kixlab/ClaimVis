@@ -118,9 +118,9 @@ class ClaimDetector():
             claimbuster_task = asyncio.create_task(session.get(url=api_endpoint, headers=request_headers))
             if llm_classify:
                 chat_task = asyncio.create_task(openai.ChatCompletion.acreate(
-                    model=Model.GPT3,
+                    model=Model.GPT4,
                     messages=[
-                        {"role": "system", "content": """Label the following claims as 'Y' if they are related to datasets about social issues like Climate Change, Economy, etc.; otherwise 'N' according to the following format.
+                        {"role": "system", "content": """Label the following claims as 'Y' if they are verfiable by datasets about social issues like Climate Change, Economy, etc.; otherwise 'N' according to the following format.
                         \{
                             "explain": "<TODO: explain why the claim can be verified using data or not. Think step by step.>",
                             "verdict": "<TODO: Y or N>"
