@@ -149,16 +149,16 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
             "role": "assistant",
             "content": """[{
     "values": ["South Korea"],
-    "teaser": "How does the impact of tourism on New Zealand's economy compare to that of South Korea?"
+    "teaser": "How does the impact of tourism on New Zealand's economy compare to that of the reader's country?"
 },{
     "values": ["Thailand", "Greece", "Spain"],
     "teaser": "How is the impact of tourism on the economy in other countries known for tourism?"
 }, {
     "values": ["Australia", "Canada", "Norway"],
-    "teaser": "How is the impact of tourism on the economy in other developed countries?"
+    "teaser": "How is the impact of tourism on the economy in other developed countries similar to New Zealand?"
 }, {
     "values": ["Japan", "China", "Taiwan"],
-    "teaser": "How does the impact of tourism on New Zealand's economy compare to that of other East Asian countries?"
+    "teaser": "How does the impact of tourism on New Zealand's economy compare to that of other East Asian countries similar to South Korea?"
 }, {
     "values": ["@(Top 3 countries with the highest contribution to GDP from tourism)"],
     "teaser": "What are the top 3 countries with the highest contribution to GDP from tourism?"
@@ -182,6 +182,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         self.max_decode_steps = max_decode_steps  # fixed
         self.samples = samples  # to change
         self.model = model  # fixed
+        self.nlp = None
 
         self.date_pattern = r"(@\(.*?\)|\d{4})(\s*-\s*(@\(.*?\)|\d{4}))?"
 
@@ -515,7 +516,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
 
         return prompt
     
-    async def _pairwise_comparison(self, claim: UserClaimBody, questionA, questionB):
+    async def _pairwise_comparison(self, claim: UserClaimBody, questionA, questionB, cut_context):
         """
         Compare two questions and return the one with higher priority
         Input: questionA, questionB
@@ -543,7 +544,7 @@ Simply ANSWER A, B, or SAME
             },
             {
                 "role": "user",
-                "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nQuestion A: {A}\nQuestion B: {B}"""
+                "content": f"""Reader's background: {claim.context} \nParagraph: {cut_context}\nClaim: "{claim.userClaim}"\nQuestion A: {A}\nQuestion B: {B}"""
             }
         ]
         response = await self._call_api_2(prompt, model=Model.GPT4, temperature=0.25, max_decode_steps=1)
@@ -558,7 +559,7 @@ Simply ANSWER A, B, or SAME
             print(response[0])
             return 0
         
-    async def _fill_each_element(self, questions: list, i, j, claim: UserClaimBody, matrix: np.ndarray, verbose=True):
+    async def _fill_each_element(self, questions: list, i, j, claim: UserClaimBody, matrix: np.ndarray, cut_context: str, verbose=True):
         """
         Fill each element in the question
         Input: questions, claim
@@ -567,7 +568,7 @@ Simply ANSWER A, B, or SAME
         # <TODO>
         questionA = questions[i]
         questionB = questions[j]
-        question = await self._pairwise_comparison(claim, questionA, questionB)
+        question = await self._pairwise_comparison(claim, questionA, questionB, cut_context)
         if question == questionA:
             matrix[i][j] += 1
         elif question == questionB:
@@ -576,8 +577,34 @@ Simply ANSWER A, B, or SAME
             matrix[i][j] += 0.5
             matrix[j][i] += 0.5
         return 
-        
     
+    def cut_context(self, context: str, userClaim: str) -> str:
+        """
+        Cut the context into sentences using spacy
+        Input: context
+        Output: sentences
+        """
+        # <TODO>
+        self.nlp = spacy.load("en_core_web_sm") if self.nlp is None else self.nlp
+        doc = self.nlp(context)
+        sentences = [sent.text for sent in doc.sents]
+        claim = userClaim.strip()
+        ## if there are more than three sentences, leave the ones with the claim, the one before the claim, and the one after the claim
+        if len(sentences) > 3:
+            ## Find the sentence containing the claim
+            claim_index = -1
+            for i in range(len(sentences)):
+                if claim in sentences[i]:
+                    claim_index = i
+                    break
+
+            sentences = sentences[max(0, claim_index - 1): min(claim_index + 2, len(sentences))]
+            ## join sentences into a string
+            sentences = " ".join(sentences)
+            return sentences
+        else:
+            return context
+
     async def _bubble_sort(self, questions: list, claim: UserClaimBody, verbose=True):
         """
         Sort questions based on the claim
@@ -590,8 +617,9 @@ Simply ANSWER A, B, or SAME
 
         ## Then, compute the matrix of pairwise comparison for each question
         matrix = np.zeros((len(questions), len(questions)))
+        cut_context = self.cut_context(claim.paragraph, claim.userClaim)
 
-        result = await asyncio.gather(*[self._fill_each_element(questions, i, j, claim, matrix, verbose) for i in range(len(questions)) for j in range(len(questions)) if i > j])
+        result = await asyncio.gather(*[self._fill_each_element(questions, i, j, claim, matrix, cut_context, verbose) for i in range(len(questions)) for j in range(len(questions)) if i > j])
 
         ## From the matrix, compute the score of each question
         if verbose: print(f"score matrix: {matrix}")
