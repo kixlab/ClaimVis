@@ -75,7 +75,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism""",
   "indicator": "share of GDP from tourism",
   "sets": [{
     "values": ["GDP"],
-    "teaser": "What's the total GDP of the country?"
+    "teaser": "What's the total GDP of New Zealand?"
   }, {
     "values": ["exports", "international trade"],
     "teaser": "How does New Zealand's reliance on tourism compare to its reliance on exports or international trade?"
