@@ -522,6 +522,12 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
         Output: question with higher priority
         """
         # <TODO>
+        A = questionA
+        B = questionB
+        if random.random() < 0.5:
+            A = questionB
+            B = questionA
+
         prompt = [
             {
                 "role": "system",
@@ -532,12 +538,12 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
 3. Is the question helpful to consider the broader context around the claim?
 4. Is the question suggesting a new aspect?
 
-Simply ANSWER A or B
+Simply ANSWER A, B, or SAME
 """
             },
             {
                 "role": "user",
-                "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nQuestion A: {questionA}\nQuestion B: {questionB}"""
+                "content": f"""Reader's background: {claim.context} \nParagraph: {claim.paragraph}\nClaim: "{claim.userClaim}"\nQuestion A: {A}\nQuestion B: {B}"""
             }
         ]
         response = await self._call_api_2(prompt, model=Model.GPT4, temperature=0.25, max_decode_steps=1)
@@ -546,6 +552,8 @@ Simply ANSWER A or B
             return questionA
         elif response[0] == "B":
             return questionB
+        elif response[0] == "SAME":
+            return None
         else:
             print(response[0])
             return 0
@@ -561,8 +569,11 @@ Simply ANSWER A or B
         questionB = questions[j]
         question = await self._pairwise_comparison(claim, questionA, questionB)
         if question == questionA:
-            matrix[i][j] += 0.5
+            matrix[i][j] += 1
         elif question == questionB:
+            matrix[j][i] += 1
+        elif question == None:
+            matrix[i][j] += 0.5
             matrix[j][i] += 0.5
         return 
         
@@ -580,7 +591,7 @@ Simply ANSWER A or B
         ## Then, compute the matrix of pairwise comparison for each question
         matrix = np.zeros((len(questions), len(questions)))
 
-        result = await asyncio.gather(*[self._fill_each_element(questions, i, j, claim, matrix, verbose) for i in range(len(questions)) for j in range(len(questions)) if i != j])
+        result = await asyncio.gather(*[self._fill_each_element(questions, i, j, claim, matrix, verbose) for i in range(len(questions)) for j in range(len(questions)) if i > j])
 
         ## From the matrix, compute the score of each question
         if verbose: print(f"score matrix: {matrix}")
