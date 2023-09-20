@@ -62,6 +62,7 @@ class ClaimMap(BaseModel):
         values: list[str]
         explain: str
         rank: int
+        caution: list[str] = []
 
     country: list[str]
     value: list[str]

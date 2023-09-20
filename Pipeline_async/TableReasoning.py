@@ -704,8 +704,6 @@ Simply ANSWER A or B
         # ranked_suggestions = self._rank_suggestions(attributes, body, verbose=verbose)
         # run rank_suggestions concurrent with the other logic
         loop = asyncio.get_event_loop()
-        p = Profiler(   )
-        p.start()
         ranked_suggestions = asyncio.create_task(
             self._bubble_sort((attributes + years + countries), body, verbose=verbose)
         )
@@ -790,7 +788,7 @@ Simply ANSWER A or B
                 else:
                     rec_warn = f"The pipeline is not confident about the suggested value attribute {attributes[i]}"
                     print(f"{'@'*100}\n{rec_warn}. Score: {score[argmax_indices[i]]}\n{'@'*100}")
-                    new_attributes[i] = None
+                    new_attributes[i] = "!" + new_attributes[i]
 
         if not warn_flag:
             print(f"{'@'*100}\nThe pipeline is confident. Score: {min(score[argmax_indices[i]] for i, score in enumerate(scores[:len(claim_map.value)]))}\n{'@'*100}")
@@ -845,10 +843,15 @@ Simply ANSWER A or B
         claim_map.mapping.update({country_to_infer[idx]: country_list for idx, country_list in enumerate(inferred_countries)})
 
         for suggest in claim_map.suggestion: 
-            for idx, val in enumerate(suggest.values):
-                if (val.startswith('@(') or suggest.field == "value") and\
-                    not claim_map.mapping[val]:
-                    del suggest.values[idx]
+            for idx in reversed(range(len(suggest.values))):
+                val = suggest.values[idx]
+                if (val.startswith('@(') or suggest.field == "value"):
+                    if not claim_map.mapping[val]:
+                        del suggest.values[idx]
+                    elif isinstance(claim_map.mapping[val], str) and claim_map.mapping[val].startswith("!"):
+                        suggest.caution.append(val)
+                        claim_map.mapping[val] = claim_map.mapping[val][1:]
+                        del suggest.values[idx]
 
         return {
             "datasets": datasets,
