@@ -149,7 +149,10 @@ class DataMatcher(object):
                 ind, name = dataset_map[3], dataset_map[0]
                 attr_scores = np.max(score_batches[ind], axis=0)
                 max_score = max(attr_scores)
-                dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], attr_scores) if score > max_score * .9]
+                # take the top 10 attributes with highest scores
+                attr_score_pairs = [(attr, score) for attr, score in zip(self.description[name]['columns'], attr_scores) if score > max_score * .9]
+                attr_score_pairs.sort(key=lambda x: x[1], reverse=True)
+                dataset_map[3] = [attr for attr, score in attr_score_pairs[:10]]
         else:
             # reset dataset_map[3] to empty list
             for dataset_map in top_k_datasets:

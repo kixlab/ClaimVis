@@ -526,7 +526,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = ""
-	userClaim = "China had the smallest emission among G7 countries in 2014."
+	userClaim = "suicide rate among countries drop below 23% from 2018 to 2020."
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
