@@ -313,25 +313,32 @@ class AutomatedViz(object):
 			info_table.columns = info_table.columns.str.lower()
 		
 		def get_provenance(attr: str):
-			if 'value' in info_table.columns:
-				provenance = info_table[info_table['value'] == attr]['source'].iloc[0]
-			elif 'title' in info_table.columns:
-				provenance = info_table[info_table['title'] == attr]['source'].iloc[0]
-			else:
+			try:
+				if 'value' in info_table.columns:
+					provenance = info_table[info_table['value'] == attr]['source'].iloc[0]
+				elif 'title' in info_table.columns:
+					provenance = info_table[info_table['title'] == attr]['source'].iloc[0]
+				else:
+					provenance = ""
+			except Exception as e:
 				provenance = ""
+				print(f"Error in getting provenance: {e}")
 			return provenance
 		
 		def get_unit(attr: str):
-			if 'unit' in info_table.columns:
-				provenance = info_table[info_table['value'] == attr]['unit'].iloc[0] 
-				provenance = provenance if str(provenance) != 'nan' else None
-			elif 'units' in info_table.columns:
-				provenance = info_table[info_table['title'] == attr]['units'].iloc[0]
-				provenance = provenance if str(provenance) != 'nan' else None
-
-			else:
-				provenance = None
-			return provenance
+			try:
+				if 'unit' in info_table.columns:
+					unit = info_table[info_table['value'] == attr]['unit'].iloc[0] 
+					unit = unit if str(unit) != 'nan' else None
+				elif 'units' in info_table.columns:
+					unit = info_table[info_table['title'] == attr]['units'].iloc[0]
+					unit = unit if str(unit) != 'nan' else None
+				else:
+					unit = None
+			except Exception as e:
+				unit = None
+				print(f"Error in getting unit: {e}")
+			return unit
 
 		country_attr, date_attr = claim_map.mapping['country'], claim_map.mapping['date']
 		# tailored specifically for country-date-value model / might need to generalize later

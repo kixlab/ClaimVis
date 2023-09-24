@@ -801,7 +801,6 @@ Simply ANSWER A, B, or SAME
 		2. Infer the @() countries
 		3. Infer @() years????
 	"""
-
         value_keywords = [keyword for sublist in claim_map.suggestion for keyword in sublist.values if sublist.field == "value" or keyword.startswith("@(")]
         country_keywords = [keyword[2:-2].replace("Country", "").replace("Countries", "").strip() for keyword in claim_map.country if keyword.startswith("@(")]
         keywords = country_keywords + claim_map.value + value_keywords
@@ -1103,8 +1102,9 @@ Simply ANSWER A, B, or SAME
                 ]
                 if not new_lst and isinstance(lst[0], str):
                     return str(random.sample(lst, 10))  # array full of string
+                new_lst = [round(x, 3) for x in new_lst]
                 return f"Ranging from {str(min(new_lst))} to {str(max(new_lst))}, with average {str(sum(new_lst)/len(new_lst))}"
-            return str(lst)
+            return str([round(x, 3) if isinstance(x, float) else x for x in lst])
         except Exception as e:
             if verbose:
                 print("error with list ans: ", e)
@@ -1255,8 +1255,9 @@ Simply ANSWER A, B, or SAME
         answers.extend(await self._call_api_2(dec_prompt))
 
         msg = [
-                {"role": "system", "content": """You are an amazing rhetorician and logician. You are given a sequence of questions and answers that aims to tackle an ultimate question step by step. 
-                You need to reframe the sequence to make it look like a coherent, smooth paragraph of logical deduction. Make adjustment to the logic if needed."""},
+                {"role": "system", "content": """You are an amazing rhetorician and logician. You are given a sequence of questions and answers that aims to provide insight into the data. 
+                First, reframe the sequence into a logical, coherent paragraph of deduction. Make adjustment to the logic if needed.
+                Second, suggest some interesting patterns in the data within the deduction."""},
                 {"role": "user", "content": "\n".join(query + "\n" + answer for query, answer in zip(queries, answers))},
             ]
         print(f"msg: {msg}")
@@ -1273,7 +1274,7 @@ Simply ANSWER A, B, or SAME
 async def main():
     data_matcher = DataMatcher(datasrc="../Datasets")
     table_reasoner = TableReasoner(datamatcher=data_matcher)
-    query = "Vietnam has become the largest coal manufacturer since 2017."
+    query = "Albania had not had good economic prospect 20 years ago compared to East Asian Countries."
     await table_reasoner._suggest_queries_2(UserClaimBody(userClaim=query), verbose=True)
     # data = await table_reasoner._tag_claim(
     #     query,

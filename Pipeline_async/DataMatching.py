@@ -143,7 +143,7 @@ class DataMatcher(object):
         if method == "attr":
             for dataset_map in top_k_datasets:
                 ind, name = dataset_map[3], dataset_map[0]
-                dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], score_batches[ind]) if score > top_k_datasets[0][2] * .8]
+                dataset_map[3] = [attr for attr, score in zip(self.description[name]['columns'], score_batches[ind]) if score > top_k_datasets[0][2] * .9]
         elif method == "gpt":
             for dataset_map in top_k_datasets:
                 ind, name = dataset_map[3], dataset_map[0]
