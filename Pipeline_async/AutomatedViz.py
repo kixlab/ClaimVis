@@ -372,7 +372,9 @@ class AutomatedViz(object):
 			elif field.type == "temporal":
 				dates = []
 				for val in claim_map.date.copy():
-					if '-' in val:
+					if val.startswith("@("):
+						dates.extend(list(claim_map.mapping[val]))
+					elif '-' in val:
 						start, end = val.split('-')
 						start, end = int(start), int(end)
 						dates.extend(list(range(start, end+1)))

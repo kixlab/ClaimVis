@@ -1034,8 +1034,7 @@ Simply ANSWER A, B, or SAME
 
         # print(f"sqlss: {sqlss}")
         for idx, (sqls, query) in enumerate(zip(sqlss, queries)):
-            if verbose:
-                print(f"Q{idx+1}: {query}\nGenerated SQLs: {sqls}")
+            if verbose: print(f"Q{idx+1}: {query}\nGenerated SQLs: {sqls}")
 
             preds = []
             for sql in sqls:
@@ -1049,6 +1048,7 @@ Simply ANSWER A, B, or SAME
 
             top_ans, pred_sqls = majority_vote(nsqls=sqls, pred_answer_list=preds)
             top_ans = self._process_list(top_ans, verbose)
+            if verbose: print(f"Top answer: {top_ans}")
             unit = self.parser.parse_sql_unit(pred_sqls[0][0])
             if verbose:
                 print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")
@@ -1218,7 +1218,11 @@ Simply ANSWER A, B, or SAME
         for country in claim_map.country:
             for datetime in claim_map.date:
                 for category in claim_map.value:
-                    if '-' in datetime:
+                    if datetime.startswith('@('):
+                        dates = list(claim_map.mapping[datetime])
+                        date_mask = df[date_attr].isin(dates)
+                        date_name = f"in {', '.join([str(date) for date in dates])}"
+                    elif '-' in datetime:
                         start, end = datetime.split('-')
                         date_mask = (df[date_attr] >= int(start)) & (df[date_attr] <= int(end))
                         date_name = f"from {start} to {end}"
