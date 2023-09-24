@@ -378,7 +378,7 @@ class AutomatedViz(object):
 						start, end = val.split('-')
 						start, end = int(start), int(end)
 						dates.extend(list(range(start, end+1)))
-					else:
+					elif val.isdigit():
 						dates.append(int(val))
 				filtered_table = filtered_table[filtered_table[field.name].isin(dates)]
 

@@ -113,6 +113,8 @@ async def call_model(
                 max_decode_steps=max_decode_steps,
                 samples=samples
             )
+            if result is None:
+                raise ValueError('No response from OpenAI')
             results.extend(result)
         else:
             raise ValueError(f'Unknown model_type={model}')

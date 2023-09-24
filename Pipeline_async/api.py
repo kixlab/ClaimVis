@@ -525,8 +525,8 @@ async def main():
 	# paragraph = "South Korea’s emissions did not peak until 2018, almost a decade after Mr Lee made his commitment and much later than in most other industrialised countries. The country subsequently adopted a legally binding commitment to reduce its emissions by 40% relative to their 2018 level by 2030, and to achieve net-zero emissions by 2050. But this would be hard even with massive government intervention. To achieve its net-zero target South Korea would have to reduce emissions by an average of 5.4% a year. By comparison, the EU must reduce its emissions by an average of 2% between its baseline year and 2030, while America and Britain must achieve annual cuts of 2.8%."
 	# p = Profiler()
 	# p.start()
-	paragraph = "The decoupling trend held even in the United States industrial sector. Between 2000 and 2014, Mr. Aden found that energy-related carbon dioxide emissions dropped 16 percent in the American industrial sector, while economic activity increased 9 percent"
-	userClaim = "The decoupling trend held even in the United States industrial sector."
+	paragraph = "But a study released by the International Energy Agency last month found that the trend continued in 2015. In another study published on Tuesday, Nathaniel Aden, a research fellow at the World Resources Institute, a Washington think tank, found that since the start of the 21st century, 21 countries, including the United States, have already fully decoupled their economic growth from carbon emissions. In those countries, while G.D.P. went up over the past 15 years, carbon pollution went down."
+	userClaim = "In those countries, while G.D.P. went up over the past 15 years, carbon pollution went down."
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)

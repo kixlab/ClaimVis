@@ -349,7 +349,7 @@ Statement: A significant amount of New Zealand's GDP comes from tourism"""
             else:
                 return set(item for item in countries if isinstance(item, str))
         except Exception as e:
-            if verbose: print(e)
+            if verbose: print("Error:", e)
             return []
 
     async def _infer_datetime(
@@ -1047,11 +1047,9 @@ Simply ANSWER A, B, or SAME
                     continue
 
             top_ans, pred_sqls = majority_vote(nsqls=sqls, pred_answer_list=preds)
-            top_ans = self._process_list(top_ans, verbose)
-            if verbose: print(f"Top answer: {top_ans}")
+            top_ans = self._process_list(top_ans, verbose) if isinstance(top_ans, list) else '[]'
             unit = self.parser.parse_sql_unit(pred_sqls[0][0])
-            if verbose:
-                print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")
+            if verbose: print(f"A{idx+1}: {top_ans}. {unit}\n{'*'*75}")
 
             answers.append((top_ans, unit))
 

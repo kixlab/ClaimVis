@@ -152,7 +152,7 @@ class DataMatcher(object):
                 # take the top 10 attributes with highest scores
                 attr_score_pairs = [(attr, score) for attr, score in zip(self.description[name]['columns'], attr_scores) if score > max_score * .9 and score > .5]
                 attr_score_pairs.sort(key=lambda x: x[1], reverse=True)
-                dataset_map[3] = [attr for attr, score in attr_score_pairs[:10]]
+                dataset_map[3] = [attr for attr, score in attr_score_pairs[:15]]
         else:
             # reset dataset_map[3] to empty list
             for dataset_map in top_k_datasets:
@@ -315,7 +315,13 @@ async def main():
     #     verbose=True,
     #     keywords=keywords
     # )
-    matcher.recompute_col_embeddings()
+    # matcher.recompute_col_embeddings()
+    max_score = 0
+    for attr, embed in matcher.attrs_embeddings["Economy & Growth.csv"].items():
+        score = matcher.similarity_score("GDP", embed)
+        print(f"Score for G.D.P against attribute {attr}: {score}")
+        max_score = max(max_score, score)
+    print(max_score)
 
 if __name__ == "__main__":
     asyncio.run(main())
