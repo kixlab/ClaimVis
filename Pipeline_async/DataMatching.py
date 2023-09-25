@@ -135,7 +135,7 @@ class DataMatcher(object):
         
         # Combine the dataset names, descriptions, similarities, and their corresponding index
         result = [[self.description[name]['name'], self.description[name]['description'], similarity, index] \
-                            for index, (name, similarity) in enumerate(zip(self.datasets, similarities))]
+                            for index, (name, similarity) in enumerate(zip(self.datasets, similarities)) if similarity > 0.45]
         # Sort the result based on similarity in descending order
         result.sort(key=lambda x: x[2], reverse=True)
 
