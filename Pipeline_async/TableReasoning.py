@@ -750,8 +750,10 @@ Simply ANSWER A, B, or SAME
             "X": self.MIN_DATE,
             "Y": self.MAX_DATE,
         }, claim_tag["vis"]
+        print(f"claim_tag: {claim_tag}")
         for idx, tagged_date in enumerate(claim_tag["datetime"]):
-            match = re.match(self.date_pattern, tagged_date)
+            print(f"tagged_date: {tagged_date}")
+            match = re.search(self.date_pattern, tagged_date)
             start_end = (
                 [match.group(1), match.group(3)] if match.group(3) else [match.group(1)]
             )
@@ -864,7 +866,11 @@ Simply ANSWER A, B, or SAME
                     # suggest_countries = random.sample(suggest_countries, 5)
                     claim_map.mapping[country] = actual_suggest_countries[:5] # take the top 5 suggested
             else:
-                claim_map.country[idx] = _get_matched_cells(country, self.dm, table, attr=country_attr)[0][0]
+                matched_cells = _get_matched_cells(country, self.dm, table, attr=country_attr)
+                if matched_cells:
+                    claim_map.mapping[country] = matched_cells[0][0]
+                else:
+                    claim_map.mapping[country] = ""
 
         for suggest in claim_map.suggestion: 
             for val in suggest.values:
@@ -1224,9 +1230,12 @@ Simply ANSWER A, B, or SAME
                         start, end = datetime.split('-')
                         date_mask = (df[date_attr] >= int(start)) & (df[date_attr] <= int(end))
                         date_name = f"from {start} to {end}"
-                    else:
+                    elif datetime[-1] == 's': # 1960s, 1980s
+                        date_mask = (df[date_attr] >= int(datetime[:-1])) & (df[date_attr] <= int(datetime[:-1]) + 9)
+                        date_name = f"in the {datetime}"
+                    elif datetime.isdigit():
                         date_mask = df[date_attr] == int(datetime)
-                        date_name = f"in {datetime}"
+                        date_name = f"in the {datetime}"
 
                     category_name = claim_map.mapping[category] 
 
@@ -1241,8 +1250,8 @@ Simply ANSWER A, B, or SAME
                         queries.append(f"Q{len(queries)+1}: {query}")
                         answers.append(f"A{len(answers)+1}: {country_name}")
                     else:
-                        country_mask = df[country_attr] == country
-                        country_name = country
+                        country_name = claim_map.mapping[country] or country
+                        country_mask = df[country_attr] == country_name
 
                     val = df[date_mask & country_mask][category_name].values
                     val = self._process_list(val, verbose)

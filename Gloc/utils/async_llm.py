@@ -38,7 +38,7 @@ def retry(try_count=3, sleep_seconds=2):
     return decorator
 
 
-@retry(try_count=3, sleep_seconds=1)
+@retry(try_count=5, sleep_seconds=1)
 @AsyncTokenCount
 async def _call_openai(
     prompt = [],
@@ -93,6 +93,10 @@ async def _call_openai(
         print('Sleeping 10 secs.')
         await asyncio.sleep(10)
         raise KeyError('ServiceUnavailableError') from e
+    except openai.error.APIConnectionError as e:
+        print('Sleeping 10 secs.')
+        await asyncio.sleep(15)
+        raise ValueError('APIConnectionError') from e
 
 async def call_model(
     model,

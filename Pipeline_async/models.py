@@ -64,6 +64,15 @@ class ClaimMap(BaseModel):
         rank: int
         caution: list[str] = []
 
+        def to_json(self) -> Any:
+            return {
+                "field": self.field,
+                "values": self.values,
+                "explain": self.explain,
+                "rank": self.rank,
+                "caution": self.caution,
+            }
+
     country: list[str]
     value: list[str]
     date: list[str]
@@ -72,6 +81,18 @@ class ClaimMap(BaseModel):
     rephrase: str 
     suggestion: list[SuggestValue]
     mapping: Dict[str, Any]
+
+    def to_json(self) -> Any:
+        return {
+            "country": self.country,
+            "value": self.value,
+            "date": self.date,
+            "vis": self.vis,
+            "cloze_vis": self.cloze_vis,
+            "rephrase": self.rephrase,
+            "suggestion": [sv.to_json() for sv in self.suggestion],
+            "mapping": {k: list(v) if isinstance(v, set) else v for k, v in self.mapping.items()},
+        }
 
 class Dataset(BaseModel):
     name: str
