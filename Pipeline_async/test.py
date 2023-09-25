@@ -16,6 +16,8 @@ import os
 from ClaimDetection import ClaimDetector
 from TableReasoning import TableReasoner
 from Gloc.utils.async_llm import Model
+from models import *
+from api import *
 
 class Tester():
     def __init__(self, datasrc: str = None):
@@ -236,10 +238,45 @@ data provided does not include the necessary information """
             with open("claims_2.json", "w") as f:
                 json.dump(ans, f, indent=4)
             
+    async def get_suggested_queries_and_write(self, claim, model, ind, lock):
+        async with lock:
+            with open('./processed_files/Recommendations.json', 'r+') as f:
+                data = json.load(f)
+                if str(ind) not in data:
+                    result = await get_suggested_queries(claim, model)
+                    data[str(ind)] = result['claim_map'].to_json()
+                    f.seek(0)
+                    json.dump(data, f)
+                    f.truncate()
+                else:
+                    print(f"Already processed {ind}")
+
+    async def test_recommend(self, n=1):
+        filename = "./processed_files/Pipeline Evaluation - Ground Truth - Datasets.csv"
+        df = pd.read_csv(filename)
+        lock = asyncio.Lock()
+        sem = asyncio.Semaphore(n)  # Limit to n concurrent tasks
+        tasks = []
+        for ind, row in df.iterrows():
+            if pd.notna(row["Sentence"]):
+                sentence = row["Sentence"]
+            else: continue
+            if pd.notna(row["Comment"]):
+                paragraph = row["Comment"]
+            else: continue
+            claim = UserClaimBody(userClaim=sentence, paragraph=paragraph)
+            task = asyncio.create_task(self.bounded_get_suggested_queries_and_write(claim, Model.GPT_TAG_4, ind, lock, sem))
+            tasks.append(task)
+        await asyncio.gather(*tasks)
+
+    async def bounded_get_suggested_queries_and_write(self, claim, model, ind, lock, sem):
+        async with sem:  # This will block if there are already n running tasks
+            await self.get_suggested_queries_and_write(claim, model, ind, lock)
 
 async def main():
     tester = Tester(datasrc="../Datasets")
-    await tester.test_arrange_article()
+    await tester.test_recommend()
+
 if __name__ == "__main__":
     asyncio.run(main())
     # pass

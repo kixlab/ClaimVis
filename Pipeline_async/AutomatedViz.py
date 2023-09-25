@@ -366,9 +366,12 @@ class AutomatedViz(object):
 				for country in claim_map.country:
 					if country.startswith("@("):
 						countries.extend(claim_map.mapping[country])
-					else:
+					elif claim_map.mapping[country]:
+						countries.append(claim_map.mapping[country])
+					else: # raw country
 						countries.append(country)
 				filtered_table = filtered_table[filtered_table[field.name].isin(countries)]
+
 			elif field.type == "temporal":
 				dates = []
 				for val in claim_map.date.copy():
@@ -378,6 +381,8 @@ class AutomatedViz(object):
 						start, end = val.split('-')
 						start, end = int(start), int(end)
 						dates.extend(list(range(start, end+1)))
+					elif val[-1] == 's':
+						dates.extend(list(range(int(val[:-1]), int(val[:-1])+10)))
 					elif val.isdigit():
 						dates.append(int(val))
 				filtered_table = filtered_table[filtered_table[field.name].isin(dates)]

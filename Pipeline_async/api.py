@@ -526,7 +526,7 @@ async def main():
 	# p = Profiler()
 	# p.start()
 	paragraph = "But a study released by the International Energy Agency last month found that the trend continued in 2015. In another study published on Tuesday, Nathaniel Aden, a research fellow at the World Resources Institute, a Washington think tank, found that since the start of the 21st century, 21 countries, including the United States, have already fully decoupled their economic growth from carbon emissions. In those countries, while G.D.P. went up over the past 15 years, carbon pollution went down."
-	userClaim = "In those countries, while G.D.P. went up over the past 15 years, carbon pollution went down."
+	userClaim = "South Korea has dropped its fertility rate further 2% in 2018."
 	# userClaim = "New Zealand's GDP is 10% from tourism."
 	# A significant amount of New Zealand's GDP comes from tourism
 	claim = UserClaimBody(userClaim=userClaim, paragraph=paragraph)
