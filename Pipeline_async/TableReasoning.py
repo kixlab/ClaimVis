@@ -805,7 +805,7 @@ Simply ANSWER A, B, or SAME
         country_keywords = [keyword[2:-2].replace("Country", "").replace("Countries", "").strip() for keyword in claim_map.country if keyword.startswith("@(")]
         keywords = country_keywords + claim_map.value + value_keywords
         print("keywords:", keywords)
-        top_k_datasets = await self.dm.find_top_k_datasets("", k=5, method="gpt", verbose=verbose, keywords=keywords)
+        top_k_datasets = await self.dm.find_top_k_datasets("", k=8, method="gpt", verbose=verbose, keywords=keywords)
         datasets = [Dataset(name=name, description=description, score=score, fields=fields) 
             for name, description, score, fields in top_k_datasets]
 
