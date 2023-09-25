@@ -366,7 +366,7 @@ class AutomatedViz(object):
 				for country in claim_map.country:
 					if country.startswith("@("):
 						countries.extend(claim_map.mapping[country])
-					elif claim_map.mapping[country]:
+					elif country in claim_map.mapping: #[country]:
 						countries.append(claim_map.mapping[country])
 					else: # raw country
 						countries.append(country)
