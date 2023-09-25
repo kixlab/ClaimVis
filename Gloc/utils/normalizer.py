@@ -332,7 +332,7 @@ def _get_matched_cells(value_str, matcher: DataMatcher, df: pd.DataFrame, fuzz_t
             cells = list(df[attr].unique())
             scores = matcher.similarity_batch(value_str, cells)  # Use vectorized operation
             matched_cells = [(cell, score) for cell, score in zip(cells, scores) if score > 0.5]
-        elif attr and df.dtypes[attr] == 'float64':
+        elif attr and df.dtypes[attr] == 'float64' and value_str.replace('.', '', 1).replace('-', '', 1).isnumeric():
             val = float(value_str)
             matched_cells = df[(df[attr] > val * 0.9) and (df[attr] < val * 1.1)] # 10% tolerance
             ## convert this to (cell, score) format
