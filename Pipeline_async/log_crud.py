@@ -17,3 +17,6 @@ def create_log(db: Session, log: models.LogCreate):
     db.commit()
     db.refresh(db_log)
     return db_log
+
+def get_usernames(db: Session):
+    return db.query(ORMModels.Log.username).distinct().all()

@@ -1,3 +1,5 @@
+import json
+import os
 import random
 from typing import Annotated
 import numpy as np
@@ -39,6 +41,8 @@ app.add_middleware(
 	allow_headers=["*"],
 )
 
+with open("../Datasets/description/desc.json") as f:
+	desc = json.load(f)
 # df = pd.read_csv("../Datasets/owid-energy-data.csv")
 
 """
@@ -467,6 +471,10 @@ def get_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), use
 		return log_crud.get_logs_by_user(db=db, user=username, skip=skip, limit=limit)
 	else:
 		return log_crud.get_logs(db=db, skip=skip, limit=limit)
+	
+@app.get("/usernames")
+def get_usernames(db: Session = Depends(get_db)):
+	return log_crud.get_usernames(db=db)
 
 @app.get('/dataset_explanation') 
 def get_dataset_explanation(dataset: str, column_name: str):
@@ -495,6 +503,36 @@ def get_dataset_explanation_2(datasets: list[Dataset], column_name: Annotated[st
 		return df['description'].iloc[0]
 	else:
 		return ''
+	
+@app.post('/dataset_explanation_3') 
+def get_dataset_explanation_3(table_name: Annotated[str, Body()], column_name: Annotated[str, Body()]):
+	datasets_str = table_name.split("@")
+	datasets_names = [filename for filename in os.listdir('../Datasets') if filename.endswith('.csv')]
+	# Fron datasets_names, find names that has one of the name in datasets_str as its substring
+	datasets = []
+	for dataset_name in datasets_names:
+		for dataset_str in datasets_str:
+			if dataset_str in dataset_name:
+				datasets.append(dataset_name)
+				break
+	
+	## dataset with columns
+	datasets = [dataset for dataset in datasets if (dataset in desc) and (column_name in desc[dataset]['columns']) ]
+	for dataset in datasets:
+		try:
+			df = pd.read_csv(f"../Datasets/info/{dataset}")
+		except:
+			continue
+		# df = pd.read_csv(f"../Datasets/info/{dataset}")
+		if 'value' in df.columns:
+			df = df[df['value'] == column_name]
+			if df.shape[0] > 0:
+				return df['Longdefinition'].iloc[0]
+		if 'title' in df.columns:
+			df = df[df['title'] == column_name]
+			if df.shape[0] > 0:
+				return df['description'].iloc[0]
+	return ''
 
 @app.post('/reasoning_evaluation')
 def get_reasoning_evaluation(reasoning: str):
